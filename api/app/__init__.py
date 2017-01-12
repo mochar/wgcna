@@ -168,6 +168,8 @@ def genotype(name):
         cmd = ['Rscript', '--no-init-file', 'scripts/genotype.R', name, groups]
         subprocess.check_output(cmd, universal_newlines=True)
         update_info(name, 'step', 5)
-    df = pd.read_csv('data/{}/genotype-pvalues.csv'.format(name),
-                     names=['modules', 'pvalues'], skiprows=1)
-    return jsonify(df.to_dict(orient='list'))
+    df = pd.read_csv('data/{}/pvalues.csv'.format(name), index_col=0)
+    response = {}
+    response['pvalues'] = df.to_dict(orient='list')
+    response['modules'] = df.index.tolist()
+    return jsonify(response)

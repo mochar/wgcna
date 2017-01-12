@@ -3,7 +3,7 @@
     <div class="row">
         <h5 class="card-title">3. Module-genotype significance</h5>
 
-        <div class="row">
+        <div class="row" v-if="!pvalues">
             <div class="col-xs-3">
                 <strong>Samples</strong>
                 <ul>
@@ -32,17 +32,34 @@
             </div>
         </div>
 
-        <div v-if="pvalues" style="overflow-x: auto">
-            <table class="table">
-                <thead>
-                    <th v-for="module in modules">{{ module.substring(2) }}</th>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td v-for="pvalue in pvalues">{{ pvalue|round(3) }}</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div id="heatmap" class="row" v-else>
+            <div class="col-xs-2">
+                <span class="flex col row-label" 
+                      v-for="(module, i) in modules"
+                      :style="{ 'border-right': `5px solid ${module.substring(2)}` }">
+                    {{ module.substring(2) }}
+                    <span v-if="pvalues['significance'][i] < 0.05">*</span>
+                </span>
+            </div>
+            <div class="col-xs-10">
+                <div>
+                    <div v-for="(module, i) in modules" class="flex">
+                        <span class="col sig-cell">
+                            {{ pvalues['significance'][i] | round(3) }}
+                        </span>
+                        <span 
+                            class="col"
+                            v-for="column in columns">{{ pvalues[column][i] | round(3) }}
+                        </span>
+                    </div>
+                </div>
+                <div class="flex">
+                    <span class="col-label">Significance</span>
+                    <span class="col-label" v-for="column in columns">
+                        {{ column }}
+                    </span>
+                </div>
+            </div>
         </div>
     </div>
 </div> 
@@ -53,7 +70,6 @@ export default {
     data() {
         return {
             samples: [],
-            levels: [],
             pattern: '^([A-Za-z\+-]+)',
             calculating: false,
             modules: null,
@@ -84,7 +100,6 @@ export default {
         getSamples() {
             $.get(`${ROOTURL}/expression/${this.name}`).then(data => {
                 this.samples = data.rowNames
-                this.levels = [...new Set(this.samples)]
             })
         },
         getPvalues() {
@@ -106,6 +121,9 @@ export default {
             } catch(e) {
                 return []
             }
+        },
+        columns() {
+            return this.pvalues ? Object.keys(this.pvalues).filter(x => x !='significance') : []
         }
     },
 
@@ -115,3 +133,33 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+#heatmap {
+    margin: 1rem 2rem 4rem 2rem;
+}
+
+.flex {
+    display: flex;
+}
+
+.col {
+    flex: 1;
+    padding: .2rem 1.5rem;
+}
+
+.col-label {
+    flex: 1;
+    transform: rotate(-40deg) translate(-65%, -50%);
+    text-align: right;
+}
+
+.row-label {
+    text-align: right;
+    display: block;
+}
+
+.sig-cell {
+    border-right: 1px solid #bbb;
+}
+</style>

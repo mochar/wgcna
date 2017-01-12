@@ -72,7 +72,8 @@
             :power="power"
             :step="step"
             v-if="step > 1"
-            @done="x => { power = x; step = 4 }">
+            @cutting="step = 3"
+            @done="step = 4">
         </cluster>
         <genotype
             :name="name" 
@@ -129,9 +130,7 @@ export default {
                 cache: false,
                 contentType: false,
                 processData: false
-            }).then(() => {
-                this.$router.push({ path: 'traits' })
-            })
+            }).then(() => this.$router.push({ path: 'traits' }) )
         }
     },
 

@@ -1,7 +1,7 @@
 <template>
 <div class="card card-block">
     <div class="row">
-        <h5 class="card-title" style="display: inline-block">2. Cluster genes</h5>
+        <h5 class="card-title">2. Cluster genes</h5>
 
         <span class="fa fa-cog fa-spin fa-2x" v-if="loading"></span>
 
@@ -49,6 +49,7 @@ export default {
         },
         cut(event) {
             this.cutting = true
+            this.$emit('cutting')
             const formData = new FormData(event.srcElement)
             $.post({
                 url: `${ROOTURL}/cutgenes/${this.name}`,
