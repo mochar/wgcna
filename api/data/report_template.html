@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div class="section">
+        <h2>WGCNA report - {{ name }}</h2>
+
+        <h3>Dataset summary</h3>
+        <span>
+            <strong class="info-title">Name</strong>{{ name }}
+        </span>
+        <span>
+            <strong class="info-title">Samples</strong>{{ sample_count }}
+        </span>
+        <span>
+            <strong class="info-title">Probes</strong>{{ probe_count }}
+        </span>
+
+        <span class="img-title">Hierarchical clustering samples</span>
+        <img style="width: 100%" src="{{ sample_img }}" />
+    </div>
+
+    <div class="section">
+        <h3>Soft tresholding</h3>
+        <span>Soft tresholding power: <strong>{{ power }}</strong></span>
+        <img style="max-width: 100%" src="{{ tresholds_img }}" />
+        {{ tresholds_table }}
+    </div>
+
+    <div class="section">
+        <h3>Modules</h3>
+        <img style="width: 100%" src="{{ tom_img }}" />
+
+        <table style="width: 100%; margin-top: 1rem;" class="table">
+            <thead>
+            </thead>
+            <tbody>
+                {% for module, ps in pvalues.iterrows()  %}
+                    <tr>
+                        <!-- <th style="border-right: 3px solid {{ module }}">{{ module }}</th> -->
+                        <th>{{ module }}</th>
+                        <td class="sig-col">{{ ps.significance|round(3) }}</td>
+                        {% for combination in combinations  %}
+                            <td>{{ ps[combination]|round(3) }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td></td>
+                    <td>Significance</td>
+                    {% for combination in combinations  %}
+                        <td>{{ combination }}</td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
