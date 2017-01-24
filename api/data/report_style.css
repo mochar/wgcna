@@ -1,0 +1,52 @@
+.dataframe > tbody > tr > th {
+    color: white;
+}
+
+.dataframe {
+    width: 100%;
+}
+
+.dataframe th {
+    text-align: left;
+}
+
+small {
+    font-size: .7rem;
+    margin-bottom: .25rem;
+}
+
+.section {
+    page-break-before: always;
+}
+
+.section > span {
+    display: block;
+}
+
+.info-title {
+    display: inline-block;
+    width: 150px;
+}
+
+.img-title {
+    text-align: center;
+    font-size: 1.1rem;
+    margin-top: 1rem;
+}
+
+.table {
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    padding: .5rem .25rem;
+}
+
+.table th { text-align: right; }
+
+.table td { text-align: center; }
+
+.sig-col {
+    border: 1px solid grey;
+    border-width: 0 1px;
+}
