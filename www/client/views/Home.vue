@@ -35,6 +35,9 @@
         <select v-model="name" class="custom-select float-xs-right">
             <option v-for="name in names">{{ name }}</option>
         </select>
+        <button class="btn btn-primary float-xs-right">
+            Generate report
+        </button>
         <div class="row" v-if="false">
             <div class="col-xs-3">
                 <div class="card card-block">
@@ -78,9 +81,13 @@
         <genotype
             :name="name" 
             :step="step"
+            @done="step = 5"
             v-if="step > 3">
         </genotype>
-    </div>
+<!--         <annotation
+            v-if="step > 4">
+        </annotation>
+ -->    </div>
 </div>
 </template>
 
@@ -88,6 +95,7 @@
 import Treshold from '../components/Treshold'
 import Cluster from '../components/Cluster'
 import Genotype from '../components/Genotype'
+import Annotation from '../components/Annotation'
 
 export default {
     data() {
@@ -102,7 +110,8 @@ export default {
     components: {
         Treshold,
         Cluster,
-        Genotype
+        Genotype,
+        Annotation
     },
 
     methods: {
@@ -136,6 +145,7 @@ export default {
 
     watch: {
         name() {
+            this.step = 0
             $.getJSON(`${ROOTURL}/info/${this.name}`).then(data => {
                 this.power = data.power
                 this.step = data.step

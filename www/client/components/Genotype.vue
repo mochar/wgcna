@@ -3,7 +3,7 @@
     <div class="row">
         <h5 class="card-title">3. Module-genotype significance</h5>
 
-        <div class="row" v-if="!pvalues">
+        <div class="row" v-if="step != 5">
             <div class="col-xs-3">
                 <strong>Samples</strong>
                 <ul>
@@ -25,7 +25,7 @@
 
             <div class="col-xs-3">
                 <button 
-                    class="btn btn-primary" 
+                    class="btn btn-primary"
                     :disabled="calculating"
                     @click="calculate">Calculate significance
                 </button>
@@ -95,6 +95,7 @@ export default {
                 this.calculating = false
                 this.modules = data.modules
                 this.pvalues = data.pvalues
+                this.$emit('done')
             })
         },
         getSamples() {

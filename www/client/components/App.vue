@@ -22,4 +22,27 @@ Vue.filter('round', function(value, decimals) {
 #app {
     margin-top: 1rem;
 }
+
+.btn-primary, .btn-success, .btn-danger {
+    border-width: 0 1px 2px 1px;
+}
+.btn-secondary { border-width: 1px 1px 2px 1px }
+
+.btn-primary:active, .btn-success:active, .btn-danger:active {
+    border-width: 2px 1px 0 1px;
+}
+.btn-secondary:active { border-width: 2px 1px 1px 1px }
+
+.btn-primary { border-color: #01549b; }
+.btn-primary:hover, .btn-primary:focus { background-color: #0275d8; }
+.btn-success { border-color: #419641; }
+.btn-success:hover, .btn-success:focus { background-color: #5cb85c; }
+.btn-danger { border-color: #c12e2a; }
+.btn-danger:hover, .btn-danger:focus { background-color: #d9534f; }
+.btn-secondary { border-color: #adadad; }
+.btn-secondary:hover, .btn-secondary:focus { background-color: #fff;  }
+
+.btn:focus {
+    box-shadow: inherit;
+}
 </style>
