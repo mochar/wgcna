@@ -171,7 +171,7 @@ def genotype(name):
         subprocess.check_output(cmd, universal_newlines=True)
         update_info(name, 'step', 5)
         update_info(name, 'groups', groups)
-    df = pd.read_csv('data/{}/pvalues.csv'.format(name), index_col=0)
+    df = pd.read_csv('data/{}/pvalues.csv'.format(name), index_col=0, keep_default_na=False, na_values=[''])
     response = {}
     response['pvalues'] = df.to_dict(orient='list')
     response['modules'] = df.index.tolist()
