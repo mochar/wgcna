@@ -49,7 +49,9 @@
                         </span>
                         <span 
                             class="col"
-                            v-for="column in columns">{{ pvalues[column][i] | round(3) }}
+                            :style="pvalToStyle(pvalues[column][i])" 
+                            v-for="column in columns">
+                            <span v-if="pvalues[column][i] !== 'NA'">{{ pvalues[column][i] | round(3) }}</span>
                         </span>
                     </div>
                 </div>
@@ -108,6 +110,10 @@ export default {
                 this.modules = data.modules
                 this.pvalues = data.pvalues
             })
+        },
+        pvalToStyle(pvalue) {
+            if (pvalue === 'NA' || pvalue > .05) return { 'background-color': 'white'}
+            else return { 'background-color': '#ED4337', color: 'black' }
         }
     },
 
