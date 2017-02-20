@@ -16,28 +16,20 @@
                 </form>
             </div>
         </div>
-
-        <div class="col-xs-3">
-            <div class="card card-block">
-                <h5 class="card-title">Traits</h5>
-                <form enctype="multipart/form-data" @submit.prevent="loadTraits">
-                    <div class="form-group">
-                        <input type="file" name="traits" style="width: 100%">
-                    </div>
-                    <button type="submit" class="btn btn-link float-xs-right">Load</button>
-                </form>
-            </div>
-        </div>
     </div>
 
     <div v-show="name">
         <h3 style="margin-top: 1rem; display: inline-block">WGCNA</h3>
-        <select v-model="name" class="custom-select float-xs-right">
-            <option v-for="name in names">{{ name }}</option>
-        </select>
-        <button class="btn btn-primary float-xs-right">
-            Generate report
-        </button>
+
+        <div class="btn-group float-xs-right">
+            <button class="btn btn-primary">
+                Generate report
+            </button>
+            <select v-model="name" id="name-select" class="custom-select btn btn-secondary">
+                <option v-for="name in names">{{ name }}</option>
+            </select>
+        </div>
+
         <div class="row" v-if="false">
             <div class="col-xs-3">
                 <div class="card card-block">
@@ -155,7 +147,7 @@ export default {
 
     created() {
         $.getJSON(`${ROOTURL}/expression/`).then(data => {
-            this.names = data.names
+            this.names = data.names.sort((a, b) => a < b ? -1 : 1)
             if (this.names.length > 0) this.name = this.names[0]
         })
     }
@@ -163,4 +155,7 @@ export default {
 </script>
 
 <style>
+#name-select:active:hover {
+    background-color: white;
+}
 </style>
