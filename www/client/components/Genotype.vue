@@ -1,31 +1,35 @@
 <template>
 <div class="card card-block">
     <div class="row">
-        <h5 class="card-title">3. Module-genotype significance</h5>
+        <div class="card-title">
+            <h5 style="display: inline-block">3. Module-genotype significance</h5>
+            <button @click.prevent="showPvalues = false" class="btn btn-link float-xs-right" v-if="showPvalues">
+                Return
+            </button>
+        </div>
 
-        <div class="row" v-if="step != 5">
-            <div class="col-xs-3">
-                <strong>Samples</strong>
-                <ul>
-                    <li v-for="sample in samples">{{ sample }}</li>
-                </ul>
+        <div class="row" v-if="!showPvalues">
+            <div class="col-xs-2 text-muted">
+            </div>
+
+            <div class="col-xs-5">
+                <div v-for="(sample, i) in samples" style="display: flex; text-align: center">
+                    <span style="flex: 1">{{ sample }}</span>
+                    <input style="flex: 1" :value="groups[i]" @keydown="e => change(e, i)" />
+                </div>
             </div>
 
             <div class="col-xs-3">
-                <strong>Regex</strong><br>
-                <input placeholder="regex" v-model="pattern">
-            </div>
+                <div class="well">
+                    <strong>Apply regex</strong><br>
+                    <input placeholder="regex" v-model="pattern">
+                    <button class="btn btn-secondary" style="margin-top: .5rem"
+                            @click="applyRegex">Apply</button>
+                </div>
 
-            <div class="col-xs-3">
-                <strong>Groups</strong>
-                <ul>
-                    <li v-for="group in groups">{{ group }}</li>
-                </ul>
-            </div>
-
-            <div class="col-xs-3">
                 <button 
-                    class="btn btn-primary"
+                    style="margin-top: 1rem;"
+                    class="btn btn-primary btn-block"
                     :disabled="calculating"
                     @click="calculate">Calculate significance
                 </button>
@@ -72,10 +76,12 @@ export default {
     data() {
         return {
             samples: [],
+            groups: [],
             pattern: '^([A-Za-z\+-]+)',
             calculating: false,
             modules: null,
-            pvalues: null
+            pvalues: null,
+            showPvalues: false
         }
     },
 
@@ -97,6 +103,7 @@ export default {
                 this.calculating = false
                 this.modules = data.modules
                 this.pvalues = data.pvalues
+                this.showPvalues = true
                 this.$emit('done')
             })
         },
@@ -114,21 +121,23 @@ export default {
         pvalToStyle(pvalue) {
             if (pvalue === 'NA' || pvalue > .05) return { 'background-color': 'white'}
             else return { 'background-color': '#ED4337', color: 'black' }
+        },
+        applyRegex() {
+            if (!this.pattern) return
+            try {
+                const re = new RegExp(this.pattern)
+                this.groups = this.samples
+                    .map(sample => re.exec(sample)[0])
+                    .filter(sample => sample)
+            } catch(e) {
+            }
+        },
+        change(e, i) {
+            this.groups[i] = e.srcElement.value
         }
     },
 
     computed: {
-        groups() {
-            if (!this.pattern) return []
-            try {
-                const re = new RegExp(this.pattern)
-                return this.samples
-                    .map(sample => re.exec(sample)[0])
-                    .filter(sample => sample)
-            } catch(e) {
-                return []
-            }
-        },
         columns() {
             return this.pvalues ? Object.keys(this.pvalues).filter(x => x !='significance') : []
         }
@@ -136,7 +145,10 @@ export default {
 
     created() {
         this.getSamples()
-        if (this.step > 4) this.getPvalues()
+        if (this.step > 4) {
+            this.getPvalues()
+            this.showPvalues = true
+        } 
     }
 }
 </script>
@@ -168,5 +180,10 @@ export default {
 
 .sig-cell {
     border-right: 1px solid #bbb;
+}
+
+.well {
+    background-color: #efefef;
+    padding: .5rem 1rem 1rem;
 }
 </style>
