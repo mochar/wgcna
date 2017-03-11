@@ -12,6 +12,7 @@ datExpr <- read.csv(filename, row.names = 1)
 nSamples <- nrow(datExpr)
 MEs0 <- moduleEigengenes(datExpr, colors)$eigengenes
 MEs <- orderMEs(MEs0)
+MEs <- MEs[, colnames(MEs) != 'MEgrey']
 
 p.values <- sapply(colnames(MEs), function(col) kruskal.test(MEs[, col], group)$p.value)
 p.values.adjusted <- p.adjust(p.values, 'fdr')
@@ -35,11 +36,6 @@ p.values.samples <- sapply(seq(1, ncol(MEs)), function(index) {
 p.values.samples <- p.adjust(unlist(as.list(p.values.samples)), 'fdr')
 p.values.samples <- matrix(p.values.samples, ncol=length(MEs), nrow=nCombinations)
 
-# if (class(p.values.samples) == 'numeric') {
-#     m <- as.data.frame(p.values.samples)
-# } else {
-#     m <- data.frame(t(p.values.samples))
-# }
 m <- data.frame(t(p.values.samples))
     
 colnames(m) <- apply(combinations, 2, function(c) paste(c[1], 'vs', c[2]))
