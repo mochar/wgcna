@@ -9,7 +9,7 @@ datExpr <- read.csv(filename, row.names = 1)
 
 powers <- c(c(1:10), seq(from = 12, to=20, by=2))
 sft <- pickSoftThreshold(datExpr, powerVector = powers, verbose = 5,
-                         corFnc = 'bicor')
+                         networkType = 'signed', corFnc = 'bicor')
 
 tresholds <- data.frame(
     powers = powers, 

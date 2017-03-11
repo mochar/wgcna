@@ -9,8 +9,8 @@ softPower <- as.integer(args[2])
 
 datExpr <- read.csv(expressionfile, row.names = 1)
 
-adjacency <- adjacency(datExpr, power = softPower, corFnc = 'bicor')
-TOM <- TOMsimilarity(adjacency)
+adjacency <- adjacency(datExpr, power = softPower, type = 'signed', corFnc = 'bicor')
+TOM <- TOMsimilarity(adjacency, TOMType = 'signed')
 dissTOM <- 1 - TOM
 
 geneTree <- hclust(as.dist(dissTOM), method = 'average')
