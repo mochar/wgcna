@@ -1,18 +1,26 @@
 <template>
 <div class="container" id="app">
     <router-view></router-view>
+    <export-modal></export-modal>
 </div>
 </template>
 
 <script>
 import 'bootstrap'
 import Vue from 'vue'
+import ExportModal from 'components/ExportModal'
 
 Vue.filter('round', function(value, decimals) {
   if(!value) value = 0
   if(!decimals) decimals = 0
   return Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals)
 })
+
+export default {
+    components: {
+        ExportModal
+    }
+}
 </script>
 
 <style>
@@ -21,6 +29,14 @@ Vue.filter('round', function(value, decimals) {
 
 #app {
     margin-top: 1rem;
+}
+
+.btn {
+    cursor: pointer;
+    position: relative;
+    -webkit-transition: initial;
+       -moz-transition: initial;
+            transition: initial;
 }
 
 .btn-primary, .btn-success, .btn-danger {

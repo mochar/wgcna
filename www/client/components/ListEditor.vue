@@ -20,15 +20,20 @@
             </label>
         </div>
 
-        <div class="card-block row">
-            <div class="text-xs-center">
+        <div class="card-block d-flex justify-content-between">
+            <div>
+                <a href="#" @click.prevent="prevPage" v-if="canPrev"> &larr; Prev </a>
+                <span v-else> &larr; Prev </span>
+            </div>
+
+            <div class="text-center">
                 <span>{{ page }}</span><span> / {{ pages }} </span>
             </div>
             
-            <a href="#" @click.prevent="prevPage" v-if="canPrev"> &larr; Prev </a>
-            <span v-else> &larr; Prev </span>
-            <a href="#" class="float-xs-right" @click.prevent="nextPage" v-if="canNext"> Next &rarr; </a>
-            <span class="float-xs-right" v-else> Next &rarr; </span>
+            <div>
+                <a href="#" class="float-right" @click.prevent="nextPage" v-if="canNext"> Next &rarr; </a>
+                <span class="float-right" v-else> Next &rarr; </span>
+            </div>
         </div>
     </div>
     <div v-else>

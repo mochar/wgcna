@@ -6,7 +6,7 @@
 
         <h5 style="margin-top: 2rem">Bad samples</h5>
         <div class="row" v-if="badSamples.length">
-            <span v-for="sample in badSamples" style="display: list-item" class="col-xs-2">
+            <span v-for="sample in badSamples" style="display: list-item" class="col-2">
                 {{ sample }}
             </span>
         </div>
@@ -14,7 +14,7 @@
 
         <h5 style="margin-top: 2rem">Bad genes</h5>
         <div class="row" v-if="badGenes.length">
-            <span v-for="gene in badGenes" style="display: list-item" class="col-xs-2">
+            <span v-for="gene in badGenes" style="display: list-item" class="col-2">
                 {{ gene }}
             </span>
         </div>

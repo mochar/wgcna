@@ -1,12 +1,10 @@
 <template>
-<div class="card card-block">
-    <div class="row">
-        <h5 class="card-title">1. Soft treshold</h5>
+<div class="card card-block block">
+    <h5 class="card-title">1. Soft treshold</h5>
 
-        <span class="fa fa-cog fa-spin fa-2x" v-if="loading"></span>
-
-        <div v-else>
-        <div class="col-xs-4">
+    <span class="fa fa-cog fa-spin fa-2x" v-if="loading"></span>
+    <div class="row" v-else>
+        <div class="col-4">
             <table class="table table-hover table-sm">
                 <thead>
                     <th>Power</th>
@@ -28,8 +26,8 @@
             </table>
         </div>
 
-        <div class="col-xs-4">
-            <h4 class="text-xs-center">Scale independence</h4>
+        <div class="col-4">
+            <h4 class="text-center">Scale independence</h4>
             <scatter 
                 v-if="powers"
                 :highlight="highlight"
@@ -38,15 +36,14 @@
             </scatter>
         </div>
 
-        <div class="col-xs-4">
-            <h4 class="text-xs-center">Mean connectivity</h4>
+        <div class="col-4">
+            <h4 class="text-center">Mean connectivity</h4>
             <scatter 
                 v-if="powers"
                 :highlight="highlight"
                 :xData="powers" 
                 :yData="meank">
             </scatter>
-        </div>
         </div>
     </div>
 </div>

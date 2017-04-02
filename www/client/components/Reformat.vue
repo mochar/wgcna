@@ -1,19 +1,19 @@
 <template>
 <div>
     <div class="row" v-if="!loading">
-        <div class="col-xs-6">
+        <div class="col-6">
             <label class="form-check-label">
                 <input class="form-check-input" type="checkbox" v-model="transpose"> Transpose
             </label>
             <br/>
         </div>
 
-        <div class="col-xs-3">
+        <div class="col-3">
             <h5>Rows</h5>
             <list-editor :list="rowNames" @removed="updateRemovedRowNames"></list-editor>
         </div>
 
-        <div class="col-xs-3">
+        <div class="col-3">
             <h5>Columns</h5>
             <list-editor :list="colNames" @removed="updateRemovedColNames"></list-editor>
         </div>

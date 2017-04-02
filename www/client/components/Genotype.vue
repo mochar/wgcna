@@ -1,25 +1,25 @@
 <template>
-<div class="card card-block">
-    <div class="row">
-        <div class="card-title">
-            <h5 style="display: inline-block">3. Module-genotype significance</h5>
-            <button @click.prevent="showPvalues = false" class="btn btn-link float-xs-right" v-if="showPvalues">
-                Return
-            </button>
-        </div>
+<div class="card card-block block">
+    <div class="card-title d-flex justify-content-between">
+        <h5>3. Module-genotype significance</h5>
+        <button @click.prevent="showPvalues = false" class="btn btn-link" v-if="showPvalues">
+            Return
+        </button>
+    </div>
 
+    <div>
         <div class="row" v-if="!showPvalues">
-            <div class="col-xs-2 text-muted">
+            <div class="col-2 text-muted">
             </div>
 
-            <div class="col-xs-5">
+            <div class="col-5">
                 <div v-for="(sample, i) in samples" style="display: flex; text-align: center">
                     <span style="flex: 1">{{ sample }}</span>
                     <input style="flex: 1" :value="groups[i]" @keydown="e => change(e, i)" />
                 </div>
             </div>
 
-            <div class="col-xs-3">
+            <div class="col-3">
                 <div class="well">
                     <strong>Apply regex</strong><br>
                     <input placeholder="regex" v-model="pattern">
@@ -37,7 +37,7 @@
         </div>
 
         <div id="heatmap" class="row" v-else>
-            <div class="col-xs-2">
+            <div class="col-2">
                 <span class="flex col row-label" 
                       v-for="(module, i) in modules"
                       :style="{ 'border-right': `5px solid ${module.substring(2)}` }">
@@ -45,7 +45,7 @@
                     <span v-if="pvalues['significance'][i] < 0.05">*</span>
                 </span>
             </div>
-            <div class="col-xs-10">
+            <div class="col-10">
                 <div>
                     <div v-for="(module, i) in modules" class="flex">
                         <span class="col sig-cell">
@@ -155,7 +155,7 @@ export default {
 
 <style scoped>
 #heatmap {
-    margin: 1rem 2rem 4rem 2rem;
+    margin: 0 2rem 4rem 2rem;
 }
 
 .flex {

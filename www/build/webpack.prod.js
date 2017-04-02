@@ -28,7 +28,8 @@ base.plugins.push(
   new ExtractTextPlugin('styles.[contenthash:8].css'),
   new webpack.DefinePlugin({
     'process.env.NODE_ENV': JSON.stringify('production'),
-    'ROOTURL': JSON.stringify('')
+    // 'ROOTURL': JSON.stringify('')
+    'ROOTURL': JSON.stringify('http://localhost:5000')
   }),
   new webpack.LoaderOptionsPlugin({
     minimize: true

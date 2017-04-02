@@ -1,12 +1,12 @@
 <template>
-<div class="card card-block">
+<div class="card card-block block">
     <div class="row">
         <h5 class="card-title">2. Cluster genes</h5>
 
         <span class="fa fa-cog fa-spin fa-2x" v-if="loading"></span>
 
         <div v-else>
-            <div class="float-xs-right">
+            <div class="float-right">
                 <form class="form-inline" enctype="multipart/form-data" @submit.prevent="cut">
                     <div class="form-group">
                         <label>Minimum module size</label>

@@ -2,7 +2,7 @@
 <div>
     <h3>Data</h3>
     <div class="row">
-        <div class="col-xs-3">
+        <div class="col-3">
             <div class="card card-block">
                 <h5 class="card-title">Expression</h5>
                 <form enctype="multipart/form-data" @submit.prevent="loadExpression">
@@ -12,7 +12,7 @@
                     <div class="form-group">
                         <input type="file" name="expression" style="width: 100%">
                     </div>
-                    <button type="submit" class="btn btn-link float-xs-right">Load</button>
+                    <button type="submit" class="btn btn-link float-right">Load</button>
                 </form>
             </div>
         </div>
@@ -21,9 +21,12 @@
     <div v-show="name">
         <h3 style="margin-top: 1rem; display: inline-block">WGCNA</h3>
 
-        <div class="btn-group float-xs-right">
-            <button class="btn btn-primary">
+        <div class="btn-group float-right">
+            <button class="btn btn-primary" style="border-top-width: 1px">
                 Generate report
+            </button>
+            <button class="btn btn-secondary" data-toggle="modal" data-target="#export-modal">
+                Export modules
             </button>
             <select v-model="name" id="name-select" class="custom-select btn btn-secondary">
                 <option v-for="name in names">{{ name }}</option>
@@ -31,24 +34,24 @@
         </div>
 
         <div class="row" v-if="false">
-            <div class="col-xs-3">
+            <div class="col-3">
                 <div class="card card-block">
                     <h5 class="card-title">3. Module-genotype significance</h5>
                     <router-link 
                         tag="button" 
-                        class="btn btn-link float-xs-right"
+                        class="btn btn-link float-right"
                         :to="{ path: `genotype/${name}` , params: { name: name } }"
                         :disabled="!name">Check
                     </router-link>
                 </div>
             </div>
 
-            <div class="col-xs-3">
+            <div class="col-3">
                 <div class="card card-block">
                     <h5 class="card-title">4. Module-trait associations</h5>
                     <router-link 
                         tag="button" 
-                        class="btn btn-link float-xs-right"
+                        class="btn btn-link float-right"
                         :to="{ path: 'treshold' }"
                         :disabled="!name">Check
                     </router-link>
@@ -157,5 +160,9 @@ export default {
 <style>
 #name-select:active:hover {
     background-color: white;
+}
+
+.block {
+    margin-bottom: 1rem;
 }
 </style>

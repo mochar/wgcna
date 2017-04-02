@@ -15,7 +15,7 @@
             </span>
         </h3>
 
-        <router-link to="/" class="float-xs-right" style="display: inline-block">
+        <router-link to="/" class="float-right" style="display: inline-block">
             Cancel
         </router-link>
     </div>
