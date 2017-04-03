@@ -3,8 +3,9 @@ import os
 import subprocess
 import base64
 import json
+from collections import Counter
 
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, make_response
 from flask_cors import CORS
 import pandas as pd
 
@@ -176,3 +177,29 @@ def genotype(name):
     response['pvalues'] = df.to_dict(orient='list')
     response['modules'] = df.index.tolist()
     return jsonify(response)
+
+
+@app.route('/export/<name>')
+def export(name):
+    format_ = request.args.get('format')
+    df = pd.read_csv('data/{}/modules.csv'.format(name))
+    if format_ == 'A':
+        filters = request.args.get('filter')
+        if filters:
+            df = df[df.module.isin(filters.split(','))]
+        response = make_response(df.to_csv(index=False))
+        response.headers['Content-Disposition'] = 'attachment; filename=modules.csv'
+        return response
+    elif format_ == 'B':
+        module = request.args.get('module')
+        if not module:
+            return 404
+        names = df[df.module == module].name
+        response = make_response('\n'.join(names.tolist()))
+        response.headers['Content-Disposition'] = 'attachment; filename='
+        response.headers['Content-Disposition'] += '{}.txt'.format(module)
+        return response
+    else:
+        counter = Counter(df.module)
+        data = [{'module': module, 'size': size} for module, size in counter.items()]
+        return jsonify({'modules': data})

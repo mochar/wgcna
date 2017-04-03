@@ -35,15 +35,15 @@
                 <th># genes</th>
             </thead>
             <tbody>
-                <tr v-for="m in modules" @click="select(m)">
+                <tr v-for="m in modules" @click="select(m.module)">
                     <td v-show="format == 'A'">
-                        <input type="checkbox" :checked="selected.includes(m)">
+                        <input type="checkbox" :checked="selected.includes(m.module)">
                     </td>
                     <td v-show="format == 'B'">
-                        <input type="radio" :checked="module_ == m">
+                        <input type="radio" :checked="module_ == m.module">
                     </td>
-                    <td>{{ m }}</td>
-                    <td>x</td>
+                    <td>{{ m.module }}</td>
+                    <td>{{ m.size }}</td>
                 </tr>
             </tbody>
         </table>
@@ -51,7 +51,7 @@
 
     <div class="d-flex justify-content-between">
         <button class="btn btn-link" data-dismiss="modal">Cancel</button>
-        <button class="btn btn-primary">Export</button>
+        <button class="btn btn-primary" @click="export_" :disabled="exportDisabled">Export</button>
     </div>
 
 </div>
@@ -89,15 +89,22 @@ export default {
                 this.module_ = module_
             }
         },
-        export() {
-            $.getJSON(`${ROOTURL}/export/${this.name}`, {format: this.format}).then(() => {
-                
-            })
+        export_() {
+            let url = `${ROOTURL}/export/${this.name}?format=${this.format}`
+            if (this.format == 'A') url += `&filter=${this.selected.join(',')}`
+            else url += `&module=${this.module_}`
+            window.open(url)
         }
     },
 
     created() {
         this.getColors()
+    },
+
+    computed: {
+        exportDisabled() {
+            return this.format == 'A' ? false : !this.module_
+        }
     },
 
     watch: {
