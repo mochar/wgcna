@@ -33,32 +33,6 @@
             </select>
         </div>
 
-        <div class="row" v-if="false">
-            <div class="col-3">
-                <div class="card card-block">
-                    <h5 class="card-title">3. Module-genotype significance</h5>
-                    <router-link 
-                        tag="button" 
-                        class="btn btn-link float-right"
-                        :to="{ path: `genotype/${name}` , params: { name: name } }"
-                        :disabled="!name">Check
-                    </router-link>
-                </div>
-            </div>
-
-            <div class="col-3">
-                <div class="card card-block">
-                    <h5 class="card-title">4. Module-trait associations</h5>
-                    <router-link 
-                        tag="button" 
-                        class="btn btn-link float-right"
-                        :to="{ path: 'treshold' }"
-                        :disabled="!name">Check
-                    </router-link>
-                </div>
-            </div>
-        </div>
-
         <treshold 
             :name="name" 
             :selected="power" 
@@ -79,10 +53,9 @@
             @done="step = 5"
             v-if="step > 3">
         </genotype>
-<!--         <annotation
-            v-if="step > 4">
-        </annotation>
- -->    </div>
+
+        <export-modal :name="name"></export-modal>
+    </div>
 </div>
 </template>
 
@@ -91,6 +64,7 @@ import Treshold from '../components/Treshold'
 import Cluster from '../components/Cluster'
 import Genotype from '../components/Genotype'
 import Annotation from '../components/Annotation'
+import ExportModal from 'components/ExportModal'
 
 export default {
     data() {
@@ -106,7 +80,8 @@ export default {
         Treshold,
         Cluster,
         Genotype,
-        Annotation
+        Annotation,
+        ExportModal
     },
 
     methods: {
