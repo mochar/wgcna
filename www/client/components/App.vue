@@ -34,7 +34,7 @@ export default {
             transition: initial;
 }
 
-.btn-primary, .btn-success, .btn-danger {
+/*.btn-primary, .btn-success, .btn-danger {
     border-width: 0 1px 2px 1px;
 }
 .btn-secondary { border-width: 1px 1px 2px 1px }
@@ -51,7 +51,7 @@ export default {
 .btn-danger { border-color: #c12e2a; }
 .btn-danger:hover, .btn-danger:focus { background-color: #d9534f; }
 .btn-secondary { border-color: #adadad; }
-.btn-secondary:hover, .btn-secondary:focus { background-color: #fff;  }
+.btn-secondary:hover, .btn-secondary:focus { background-color: #fff;  }*/
 
 .btn:focus {
     box-shadow: inherit;
