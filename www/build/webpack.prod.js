@@ -1,8 +1,11 @@
 'use strict'
+process.env.NODE_ENV = 'production'
+
 const exec = require('child_process').execSync
 const webpack = require('webpack')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
-const ProgressBarPlugin = require('progress-bar-webpack-plugin')
+const ProgressPlugin = require('webpack/lib/ProgressPlugin')
+const OfflinePlugin = require('offline-plugin')
 const base = require('./webpack.base')
 const pkg = require('../package')
 const _ = require('./utils')
@@ -18,21 +21,16 @@ if (config.electron) {
   base.devtool = 'source-map'
 }
 
-// a white list to add dependencies to vendor chunk
-base.entry.vendor = config.vendor
 // use hash filename to support long-term caching
 base.output.filename = '[name].[chunkhash:8].js'
 // add webpack plugins
 base.plugins.push(
-  new ProgressBarPlugin(),
+  new ProgressPlugin(),
   new ExtractTextPlugin('styles.[contenthash:8].css'),
   new webpack.DefinePlugin({
     'process.env.NODE_ENV': JSON.stringify('production'),
     // 'ROOTURL': JSON.stringify('')
     'ROOTURL': JSON.stringify('http://localhost:5000')
-  }),
-  new webpack.LoaderOptionsPlugin({
-    minimize: true
   }),
   new webpack.optimize.UglifyJsPlugin({
     sourceMap: true,
@@ -46,23 +44,51 @@ base.plugins.push(
   // extract vendor chunks
   new webpack.optimize.CommonsChunkPlugin({
     name: 'vendor',
-    filename: 'vendor.[chunkhash:8].js'
+    minChunks: module => {
+      return module.resource && /\.(js|css|es6)$/.test(module.resource) && module.resource.indexOf('node_modules') !== -1
+    }
+  }),
+  new webpack.optimize.CommonsChunkPlugin({
+    name: 'manifest'
+  }),
+  // progressive web app
+  // it uses the publicPath in webpack config
+  new OfflinePlugin({
+    relativePaths: false,
+    AppCache: false,
+    ServiceWorker: {
+      events: true
+    }
   })
 )
 
-// extrac css in standalone .css files
-base.module.loaders.push({
-  test: /\.css$/,
-  loader: ExtractTextPlugin.extract({
-    loader: _.cssLoader,
-    fallbackLoader: 'style-loader'
+// extract css in standalone css files
+_.cssProcessors.forEach(processor => {
+  let loaders
+  if (processor.loader === '') {
+    loaders = ['postcss-loader']
+  } else {
+    loaders = ['postcss-loader', processor.loader]
+  }
+  base.module.loaders.push({
+    test: processor.test,
+    loader: ExtractTextPlugin.extract({
+      use: [_.cssLoader].concat(loaders),
+      fallback: 'style-loader'
+    })
   })
 })
 
-// extract css in single-file components
-base.vue.loaders.css = ExtractTextPlugin.extract({
-  loader: 'css-loader?-autoprefixer',
-  fallbackLoader: 'vue-style-loader'
-})
+// minimize webpack output
+base.stats = {
+  // Add children information
+  children: false,
+  // Add chunk information (setting this to `false` allows for a less verbose output)
+  chunks: false,
+  // Add built modules information to chunk information
+  chunkModules: false,
+  chunkOrigins: false,
+  modules: false
+}
 
 module.exports = base

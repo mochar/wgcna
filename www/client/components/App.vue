@@ -13,6 +13,9 @@ Vue.filter('round', function(value, decimals) {
   if(!decimals) decimals = 0
   return Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals)
 })
+
+export default {
+}
 </script>
 
 <style>
