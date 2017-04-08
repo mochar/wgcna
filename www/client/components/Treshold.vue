@@ -2,7 +2,7 @@
 <div class="card card-block block">
     <h5 class="card-title">1. Soft treshold</h5>
 
-    <span class="fa fa-cog fa-spin fa-2x" v-if="loading"></span>
+    <span class="fa fa-cog fa-spin fa-2x fa-fw" v-if="loading"></span>
     <div class="row" v-else>
         <div class="col-4">
             <table class="table table-hover table-sm">

@@ -21,7 +21,7 @@
 
     <button class="btn btn-primary" @click="done" v-if="!loading">Done</button>
 
-    <span class="fa fa-cog fa-spin fa-2x" v-if="loading"></span>
+    <span class="fa fa-cog fa-spin fa-2x fa-fw" v-if="loading"></span>
 </div>
 </template>
 

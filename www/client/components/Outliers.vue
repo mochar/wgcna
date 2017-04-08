@@ -3,7 +3,7 @@
     <div v-if="!loading">
         <input placeholder="cut height" v-model="cutHeight" />
         <button class="btn btn-secondary" :disabled="!cutHeight || cutting" @click="cut">
-            <span class="fa fa-cog fa-spin" v-if="cutting"></span>
+            <span class="fa fa-cog fa-spin fa-fw" v-if="cutting"></span>
             Cut
         </button>
         <img v-if="imgSrc" :src="imgSrc" :class="{ 'cutting': cutting }" />
@@ -11,7 +11,7 @@
         <button class="btn btn-primary" id="done" @click="done">Done</button>
     </div>
 
-    <span class="fa fa-cog fa-spin fa-2x" v-else></span>
+    <span class="fa fa-cog fa-spin fa-2x fa-fw" v-else></span>
 </div>
 </template>
 

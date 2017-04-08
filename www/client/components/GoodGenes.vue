@@ -23,7 +23,7 @@
         <button class="btn btn-primary" id="done" @click="done">Done</button>
     </div>
 
-    <span class="fa fa-cog fa-spin fa-2x" v-else></span>
+    <span class="fa fa-cog fa-spin fa-2x fa-fw" v-else></span>
 </div>
 </template>
 
