@@ -36,6 +36,12 @@ def update_info(name, key, value):
     write_info(name, info)
 
 
+def create_file_response(contents, filename):
+    response = make_response(contents)
+    response.headers['Content-Disposition'] = 'attachment; filename={}'.format(filename)
+    return response
+
+
 @app.route('/expression/', methods=['GET', 'POST'])
 def expression_list():
     if request.method == 'GET':
@@ -187,19 +193,24 @@ def export(name):
         filters = request.args.get('filter')
         if filters:
             df = df[df.module.isin(filters.split(','))]
-        response = make_response(df.to_csv(index=False))
-        response.headers['Content-Disposition'] = 'attachment; filename=modules.csv'
-        return response
+        return create_file_response(df.to_csv(index=False), 'modules.csv')
     elif format_ == 'B':
         module = request.args.get('module')
         if not module:
             return 404
         names = df[df.module == module].name
-        response = make_response('\n'.join(names.tolist()))
-        response.headers['Content-Disposition'] = 'attachment; filename='
-        response.headers['Content-Disposition'] += '{}.txt'.format(module)
-        return response
+        return create_file_response('\n'.join(names.tolist()), '{}.txt'.format(module))
     else:
         counter = Counter(df.module)
         data = [{'module': module, 'size': size} for module, size in counter.items()]
         return jsonify({'modules': data})
+
+
+@app.route('/report/<name>')
+def report(name):
+    working_path = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.abspath(os.path.join(working_path, '../data/{}/report.pdf'.format(name)))
+    if not os.path.isfile(path):
+        cmd = ['python3', 'scripts/create_report.py', name]
+        subprocess.check_output(cmd, universal_newlines=True)
+    return send_file(path, as_attachment=True)

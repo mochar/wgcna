@@ -22,7 +22,8 @@
         <h3 style="margin-top: 1rem; display: inline-block">WGCNA</h3>
 
         <div class="btn-group float-right">
-            <button class="btn btn-primary" style="border-top-width: 1px">
+            <button class="btn btn-primary" style="border-top-width: 1px" 
+                    @click="generateReport">
                 Generate report
             </button>
             <button class="btn btn-secondary" data-toggle="modal" data-target="#export-modal">
@@ -110,6 +111,10 @@ export default {
                 contentType: false,
                 processData: false
             }).then(() => this.$router.push({ path: 'traits' }) )
+        },
+        generateReport() {
+            const url = `${ROOTURL}/report/${this.name}`
+            window.open(url)
         }
     },
 

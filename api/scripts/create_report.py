@@ -2,6 +2,7 @@ from io import BytesIO
 import os
 import base64
 import json
+import sys
 
 from jinja2 import Environment, FileSystemLoader
 from weasyprint import HTML 
@@ -9,11 +10,13 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-dataset = 'Met6'
+#dataset = 'Lip W12'
+dataset = sys.argv[1]
 working_path = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.abspath(os.path.join(working_path, '../data/'))
+style_path = os.path.join(data_path, 'report_style.css')
 dataset_path = os.path.join(data_path, dataset)
-pdf_path = os.path.join(data_path, 'report.pdf')
+pdf_path = os.path.join(dataset_path, 'report.pdf')
 
 
 def prepend_base64(data):
@@ -58,9 +61,9 @@ def write(template_vars):
     env = Environment(loader=FileSystemLoader(data_path))
     template = env.get_template('report_template.html')
     html = template.render(template_vars)
-    with open('report.html', 'w') as f:
-        f.write(html)
-    HTML(string=html).write_pdf(pdf_path, stylesheets=['report_style.css'])
+    # with open('report.html', 'w') as f:
+    #     f.write(html)
+    HTML(string=html).write_pdf(pdf_path, stylesheets=[style_path])
 
 
 if __name__ == '__main__':
