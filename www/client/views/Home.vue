@@ -29,7 +29,7 @@
             <button class="btn btn-secondary" data-toggle="modal" data-target="#export-modal">
                 Export modules
             </button>
-            <select v-model="name" id="name-select" class="custom-select btn btn-secondary">
+            <select v-model="name" id="name-select" class="btn btn-secondary">
                 <option v-for="name in names">{{ name }}</option>
             </select>
         </div>
