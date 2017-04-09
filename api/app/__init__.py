@@ -59,17 +59,13 @@ def expression_list():
 
 @app.route('/expression/<name>', methods=['GET', 'PUT'])
 def expression(name):
+    df = pd.read_csv('data/{}/expression.csv'.format(name), index_col=0)
     if request.method == 'GET':
-        response = {}
-        with open('data/{}/expression.csv'.format(name), 'r') as f:
-            reader = csv.DictReader(f)
-            response['colNames'] = reader.fieldnames[1:]
-            response['rowNames'] = [row[''] for row in reader]
+        response = {'colNames': df.columns.tolist(), 'rowNames': df.index.tolist()}
         return jsonify(response)
     elif request.method == 'PUT':
         removed_row_names = [x for x in request.form['row'].split(',') if x != '']
         removed_col_names = [x for x in request.form['col'].split(',') if x != '']
-        df = pd.read_csv('data/{}/expression.csv'.format(name), index_col=0)
         if request.form['transpose'] == 'true':
             df = df.T
         df.drop(removed_col_names, axis=1, inplace=True)
