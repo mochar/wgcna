@@ -22,6 +22,10 @@ export default {
 @import "../../node_modules/bootstrap/dist/css/bootstrap.min.css";
 @import "../../node_modules/font-awesome/css/font-awesome.min.css";
 
+html {
+    overflow-y: scroll;
+}
+
 #app {
     margin-top: 1rem;
 }

@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '../views/Home'
-import Expression from '../views/Expression'
+import New from '../views/New'
 
 Vue.use(Router)
 
@@ -13,8 +13,8 @@ export default new Router({
             component: Home
 		},
         {
-            path: '/expression/:name',
-            component: Expression
+            path: '/new',
+            component: New
         }
 	]
 })
