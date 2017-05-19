@@ -207,6 +207,8 @@ def report(name):
     working_path = os.path.dirname(os.path.abspath(__file__))
     path = os.path.abspath(os.path.join(working_path, '../data/{}/report.pdf'.format(name)))
     if not os.path.isfile(path):
+        cmd = ['Rscript', '--no-init-file', 'scripts/sessionInfo.R', name]
+        subprocess.check_output(cmd, universal_newlines=True)
         cmd = ['python3', 'scripts/create_report.py', name]
         subprocess.check_output(cmd, universal_newlines=True)
     return send_file(path, as_attachment=True)

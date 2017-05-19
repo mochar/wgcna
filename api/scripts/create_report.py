@@ -93,4 +93,8 @@ if __name__ == '__main__':
     template_vars['pvalues'] = pvalues
     template_vars['combinations'] = [x for x in pvalues.columns if x != 'significance']
 
+    # Session info
+    with open(os.path.join(dataset_path, 'sessionInfo.txt'), 'r') as f:
+        template_vars['session_info'] = '<br>'.join(f.readlines())
+        
     write(template_vars)
