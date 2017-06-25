@@ -13,8 +13,14 @@
                         @click="format = 'A'">
                     <p>modules.csv</p>
                     <hr>
-                    <p>gene,module</p>
-                    <p>gene,module</p>
+                    <div v-if="step > 4">
+                        <p>gene,module,pvalue</p>
+                        <p>gene,module,pvalue</p>
+                    </div>
+                    <div v-else>
+                        <p>gene,module</p>
+                        <p>gene,module</p>
+                    </div>
                     <p>...</p>
                 </button>
                 <button class="btn btn-secondary format" :class="{active: format == 'B'}" 
@@ -28,6 +34,14 @@
             </div>
         </div>
 
+        <div class="form-check m-3" style="text-align: center" :class="{'text-muted': !hasPValues}">
+            <label class="form-check-label">
+                <input class="form-check-input" type="checkbox" v-model="sigOnly" :disabled="!hasPValues">
+                Show significant only
+            </label>
+        </div>
+
+
         <table class="table table-hover table-sm" style="margin-top: 1rem">
             <thead>
                 <th></th>
@@ -35,7 +49,7 @@
                 <th># genes</th>
             </thead>
             <tbody>
-                <tr v-for="m in modules" @click="select(m.module)">
+                <tr v-for="m in showModules" @click="select(m.module)">
                     <td v-show="format == 'A'">
                         <input type="checkbox" :checked="selected.includes(m.module)">
                     </td>
@@ -65,22 +79,15 @@ export default {
     data() {
         return {
             format: 'A',
-            modules: [],
             module_: null,
-            selected: []
+            selected: [],
+            sigOnly: false
         }
     },
 
-    props: ['name'],
+    props: ['name', 'step', 'modules'],
 
     methods: {
-        getColors() {
-            if (this.name) {
-                $.getJSON(`${ROOTURL}/export/${this.name}`).then(data => {
-                    this.modules = data.modules
-                })
-            }
-        },
         select(module_) {
             if (this.format == 'A') {
                 const index = this.selected.indexOf(module_)
@@ -98,23 +105,24 @@ export default {
         }
     },
 
-    created() {
-        this.getColors()
-    },
-
     computed: {
         exportDisabled() {
             return this.format == 'A' ? false : !this.module_
+        },
+        showModules() {
+            return this.sigOnly ? this.modules.filter(m => m.pvalue && m.pvalue < .05) : 
+                                  this.modules
+        },
+        hasPValues() {
+            return this.step > 4
         }
     },
 
     watch: {
         name() {
             this.format =  'A'
-            this.modules = []
             this.selected = []
             this.module_ = null
-            this.getColors()
         }
     }
 }
@@ -125,7 +133,7 @@ export default {
     text-align: left;
 }
 
-.format > p {
+.format p {
     margin: 0;
 }
 

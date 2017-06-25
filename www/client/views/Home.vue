@@ -35,16 +35,16 @@
         :step="step"
         v-if="step > 1"
         @cutting="step = 3"
-        @done="step = 4">
+        @done="clusterDone">
     </cluster>
     <genotype
         :name="name" 
         :step="step"
-        @done="step = 5"
+        @done="genotypeDone"
         v-if="step > 3">
     </genotype>
 
-    <export-modal :name="name" v-if="step > 3"></export-modal>
+    <export-modal :name="name" :step="step" :modules="modules" v-if="step > 3"></export-modal>
 </div>
 </template>
 
@@ -61,7 +61,8 @@ export default {
             name: null,
             names: [],
             power: null,
-            step: 0
+            step: 0,
+            modules: []
         }
     },
 
@@ -77,7 +78,22 @@ export default {
         generateReport() {
             const url = `${ROOTURL}/report/${this.name}`
             window.open(url)
-        }
+        },
+        clusterDone() {
+            this.step = 4
+            this.getColors()
+        },
+        genotypeDone() {
+            this.step = 5
+            this.getColors()
+        },
+        getColors() {
+            if (this.name && this.step > 3) {
+                $.getJSON(`${ROOTURL}/export/${this.name}`).then(data => {
+                    this.modules = data.modules
+                })
+            }
+        },
     },
 
     watch: {
@@ -86,6 +102,7 @@ export default {
             $.getJSON(`${ROOTURL}/info/${this.name}`).then(data => {
                 this.power = data.power
                 this.step = data.step
+                this.getColors()
             })
         }
     },

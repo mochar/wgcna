@@ -189,6 +189,9 @@ def export(name):
         filters = request.args.get('filter')
         if filters:
             df = df[df.module.isin(filters.split(','))]
+        if os.path.exists('data/{}/pvalues.csv'.format(name)):
+            pvalues = pd.read_csv('data/{}/pvalues.csv'.format(name), index_col=0)
+            df['pvalue'] = [pvalues.significance['ME{}'.format(m)] if m != 'grey' else None for m in df.module]
         return create_file_response(df.to_csv(index=False), 'modules.csv')
     elif format_ == 'B':
         module = request.args.get('module')
@@ -199,6 +202,13 @@ def export(name):
     else:
         counter = Counter(df.module)
         data = [{'module': module, 'size': size} for module, size in counter.items()]
+        if os.path.exists('data/{}/pvalues.csv'.format(name)):
+            pvalues = pd.read_csv('data/{}/pvalues.csv'.format(name), index_col=0)
+            for d in data:
+                if d['module'] == 'grey':
+                    d['pvalue'] = None
+                else:
+                    d['pvalue'] = pvalues.significance['ME{}'.format(d['module'])]
         return jsonify({'modules': data})
 
 
