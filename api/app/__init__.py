@@ -222,3 +222,18 @@ def report(name):
         cmd = ['python3', 'scripts/create_report.py', name]
         subprocess.check_output(cmd, universal_newlines=True)
     return send_file(path, as_attachment=True)
+
+
+@app.route('/module-lists/', methods=['GET', 'POST'])
+def module_list():
+    if request.method == 'GET':
+        names = [name for name in os.listdir('annotatedata/')
+                 if os.path.isdir(os.path.join('annotatedata', name))]
+        return jsonify({'names': names})
+    elif request.method == 'POST':
+        file = request.files['modules']
+        name = request.form['name']
+        os.makedirs('annotatedata/{}'.format(name))
+        #write_info(name, {'step': 1})
+        file.save('annotatedata/{}/modules.csv'.format(name))
+        return jsonify({'name': name})
