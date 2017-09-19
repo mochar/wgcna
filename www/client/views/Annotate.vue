@@ -10,10 +10,15 @@
                 New
             </router-link>
         </div>
+        <ModuleBrowser
+            :name="name">
+        </ModuleBrowser>
     </div>
 </template>
 
 <script>
+import ModuleBrowser from '../components/ModuleBrowser'
+
 export default {
     data() {
         return {
@@ -21,6 +26,11 @@ export default {
             names: [],
         }
     },
+
+    components: {
+        ModuleBrowser
+    },
+
     created() {
         $.getJSON(`${ROOTURL}/module-lists/`).then(data => {
             this.names = data.names.sort((a, b) => a < b ? -1 : 1)
