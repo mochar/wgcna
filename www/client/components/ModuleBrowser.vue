@@ -15,8 +15,22 @@ export default {
 
     props: ['name'],
 
+    methods: {
+        buildTree() {
+            $.getJSON(`${ROOTURL}/moduletree/${this.name}`).then(data => {
+                console.log(data)
+            })
+        },
+    },
+
+    watch: {
+        name() {
+            this.buildTree()
+        }
+    },
+
     created() {
-        
+        this.buildTree()
     }
 }
 </script>

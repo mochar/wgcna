@@ -237,3 +237,8 @@ def module_list():
         #write_info(name, {'step': 1})
         file.save('annotatedata/{}/modules.csv'.format(name))
         return jsonify({'name': name})
+
+
+@app.route('/moduletree/<name>')
+def moduletree(name):
+    return jsonify({"test":"succes","name":name})
