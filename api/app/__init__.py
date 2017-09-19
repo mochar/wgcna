@@ -246,10 +246,11 @@ def moduletree(name):
         next(f)
         for line in f:
             modulemember = line.split(',')[0]
-            module = line.split(',')[1]
+            modulename = line.split(',')[1]
             pvalue = line.split(',')[2].rstrip('\n')
+            pvalue = '%s' % float('%.2g' % float(pvalue))
 
-            if module not in moduletree:
-                moduletree[module] = {'modulemembers' : [], 'p-value' : pvalue}
-            moduletree[module]["modulemembers"].append(modulemember)
+            if modulename not in moduletree:
+                moduletree[modulename] = {'members' : 0, 'pvalue' : pvalue}
+            moduletree[modulename]["members"] += 1
     return jsonify(moduletree)

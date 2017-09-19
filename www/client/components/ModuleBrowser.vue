@@ -2,6 +2,11 @@
 <div class="card card-block block">
     <div class="row">
         <h5 class="card-title">Module Browser</h5>
+        <ul>
+            <li v-for="(module, key) in moduleinfo">
+                {{ key }} - {{module.members}} - {{ module.pvalue}}
+            </li>
+        </ul>
     </div>
 </div>
 </template>
@@ -10,6 +15,7 @@
 export default {
     data() {
         return {
+            moduleinfo: {},
         }
     },
 
@@ -18,7 +24,7 @@ export default {
     methods: {
         buildTree() {
             $.getJSON(`${ROOTURL}/moduletree/${this.name}`).then(data => {
-                console.log(data)
+                this.moduleinfo = data
             })
         },
     },
@@ -28,19 +34,5 @@ export default {
             this.buildTree()
         }
     },
-
-    created() {
-        this.buildTree()
-    }
 }
 </script>
-
-<style scoped>
-img {
-    width: 100%;
-}
-
-img.cutting {
-    opacity: .5;
-}
-</style>
