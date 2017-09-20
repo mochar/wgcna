@@ -226,6 +226,12 @@ def report(name):
 
 @app.route('/module-lists/', methods=['GET', 'POST'])
 def module_list():
+    """
+    GET: returns a list of names.
+    POST: receives a name and a csv file with modules. A folder with the
+    received name as name is made. The received csv file is then saved to
+    this folder.
+    """
     if request.method == 'GET':
         names = [name for name in os.listdir('annotatedata/')
                  if os.path.isdir(os.path.join('annotatedata', name))]
@@ -241,6 +247,10 @@ def module_list():
 
 @app.route('/moduletree/<name>')
 def moduletree(name):
+    """
+    Returns a dictionary with all modules in the modules file. Every
+    module has the number of members and a pvalue associated with them.
+    """
     moduletree = dict()
     with open('annotatedata/'+name+'/modules.csv', 'r') as f:
         next(f)
@@ -251,13 +261,17 @@ def moduletree(name):
             pvalue = '%s' % float('%.2g' % float(pvalue))
 
             if modulename not in moduletree:
-                moduletree[modulename] = {'members' : 0, 'pvalue' : pvalue}
+                moduletree[modulename] = {'members':0, 'pvalue':pvalue}
             moduletree[modulename]["members"] += 1
     return jsonify(moduletree)
 
 
 @app.route('/moduletree/<name>/<modulename>')
 def modulemembernames(name, modulename):
+    """
+    Returns a list of names of module members that are members of the
+    module that is received as argument.
+    """
     modulememberlist = list()
     with open ('annotatedata/'+name+'/modules.csv','r') as f:
         next(f)
