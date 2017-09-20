@@ -254,3 +254,16 @@ def moduletree(name):
                 moduletree[modulename] = {'members' : 0, 'pvalue' : pvalue}
             moduletree[modulename]["members"] += 1
     return jsonify(moduletree)
+
+
+@app.route('/moduletree/<name>/<modulename>')
+def modulemembernames(name, modulename):
+    modulememberlist = list()
+    with open ('annotatedata/'+name+'/modules.csv','r') as f:
+        next(f)
+        for line in f:
+            modulenamecsv = line.split(',')[1]
+            modulemember = line.split(',')[0]
+            if modulename == modulenamecsv:
+                modulememberlist.append(modulemember)
+    return jsonify(modulememberlist)
