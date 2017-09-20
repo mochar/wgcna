@@ -1,13 +1,21 @@
 <template>
 <div class="card card-block block">
-    <div class="row">
         <h5 class="card-title">Module Browser</h5>
-        <ul>
-            <li v-for="(module, key) in moduleinfo">
-                {{ key }} - {{module.members}} - {{ module.pvalue}}
-            </li>
-        </ul>
-    </div>
+
+        <table class="table table-hover table-sm">
+            <thead>
+                <th>Module name</th>
+                <th>Members</th>
+                <th>Module p-value</th>
+            </thead>
+            <tbody>
+                <tr v-for="(module, key) in moduleinfo">
+                    <td>{{ key }}</td>
+                    <td>{{ module.members }}</td>
+                    <td>{{ module.pvalue }}</td>
+                </tr>
+            </tbody>
+        </table>
 </div>
 </template>
 
