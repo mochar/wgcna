@@ -2,7 +2,7 @@
 <div class="card card-block block">
     <h5 class="card-title">Module Browser</h5>
     <div class="row">
-        <div class="col">
+        <div class="col-4">
             <table class="table table-hover table-sm">
                 <thead>
                     <th>Module name</th>
@@ -13,7 +13,7 @@
                     <tr v-for="(module, key) in moduleinfo"
                         :style="{ 'font-weight': pickedmodule == key ? 'bold' : 'normal',
                                   'color': pickedmodule == key ? 'red' : 'black' }"
-                        @click="pick(key)">
+                        @click="pickModule(key)">
                         <td>{{ key }}</td>
                         <td>{{ module.members }}</td>
                         <td>{{ module.pvalue }}</td>
@@ -21,10 +21,13 @@
                 </tbody>
             </table>
         </div>
-        <div class="col">
-            <ul>
-                <li v-for="member in pickedmodulemembers">
-                    {{ member }}
+        <div class="col-8">
+            <ul v-if="displayedmodulemembers">
+                <button class="btn btn-primary" v-on:click="changepage(-1)">left</button>
+                {{ displaypage }} / {{ Math.ceil(pickedmodulemembers.length / 20) }}
+                <button class="btn btn-primary" v-on:click="changepage(1)">right</button>
+                <li v-for="member in displayedmodulemembers">
+                    {{ member | truncate('85') }}
                 </li>
             </ul>
         </div>
@@ -38,14 +41,16 @@ export default {
         return {
             moduleinfo: {},
             pickedmodule: "",
-            pickedmodulemembers: null
+            pickedmodulemembers: "",
+            displayedmodulemembers: "",
+            displaypage: 1
         }
     },
 
     props: ['name'],
 
     methods: {
-        buildTree() {
+        getModuleNames() {
             $.getJSON(`${ROOTURL}/moduletree/${this.name}`).then(data => {
                 this.moduleinfo = data
             })
@@ -54,19 +59,68 @@ export default {
             $.getJSON(`${ROOTURL}/moduletree/${this.name}/${this.pickedmodule}`).then(data => {
                 this.pickedmodulemembers = data
             })
+
         },
-        pick(module) {
+        pickModule(module) {
             this.pickedmodule = module
             this.getModuleMembers()
+        },
+        changepage(change){
+            if(this.displaypage + change > 0 && this.displaypage + change <= Math.ceil(this.pickedmodulemembers.length / 20)){
+                this.displaypage += change
+            }
+        },
+        updatepage(){
+            if(this.displaypage == 0){
+                this.displaypage = 1
+            }
+            var displayed = []
+            for(var i=(this.displaypage-1)*20;i<this.displaypage*20;i++) {
+                if(this.pickedmodulemembers[i]){
+                    displayed.push(this.pickedmodulemembers[i])
+                }
+            }
+            this.displayedmodulemembers = displayed
         }
     },
 
     watch: {
-        name() {
-            this.buildTree()
+        name(){
+            this.getModuleNames()
             this.pickedmodule = ""
-            this.pickedmodulemembers = null
+
+        },
+        pickedmodule() {
+            if(this.pickedmodule){
+                this.getModuleMembers()
+            } else {
+                this.pickedmodulemembers = ""
+            }
+            this.displaypage = 1
+        },
+        displaypage() {
+            this.updatepage()
+        },
+        pickedmodulemembers() {
+            this.updatepage()
+        }
+    },
+
+    filters: {
+        truncate: function(string, value) {
+            var maxlength = 85
+            if (string.length > value){
+                return string.substring(0, value-2) + '...'
+            } else {
+                return string
+            }
         }
     },
 }
 </script>
+
+<style scoped>
+    .table > tbody {
+        cursor: pointer;
+    }
+</style>
