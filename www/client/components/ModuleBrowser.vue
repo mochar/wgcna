@@ -22,10 +22,14 @@
             </table>
         </div>
         <div class="col-8">
-            <ul v-if="displayedmodulemembers">
-                <button class="btn btn-primary" v-on:click="changepage(-1)">left</button>
-                {{ displaypage }} / {{ Math.ceil(pickedmodulemembers.length / 20) }}
-                <button class="btn btn-primary" v-on:click="changepage(1)">right</button>
+            <ul v-if="displayedmodulemembers.length > 0">
+                <button class="btn btn-primary" v-on:click="changepage(-1)" :disabled="displaypage < 2">
+                    <span class="fa fa-chevron-left"></span>
+                </button>
+                {{ displaypage }} / {{ maxdisplaypage }}
+                <button class="btn btn-primary" v-on:click="changepage(1)" :disabled="displaypage >= maxdisplaypage">
+                    <span class="fa fa-chevron-right"></span>
+                </button>
                 <li v-for="member in displayedmodulemembers">
                     {{ member | truncate('85') }}
                 </li>
@@ -92,6 +96,7 @@ export default {
         },
         pickedmodule() {
             if(this.pickedmodule){
+                this.pickedmodulemembers = ""
                 this.getModuleMembers()
             } else {
                 this.pickedmodulemembers = ""
@@ -103,6 +108,12 @@ export default {
         },
         pickedmodulemembers() {
             this.updatepage()
+        }
+    },
+
+    computed: {
+       maxdisplaypage: function () {
+            return Math.ceil(this.pickedmodulemembers.length / 20)
         }
     },
 
