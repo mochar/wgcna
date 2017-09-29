@@ -23,11 +23,13 @@
         </div>
         <div class="col-8">
             <ul v-if="displayedmodulemembers.length > 0">
-                <button class="btn btn-primary" v-on:click="changepage(-1)" :disabled="displaypage < 2">
+                <button class="btn btn-primary" v-on:click="changepage(-1)"
+			:disabled="displaypage < 2">
                     <span class="fa fa-chevron-left"></span>
                 </button>
                 {{ displaypage }} / {{ maxdisplaypage }}
-                <button class="btn btn-primary" v-on:click="changepage(1)" :disabled="displaypage >= maxdisplaypage">
+                <button class="btn btn-primary" v-on:click="changepage(1)"
+			:disabled="displaypage >= maxdisplaypage">
                     <span class="fa fa-chevron-right"></span>
                 </button>
                 <li v-for="member in displayedmodulemembers">
@@ -67,10 +69,9 @@ export default {
         },
         pickModule(module) {
             this.pickedmodule = module
-            this.getModuleMembers()
         },
         changepage(change){
-            if(this.displaypage + change > 0 && this.displaypage + change <= Math.ceil(this.pickedmodulemembers.length / 20)){
+            if(this.displaypage + change > 0 && this.displaypage + change <= this.maxdisplaypage){
                 this.displaypage += change
             }
         },
@@ -92,14 +93,11 @@ export default {
         name(){
             this.getModuleNames()
             this.pickedmodule = ""
-
         },
         pickedmodule() {
+            this.pickedmodulemembers = ""
             if(this.pickedmodule){
-                this.pickedmodulemembers = ""
                 this.getModuleMembers()
-            } else {
-                this.pickedmodulemembers = ""
             }
             this.displaypage = 1
         },
