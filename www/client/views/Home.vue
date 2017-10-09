@@ -43,6 +43,9 @@
         @done="genotypeDone"
         v-if="step > 3">
     </genotype>
+    <ModuleBrowser
+        :name="name">
+    </ModuleBrowser>
 
     <export-modal :name="name" :step="step" :modules="modules" v-if="step > 3"></export-modal>
 </div>
@@ -54,6 +57,7 @@ import Cluster from '../components/Cluster'
 import Genotype from '../components/Genotype'
 import Annotation from '../components/Annotation'
 import ExportModal from 'components/ExportModal'
+import ModuleBrowser from '../components/ModuleBrowser'
 
 export default {
     data() {
@@ -71,7 +75,8 @@ export default {
         Cluster,
         Genotype,
         Annotation,
-        ExportModal
+        ExportModal,
+        ModuleBrowser
     },
 
     methods: {

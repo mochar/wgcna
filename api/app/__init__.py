@@ -223,7 +223,19 @@ def report(name):
         subprocess.check_output(cmd, universal_newlines=True)
     return send_file(path, as_attachment=True)
 
+# TODO: better way to call this function
+def generate_modules_p_v(name):
+    format_ = request.args.get('format')
+    df = pd.read_csv('data/{}/modules.csv'.format(name))
+    if os.path.exists('data/{}/pvalues.csv'.format(name)):
+        pvalues = pd.read_csv('data/{}/pvalues.csv'.format(name), index_col=0)
+        df['pvalue'] = [pvalues.significance['ME{}'.format(m)] if m != 'grey' else None for m in df.module]
+        with open('data/{}/modulespvalue.csv'.format(name),'w') as infile:
+            infile.write(df.to_csv(index=False))
+    return 1
 
+
+# TODO different place for file storage
 @app.route('/module-lists/', methods=['GET', 'POST'])
 def module_list():
     """
@@ -237,11 +249,8 @@ def module_list():
                  if os.path.isdir(os.path.join('annotatedata', name))]
         return jsonify({'names': names})
     elif request.method == 'POST':
-        file = request.files['modules']
         name = request.form['name']
         os.makedirs('annotatedata/{}'.format(name))
-        #write_info(name, {'step': 1})
-        file.save('annotatedata/{}/modules.csv'.format(name))
         return jsonify({'name': name})
 
 
@@ -251,14 +260,18 @@ def moduletree(name):
     Returns a dictionary with all modules in the modules file. Every
     module has the number of members and a pvalue associated with them.
     """
+    generate_modules_p_v(name)
     moduletree = dict()
-    with open('annotatedata/'+name+'/modules.csv', 'r') as f:
+    with open('data/'+name+'/modulespvalue.csv', 'r') as f:
         next(f)
         for line in f:
             modulemember = line.split(',')[0]
             modulename = line.split(',')[1]
-            pvalue = line.split(',')[2].rstrip('\n')
-            pvalue = '%s' % float('%.2g' % float(pvalue))
+            try:
+                pvalue = line.split(',')[2].rstrip('\n')
+                pvalue = '%s' % float('%.2g' % float(pvalue))
+            except:
+                pvalue = "ERROR"
 
             if modulename not in moduletree:
                 moduletree[modulename] = {'members':0, 'pvalue':pvalue}
@@ -273,7 +286,7 @@ def modulemembernames(name, modulename):
     module that is received as argument.
     """
     modulememberlist = list()
-    with open ('annotatedata/'+name+'/modules.csv','r') as f:
+    with open ('data/'+name+'/modulespvalue.csv','r') as f:
         next(f)
         for line in f:
             modulenamecsv = line.split(',')[1]

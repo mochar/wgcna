@@ -2,8 +2,8 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '../views/Home'
 import New from '../views/New'
-import Annotate from '../views/Annotate'
-import Annotatenew from '../views/Annotatenew'
+import Integrate from '../views/Integrate'
+import Integratenew from '../views/Integratenew'
 
 Vue.use(Router)
 
@@ -19,12 +19,12 @@ export default new Router({
             component: New
         },
         {
-            path: '/Annotate',
-            component: Annotate
+            path: '/integrate',
+            component: Integrate
         },
         {
-            path: '/Annotatenew',
-            component: Annotatenew
+            path: '/integratenew',
+            component: Integratenew
         }
 	]
 })
