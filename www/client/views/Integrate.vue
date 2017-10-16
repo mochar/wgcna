@@ -10,21 +10,25 @@
                 New
             </router-link>
         </div>
+        <DatasetSelect
+            :name="name">
+        </DatasetSelect>
     </div>
 </template>
 
 <script>
+import DatasetSelect from '../components/DatasetSelect'
 
 export default {
     data() {
         return {
             name: null,
-            names: [],
+            names: []
         }
     },
 
     components: {
-
+        DatasetSelect
     },
 
     created() {
