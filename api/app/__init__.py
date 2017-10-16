@@ -222,3 +222,75 @@ def report(name):
         cmd = ['python3', 'scripts/create_report.py', name]
         subprocess.check_output(cmd, universal_newlines=True)
     return send_file(path, as_attachment=True)
+
+# TODO: better way to call this function
+def generate_modules_p_v(name):
+    format_ = request.args.get('format')
+    df = pd.read_csv('data/{}/modules.csv'.format(name))
+    if os.path.exists('data/{}/pvalues.csv'.format(name)):
+        pvalues = pd.read_csv('data/{}/pvalues.csv'.format(name), index_col=0)
+        df['pvalue'] = [pvalues.significance['ME{}'.format(m)] if m != 'grey' else None for m in df.module]
+        with open('data/{}/modulespvalue.csv'.format(name),'w') as infile:
+            infile.write(df.to_csv(index=False))
+    return 1
+
+
+# TODO different place for file storage
+@app.route('/module-lists/', methods=['GET', 'POST'])
+def module_list():
+    """
+    GET: returns a list of names.
+    POST: receives a name and a csv file with modules. A folder with the
+    received name as name is made. The received csv file is then saved to
+    this folder.
+    """
+    if request.method == 'GET':
+        names = [name for name in os.listdir('annotatedata/')
+                 if os.path.isdir(os.path.join('annotatedata', name))]
+        return jsonify({'names': names})
+    elif request.method == 'POST':
+        name = request.form['name']
+        os.makedirs('annotatedata/{}'.format(name))
+        return jsonify({'name': name})
+
+
+@app.route('/moduletree/<name>')
+def moduletree(name):
+    """
+    Returns a dictionary with all modules in the modules file. Every
+    module has the number of members and a pvalue associated with them.
+    """
+    generate_modules_p_v(name)
+    moduletree = dict()
+    with open('data/'+name+'/modulespvalue.csv', 'r') as f:
+        next(f)
+        for line in f:
+            modulemember = line.split(',')[0]
+            modulename = line.split(',')[1]
+            try:
+                pvalue = line.split(',')[2].rstrip('\n')
+                pvalue = '%s' % float('%.2g' % float(pvalue))
+            except:
+                pvalue = "ERROR"
+
+            if modulename not in moduletree:
+                moduletree[modulename] = {'members':0, 'pvalue':pvalue}
+            moduletree[modulename]["members"] += 1
+    return jsonify(moduletree)
+
+
+@app.route('/moduletree/<name>/<modulename>')
+def modulemembernames(name, modulename):
+    """
+    Returns a list of names of module members that are members of the
+    module that is received as argument.
+    """
+    modulememberlist = list()
+    with open ('data/'+name+'/modulespvalue.csv','r') as f:
+        next(f)
+        for line in f:
+            modulenamecsv = line.split(',')[1]
+            modulemember = line.split(',')[0]
+            if modulename == modulenamecsv:
+                modulememberlist.append(modulemember)
+    return jsonify(modulememberlist)

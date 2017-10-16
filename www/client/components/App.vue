@@ -1,5 +1,13 @@
 <template>
 <div class="container" id="app">
+    <router-link to="/" class="btn btn-primary">
+        WGCNA
+    </router-link>
+    <router-link to="/integrate" class="btn btn-primary">
+        Integrate
+    </router-link>
+    <!--These two buttons are mainly for testing purposes.
+    A better looking solution is needed for the final solution. -->
     <router-view></router-view>
 </div>
 </template>
