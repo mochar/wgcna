@@ -26,6 +26,11 @@ dev.off()
 save(colors, file=savefile)
 
 # Export colors to csv
-datExpr <- read.csv(paste('data/', args[1], '/expression.csv', sep = ''), nrows=1, row.names = 1)
+datExpr <- read.csv(paste('data/', args[1], '/expression.csv', sep = ''), row.names = 1)
 modules <- data.frame(name=names(datExpr), module=colors)
 write.csv(modules, paste('data/', args[1], '/modules.csv', sep = ''), row.names = F)
+
+# Export MEs to csv
+MEs<- orderMEs(moduleEigengenes(datExpr, colors)$eigengenes)
+rownames(MEs) <- rownames(datExpr)
+write.csv(MEs, paste('data/', args[1], '/MEs.csv', sep = ''))
