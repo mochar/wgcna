@@ -3,10 +3,12 @@ import os
 import subprocess
 import base64
 import json
+import itertools
 from collections import Counter
 
 from flask import Flask, request, jsonify, send_file, make_response
 from flask_cors import CORS
+from scipy.stats.stats import pearsonr
 import pandas as pd
 
 app = Flask(__name__)
@@ -222,3 +224,40 @@ def report(name):
         cmd = ['python3', 'scripts/create_report.py', name]
         subprocess.check_output(cmd, universal_newlines=True)
     return send_file(path, as_attachment=True)
+
+
+@app.route('/correlate')
+def correlate():
+    names = request.args.getlist('names[]')
+    app.logger.debug(names)
+
+    # Read MEs 
+    MEs_list = [pd.read_csv('data/{}/MEs.csv'.format(n), index_col=0) for n in names]
+    nodes = []
+    for i, MEs in enumerate(MEs_list):
+        nodes.extend([{'name': c, 'group': names[i]} for c in MEs.columns])
+        nodes.append({'name': 'dummy{}'.format(i), 'group': 'dummies'})
+
+    # Reduce MEs to matching samples
+    matching_samples = set(MEs_list[0].index.tolist())
+    for MEs in MEs_list[1:]:
+        matching_samples.intersection_update(MEs.index.tolist())
+    app.logger.debug(len(matching_samples))
+    for MEs in MEs_list:
+        app.logger.debug(MEs.shape)
+        MEs.drop(MEs.index[~MEs.index.isin(matching_samples)], inplace=True)
+    
+    # Calculate correlations
+    links = []
+    for i, j in itertools.combinations(range(len(names)), 2):
+        columns_i = MEs_list[i].columns.tolist()
+        columns_j = MEs_list[j].columns.tolist()
+        for module_a, module_b in itertools.product(columns_i, columns_j):
+            corr, p = pearsonr(MEs_list[i][module_a], MEs_list[j][module_b])
+            if p < 0.05 and (corr >= 0.5 or corr <= -0.05):
+                link = {'source': {'name': module_a, 'group': names[i]},
+                        'target': {'name': module_b, 'group': names[j]},
+                        'value': corr}
+                links.append(link)
+
+    return jsonify({'nodes': nodes, 'links': links})

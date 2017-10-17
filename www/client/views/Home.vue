@@ -17,10 +17,15 @@
             </select>
         </div>
 
-        <router-link to="/new" class="btn btn-primary">
-            <span class="fa fa-plus"></span>
-            New
-        </router-link>
+        <div>
+            <router-link to="/integrate" class="btn btn-secondary">
+                Integrate
+            </router-link>
+            <router-link to="/new" class="btn btn-primary">
+                <span class="fa fa-plus"></span>
+                New
+            </router-link>
+        </div>
     </div>
 
     <treshold 

@@ -39,10 +39,11 @@
         <div id="heatmap" class="row" v-else>
             <div class="col-2">
                 <span class="flex col row-label" 
+                      :title="module.substring(2)"
                       v-for="(module, i) in modules"
                       :style="{ 'border-right': `5px solid ${module.substring(2)}` }">
                     {{ module.substring(2) }}
-                    <span v-if="pvalues['significance'][i] < 0.05">*</span>
+                    <span v-if="pvalues['significance'][i] < 0.05" style="position: absolute">*</span>
                 </span>
             </div>
             <div class="col-10">
