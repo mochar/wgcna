@@ -6,10 +6,12 @@
         <div class="btn-group">
             <button class="btn btn-primary" style="border-top-width: 1px" 
                     @click="generateReport">
+                <span class="fa fa-book"></span>
                 Generate report
             </button>
             <button class="btn btn-secondary" data-toggle="modal" data-target="#export-modal"
                     :disabled="step < 4">
+                <span class="fa fa-download"></span>
                 Export modules
             </button>
             <select v-model="name" id="name-select" class="btn btn-secondary">

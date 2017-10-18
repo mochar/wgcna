@@ -27,6 +27,7 @@ export default {
 
 html {
     overflow-y: scroll;
+    font-size: 15px;
 }
 
 #app {
