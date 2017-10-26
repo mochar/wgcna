@@ -1,6 +1,6 @@
 <template>
 <div class="card card-block block">
-    <h5 class="card-title">1. Soft treshold</h5>
+    <h6 class="block-title">SOFT TRESHOLD</h6>
 
     <span class="fa fa-cog fa-spin fa-2x fa-fw" v-if="loading"></span>
     <div class="row" v-else>
@@ -13,6 +13,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="(power, i) in powers" 
+                        :key="i"
                         :style="{ 'font-weight': power == highlight ? 'bold' : 'normal',
                                   'color': power == highlight ? 'red' : 'black' }"
                         @click="pick(power)"
@@ -27,7 +28,7 @@
         </div>
 
         <div class="col-4">
-            <h4 class="text-center">Scale independence</h4>
+            <h5 class="">Scale independence</h5>
             <scatter 
                 v-if="powers"
                 :highlight="highlight"
@@ -37,7 +38,7 @@
         </div>
 
         <div class="col-4">
-            <h4 class="text-center">Mean connectivity</h4>
+            <h5 class="">Mean connectivity</h5>
             <scatter 
                 v-if="powers"
                 :highlight="highlight"
@@ -67,7 +68,7 @@ export default {
         Scatter
     },
 
-    props: ['name', 'selected'],
+    props: ['project', 'selected'],
 
     methods: {
         pick(power) {
@@ -75,16 +76,20 @@ export default {
             formData.append('power', power)
             $.ajax({
                 type: 'POST',
-                url: `${ROOTURL}/tresholds/${this.name}`,
+                url: `${ROOTURL}/projects/${this.project.id}/tresholds`,
                 data: formData,
                 async: true,
                 cache: false,
                 contentType: false,
                 processData: false
-            }).then(() => this.$emit('done', power))
+            }).then(() => {
+                this.$emit('done', power)
+            }, () => {
+                console.log('error')
+            })
         },
         getValues() {
-            $.get(`${ROOTURL}/tresholds/${this.name}`).then(data => {
+            $.get(`${ROOTURL}/projects/${this.project.id}/tresholds`).then(data => {
                 this.powers = data.powers
                 this.scaleindep = data.scaleindep
                 this.meank = data.meank
@@ -107,8 +112,8 @@ export default {
         highlight() {
             if (this.hovered) {
                 return this.hovered
-            } else if (this.selected) {
-                return this.selected
+            } else if (this.project.power) {
+                return this.project.power
             } else {
                 return null
             }

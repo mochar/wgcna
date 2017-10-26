@@ -1,74 +1,78 @@
 <template>
 <div>
-    <div class="d-flex justify-content-between align-items-center top">
-        <h3>WGCNA</h3>
-
-        <div class="btn-group">
-            <button class="btn btn-primary" style="border-top-width: 1px" 
-                    @click="generateReport">
-                <span class="fa fa-book"></span>
-                Generate report
-            </button>
-            <button class="btn btn-secondary" data-toggle="modal" data-target="#export-modal"
-                    :disabled="step < 4">
-                <span class="fa fa-download"></span>
-                Export modules
-            </button>
-            <select v-model="name" id="name-select" class="btn btn-secondary">
-                <option v-for="name in names">{{ name }}</option>
-            </select>
+    <div class="row top">
+        <div class="col-7">
+            <div class="btn-group btn-block">
+                <button class="btn btn-secondary btn-block dropdown-toggle text-left" data-toggle="dropdown">
+                    <span v-if="project">{{ project.name }}</span>
+                </button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#" v-for="project in projects" :key="project.id">
+                        <span>{{ project.name }}</span><br>
+                        <small class="text-muted">{{ project.description}}</small>
+                    </a>
+                </div>
+                <router-link to="/new" class="btn btn-secondary" tag="button">
+                    <span class="fa fa-plus"></span>
+                    <!-- New -->
+                </router-link>
+            </div>
         </div>
-
-        <div>
-            <router-link to="/integrate" class="btn btn-secondary">
+        <div class="col-3">
+            <div class="btn-group">
+                <button class="btn btn-primary" style="border-top-width: 1px" 
+                        @click="generateReport">
+                    <span class="fa fa-book"></span>
+                    Generate report
+                </button>
+                <button class="btn btn-secondary" data-toggle="modal" data-target="#export-modal"
+                        :disabled="project && project.step < 4">
+                    <span class="fa fa-download"></span>
+                    Export modules
+                </button>
+            </div>
+        </div>
+        <div class="col-2">
+            <router-link to="/integrate" class="btn btn-secondary float-right" tag="button">
+                <span class="fa fa-compress"></span>
                 Integrate
-            </router-link>
-            <router-link to="/new" class="btn btn-primary">
-                <span class="fa fa-plus"></span>
-                New
             </router-link>
         </div>
     </div>
 
-    <treshold 
-        :name="name" 
-        :selected="power" 
-        v-if="step > 0" 
-        @done="x => { power = x; step = 2 }">
-    </treshold>
-    <cluster 
-        :name="name" 
-        :power="power"
-        :step="step"
-        v-if="step > 1"
-        @cutting="step = 3"
-        @done="clusterDone">
-    </cluster>
-    <genotype
-        :name="name" 
-        :step="step"
-        @done="genotypeDone"
-        v-if="step > 3">
-    </genotype>
+    <div v-if="project">
+        <treshold 
+            :project="project" 
+            v-if="project.step > 0" 
+            @done="tresholdDone">
+        </treshold>
+        <cluster 
+            :project="project" 
+            v-if="project.step > 1"
+            @cutting="project.step = 3"
+            @done="clusterDone">
+        </cluster>
+        <genotype
+            :project="project" 
+            @done="genotypeDone"
+            v-if="project.step > 3">
+        </genotype>
+    </div>
 
-    <export-modal :name="name" :step="step" :modules="modules" v-if="step > 3"></export-modal>
+    <!-- <export-modal :name="name" :step="step" :modules="modules" v-if="step > 3"></export-modal> -->
 </div>
 </template>
 
 <script>
-import Treshold from '../components/Treshold'
-import Cluster from '../components/Cluster'
-import Genotype from '../components/Genotype'
-import Annotation from '../components/Annotation'
+import Treshold from 'components/Treshold'
+import Cluster from 'components/Cluster'
+import Genotype from 'components/Genotype'
+import Annotation from 'components/Annotation'
 import ExportModal from 'components/ExportModal'
 
 export default {
     data() {
         return {
-            name: null,
-            names: [],
-            power: null,
-            step: 0,
             modules: []
         }
     },
@@ -85,6 +89,10 @@ export default {
         generateReport() {
             const url = `${ROOTURL}/report/${this.name}`
             window.open(url)
+        },
+        tresholdDone(power) {
+            console.log('wtfd')
+            this.$store.commit('editProject', {step: 2, power})
         },
         clusterDone() {
             this.step = 4
@@ -103,23 +111,19 @@ export default {
         },
     },
 
-    watch: {
-        name() {
-            this.step = 0
-            $.getJSON(`${ROOTURL}/info/${this.name}`).then(data => {
-                this.power = data.power
-                this.step = data.step
-                this.getColors()
-            })
+    computed: {
+        projects() {
+            return this.$store.state.projects
+        },
+        project() {
+            return this.$store.getters.project
         }
     },
 
+    watch: {
+    },
+
     created() {
-        $.getJSON(`${ROOTURL}/expression/`).then(data => {
-            this.names = data.names.sort((a, b) => a < b ? -1 : 1)
-            if (this.names.length > 0) this.name = this.names[0]
-            else this.$router.push('/new')
-        })
     }
 }
 </script>
@@ -134,6 +138,13 @@ export default {
 }
 
 .top {
+    margin-bottom: 1rem;
+}
+
+.block-title {
+    color: #01549b;
+    letter-spacing: 1px;
+    font-weight: bold;
     margin-bottom: 1rem;
 }
 </style>

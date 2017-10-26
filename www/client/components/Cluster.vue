@@ -36,16 +36,16 @@ export default {
         }
     },
 
-    props: ['name', 'power', 'step'],
+    props: ['project'],
 
     methods: {
         cluster() {
             this.loading = true
-            const endpoint = this.step < 4 ? 'clustergenes' : 'cutgenes'
-            $.get(`${ROOTURL}/${endpoint}/${this.name}`).then(data => {
-                this.imgSrc = `data:image/png;base64,${data.base64}`
-                this.loading = false
-            })
+            // const endpoint = this.step < 4 ? 'clustergenes' : 'cutgenes'
+            // $.get(`${ROOTURL}/${endpoint}/${this.name}`).then(data => {
+            //     this.imgSrc = `data:image/png;base64,${data.base64}`
+            //     this.loading = false
+            // })
         },
         cut(event) {
             this.cutting = true

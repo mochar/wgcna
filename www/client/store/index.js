@@ -6,41 +6,42 @@ Vue.use(Vuex)
 
 const state = {
     projects: null, // when null, app not initialized yet
+    projectIndex: null,
     names: [],
     name: null
+}
+
+const getters = {
+    project: state => {
+        return state.projects[state.projectIndex]
+    }
 }
 
 const mutations = {
     setProjects(state, projects) {
         state.projects = projects
     },
-    setNames(state, names) {
-        state.names = names
+    setProjectIndex(state, index) {
+        state.projectIndex = index
     },
-    setName(state, name) {
-        state.name = name
+    editProject(state, edits) {
+        state.projects[state.projectIndex] = {...state.projects[state.projectIndex], ...edits}
     }
 }
 
 const actions = {
-    getNames({ commit }) {
-        $.getJSON(`${ROOTURL}/expression/`).then(data => {
-            const names = data.names.sort((a, b) => a < b ? -1 : 1)
-            commit('setNames', names)
-            if (names.length > 0) commit('setName', names[0])
-            else router.push('/new')
-        })
-    },
     getProjects({ commit }) {
-        $.getJSON(`${ROOTURL}/projects`).then(data => {
-            const projects = data.projects.sort((a, b) => a < b ? -1 : 1)
+        return $.getJSON(`${ROOTURL}/projects/`).then(data => {
+            const projects = data.projects
             commit('setProjects', projects)
+            return projects
         })
     }
 }
 
 const store = new Vuex.Store({
     state,
+    getters,
     mutations,
     actions
 })

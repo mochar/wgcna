@@ -14,10 +14,14 @@ Vue.filter('round', function(value, decimals) {
   return Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals)
 })
 
+$.ajaxSetup({ xhrFields: { withCredentials: true } })
+
 export default {
     created() {
-        this.$store.dispatch('getNames')
-        this.$store.dispatch('getProjects')
+        this.$store.dispatch('getProjects').then(data => {
+            if (data.length > 0) this.$store.commit('setProjectIndex', 0)
+            else this.$router.push('/new')
+        })
     }
 }
 </script>
@@ -28,11 +32,12 @@ export default {
 
 html {
     overflow-y: scroll;
-    font-size: 15px;
+    font-size: 14px;
 }
 
 #app {
     margin-top: 1rem;
+    color: #222 !important;
 }
 
 .btn {
@@ -43,7 +48,7 @@ html {
             transition: initial;
 }
 
-/* .btn-primary, .btn-success, .btn-danger {
+.btn-primary, .btn-success, .btn-danger {
     border-width: 0 1px 2px 1px;
 }
 .btn-secondary { border-width: 1px 1px 2px 1px }
@@ -60,9 +65,37 @@ html {
 .btn-danger { border-color: #c12e2a; }
 .btn-danger:hover, .btn-danger:focus { background-color: #d9534f; }
 .btn-secondary { border-color: #adadad; }
-.btn-secondary:hover, .btn-secondary:focus { background-color: #fff;  } */
+.btn-secondary:hover, .btn-secondary:focus { background-color: #fff;  }
 
 .btn:focus {
     box-shadow: inherit;
 }
+
+
+* {
+    -webkit-border-radius: 0 !important;
+    -moz-border-radius: 0 !important;
+    border-radius: 0 !important;
+}
+
+/* .btn-primary { border-color: #01549b; }
+.btn-primary:hover, .btn-primary:active { background-color: #0275d8; }
+.btn-success { border-color: #419641; }
+.btn-success:hover, .btn-success:hover { background-color: #5cb85c; }
+.btn-danger { border-color: #c12e2a; }
+.btn-danger:hover, .btn-danger:active { background-color: #d9534f; }
+.btn-secondary { border-color: #adadad; }
+.btn-secondary:hover, .btn-secondary:active { background-color: #fff;  }
+.btn:hover:not(:disabled) {
+    top: -1px;
+    box-shadow: 0px 1px 1px 0px #eee;
+}
+.btn:active { top: 1px !important; }
+.btn:focus { box-shadow: inherit; }
+.btn:focus:hover:not(:active) {
+    top: 0px !important;
+}
+a:active, .btn-link:active {
+    color: #333;
+} */
 </style>

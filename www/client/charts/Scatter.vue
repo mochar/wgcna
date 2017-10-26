@@ -5,6 +5,7 @@
         <g :transform="`translate(${margin.left},${margin.top})`">
             <text
                 v-for="(yVal, i) in this.yData"
+                :key="i"
                 text-anchor="middle"
                 :x="x(xData[i])"
                 :y="y(yVal)"
@@ -36,7 +37,7 @@ export default {
     mounted() {
         this.width = parseInt(d3.select(this.$el).style('width'), 10)
         this.width = this.width - this.margin.left - this.margin.right
-        this.height = this.width * 2
+        this.height = this.width * 2 * .9
         this.height = this.height - this.margin.top - this.margin.bottom
         this.svg = d3.select(this.$el).select('svg').select('g')
 

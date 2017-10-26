@@ -7,21 +7,22 @@ import itertools
 import uuid
 from collections import Counter
 
-from flask import Flask, request, jsonify, send_file, make_response
-from flask import session as flask_session
+from flask import Flask, request, jsonify, send_file, make_response, session
+from flask_session import Session
 from flask_cors import CORS
 from scipy.stats.stats import pearsonr
 from redis import StrictRedis
 import pandas as pd
 
-from app.session import RedisSessionInterface
 import app.rscripts as rscripts
 
 
 app = Flask(__name__)
 app.config.from_object('config')
-redis = StrictRedis(db=app.config['REDIS_DB'], decode_responses=False)
-app.session_interface = RedisSessionInterface(redis=redis)
+redis = StrictRedis(db=app.config['REDIS_DB_DATA'], decode_responses=True,
+     charset='utf-8')
+app.config['SESSION_REDIS'] =  StrictRedis(db=app.config['REDIS_DB_SESSION'])
+Session(app)
 CORS(app, supports_credentials=True, expose_headers=['Location'])
 
 
@@ -60,17 +61,21 @@ def project_id_to_folder(project_id):
 
 
 def user_projects():
-    user_id = flask_session.get('id')
+    user_id = session.get('id')
     if user_id is None:
         return []
-    projects = redis.smembers('projects:{}'.format(user_id))
-    return projects
+    project_ids = redis.smembers('projects:{}'.format(user_id))
+    pipe = redis.pipeline()
+    for project_id in project_ids:
+        pipe.hgetall('project:{}'.format(project_id))
+    return pipe.execute()
 
 
 def create_user():
     user_id = uuid.uuid4().hex
-    flask_session['id'] = user_id
-    flask_session.permanent = True
+    session['id'] = user_id
+    app.logger.debug('kekked')
+    app.logger.debug(session['id'])
     return user_id
 
 
@@ -85,7 +90,7 @@ def create_project(user_id, name, description, file):
     return project
 
 
-@app.route('/projects/', methods=['GET', 'POST'])
+@app.route('/projects/', methods=['GET', 'POST', 'OPTIONS'])
 def projects():
     if request.method == 'GET':
         return jsonify({'projects': user_projects()})
@@ -95,7 +100,7 @@ def projects():
         description = request.form.get('description', '')
         if file is None or name is None:
             return {'error': 'File or name not supplied.'}, 403
-        user_id = flask_session.get('id')
+        user_id = session.get('id')
         if user_id is None:
             user_id = create_user()
         project = create_project(user_id, name, description, file)
@@ -104,7 +109,7 @@ def projects():
 
 @app.route('/projects/<project_id>/expression', methods=['GET', 'POST', 'PUT'])
 def expression(project_id):
-    if not redis.sismember('projects:{}'.format(flask_session['id']), project_id):
+    if not redis.sismember('projects:{}'.format(session['id']), project_id):
         return {}, 404
     # project = redis.hgetall('project:{}'.format(project_id))
     expression_path = os.path.join(project_id_to_folder(project_id), 'expression.csv')
@@ -125,7 +130,7 @@ def expression(project_id):
 
 @app.route('/projects/<project_id>/goodsamplesgenes')
 def goodsamplesgenes(project_id):
-    if not redis.sismember('projects:{}'.format(flask_session['id']), project_id):
+    if not redis.sismember('projects:{}'.format(session['id']), project_id):
         return {}, 404
     expression_path = os.path.join(project_id_to_folder(project_id), 'expression.csv')
     results = rscripts.goodSamplesGenes(expression_path)
@@ -134,7 +139,7 @@ def goodsamplesgenes(project_id):
 
 @app.route('/projects/<project_id>/clustersamples', methods=['GET', 'POST'])
 def cluster(project_id):
-    if not redis.sismember('projects:{}'.format(flask_session['id']), project_id):
+    if not redis.sismember('projects:{}'.format(session['id']), project_id):
         return {}, 404
     project_folder = project_id_to_folder(project_id)
     expression_path = os.path.join(project_folder, 'expression.csv')
@@ -152,6 +157,30 @@ def cluster(project_id):
         return jsonify({})
 
 
+@app.route('/projects/<project_id>/tresholds', methods=['GET', 'POST'])
+def tresholds(project_id):
+    if not redis.sismember('projects:{}'.format(session['id']), project_id):
+        return {}, 404
+    if request.method == 'GET':
+        project_folder = project_id_to_folder(project_id)
+        expression_path = os.path.join(project_folder, 'expression.csv')
+        tresholds_path = os.path.join(project_folder, 'tresholds.csv') 
+        if os.path.isfile(tresholds_path):
+            df = pd.read_csv(tresholds_path)
+        else:
+            df = rscripts.soft_tresholds(expression_path)
+            df.to_csv(tresholds_path)
+        return jsonify(df.to_dict(orient='list'))
+    elif request.method == 'POST':
+        power = request.form.get('power')
+        if power is None:
+            return {'error': 'Please specify a power.'}, 403
+        pipe = redis.pipeline()
+        pipe.hset('project:{}'.format(project_id), 'power', power)
+        pipe.hset('project:{}'.format(project_id), 'step', 2)
+        pipe.execute()
+        return jsonify({})
+
 #--------------------------------------------------------
 
 @app.route('/info/<name>')
@@ -160,18 +189,18 @@ def info(name):
     return jsonify(info)
 
 
-@app.route('/tresholds/<name>', methods=['GET', 'POST'])
-def tresholds(name):
-    if request.method == 'GET':
-        if not os.path.isfile('data/{}/tresholds.csv'.format(name)):
-            cmd = ['Rscript', '--no-init-file', 'scripts/softTreshold.R', name]
-            subprocess.check_output(cmd, universal_newlines=True)
-        df = pd.read_csv('data/{}/tresholds.csv'.format(name))
-        return jsonify(df.to_dict(orient='list'))
-    elif request.method == 'POST':
-        update_info(name, 'power', request.form['power'])
-        update_info(name, 'step', 2)
-        return jsonify({})
+# @app.route('/tresholds/<name>', methods=['GET', 'POST'])
+# def tresholds(name):
+#     if request.method == 'GET':
+#         if not os.path.isfile('data/{}/tresholds.csv'.format(name)):
+#             cmd = ['Rscript', '--no-init-file', 'scripts/softTreshold.R', name]
+#             subprocess.check_output(cmd, universal_newlines=True)
+#         df = pd.read_csv('data/{}/tresholds.csv'.format(name))
+#         return jsonify(df.to_dict(orient='list'))
+#     elif request.method == 'POST':
+#         update_info(name, 'power', request.form['power'])
+#         update_info(name, 'step', 2)
+#         return jsonify({})
 
 
 @app.route('/clustergenes/<name>')
