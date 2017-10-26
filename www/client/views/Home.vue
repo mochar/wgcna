@@ -87,27 +87,26 @@ export default {
 
     methods: {
         generateReport() {
-            const url = `${ROOTURL}/report/${this.name}`
-            window.open(url)
+            // const url = `${ROOTURL}/report/${this.name}`
+            // window.open(url)
         },
         tresholdDone(power) {
-            console.log('wtfd')
             this.$store.commit('editProject', {step: 2, power})
         },
         clusterDone() {
-            this.step = 4
-            this.getColors()
+            // this.step = 4
+            // this.getColors()
         },
         genotypeDone() {
-            this.step = 5
-            this.getColors()
+            // this.step = 5
+            // this.getColors()
         },
         getColors() {
-            if (this.name && this.step > 3) {
-                $.getJSON(`${ROOTURL}/export/${this.name}`).then(data => {
-                    this.modules = data.modules
-                })
-            }
+            // if (this.name && this.step > 3) {
+            //     $.getJSON(`${ROOTURL}/export/${this.name}`).then(data => {
+            //         this.modules = data.modules
+            //     })
+            // }
         },
     },
 

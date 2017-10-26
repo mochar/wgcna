@@ -138,7 +138,7 @@ def goodsamplesgenes(project_id):
 
 
 @app.route('/projects/<project_id>/clustersamples', methods=['GET', 'POST'])
-def cluster(project_id):
+def cluster_samples(project_id):
     if not redis.sismember('projects:{}'.format(session['id']), project_id):
         return {}, 404
     project_folder = project_id_to_folder(project_id)
@@ -147,7 +147,6 @@ def cluster(project_id):
     if request.method == 'GET':
         # TODO save to file and use as cache?
         cluster_data = rscripts.hclust(expression_path)
-        app.logger.debug(len(cluster_data['labels']))
         return jsonify(cluster_data)
     elif request.method == 'POST':
         outlier_samples = request.form.getlist('samples[]')
@@ -181,38 +180,38 @@ def tresholds(project_id):
         pipe.execute()
         return jsonify({})
 
+
+@app.route('/projects/<project_id>/clustergenes', methods=['GET', 'POST'])
+def cluster_genes(project_id):
+    if not redis.sismember('projects:{}'.format(session['id']), project_id):
+        return {}, 404
+    project_folder = project_id_to_folder(project_id)
+    genetree_path = os.path.join(project_folder, 'genetree.csv')
+    diss_tom_path = os.path.join(project_folder, 'diss_tom.csv')
+    if request.method == 'GET':
+        if os.path.isfile(genetree_path):
+            with open(genetree_path, 'r') as f:
+                cluster_data = json.load(f)
+        else:
+            expression_path = os.path.join(project_folder, 'expression.csv')
+            power = redis.hget('project:{}'.format(project_id), 'power')
+            cluster_data = rscripts.tom(expression_path, diss_tom_path, int(power))
+            with open(genetree_path, 'w') as f:
+                json.dump(cluster_data, f)
+            redis.hset('project:{}'.format(project_id), 'step', 2)
+        return jsonify(cluster_data)
+    elif request.method == 'POST':
+        min_module_size = request.form.get('minModuleSize')
+        if min_module_size is None:
+            return {'error': 'Please specify the minimum module size.'}, 403
+        if not os.path.isfile(genetree_path):
+            return {'error': 'Please cluster the genes first.'}, 403
+        with open(genetree_path, 'r') as f:
+            cluster_data = json.load(f)
+        r = rscripts.cut_genes(cluster_data, diss_tom_path, int(min_module_size))
+        return jsonify(r)
+
 #--------------------------------------------------------
-
-@app.route('/info/<name>')
-def info(name):
-    info = read_info(name)
-    return jsonify(info)
-
-
-# @app.route('/tresholds/<name>', methods=['GET', 'POST'])
-# def tresholds(name):
-#     if request.method == 'GET':
-#         if not os.path.isfile('data/{}/tresholds.csv'.format(name)):
-#             cmd = ['Rscript', '--no-init-file', 'scripts/softTreshold.R', name]
-#             subprocess.check_output(cmd, universal_newlines=True)
-#         df = pd.read_csv('data/{}/tresholds.csv'.format(name))
-#         return jsonify(df.to_dict(orient='list'))
-#     elif request.method == 'POST':
-#         update_info(name, 'power', request.form['power'])
-#         update_info(name, 'step', 2)
-#         return jsonify({})
-
-
-@app.route('/clustergenes/<name>')
-def clustergenes(name):
-    info = read_info(name)
-    if info['step'] < 3:
-        cmd = ['Rscript', '--no-init-file', 'scripts/clusterGenes.R', name, info['power']]
-        subprocess.check_output(cmd, universal_newlines=True)
-    response = {'base64': base64_encode_image('data/{}/tom.png'.format(name))}
-    update_info(name, 'step', 3)
-    return jsonify(response)
-
 
 @app.route('/cutgenes/<name>', methods=['GET', 'POST'])
 def cutgenes(name):

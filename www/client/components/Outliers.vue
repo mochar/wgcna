@@ -2,6 +2,8 @@
 <div>
     <dendrogram 
         v-if="!loading" 
+        :ratio="0.6"
+        :labels="true"
         :cluster-data="clusterData"
         :cuttable="true"
         @cutted="d => outlierSamples = d">

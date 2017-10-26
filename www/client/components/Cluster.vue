@@ -1,39 +1,41 @@
 <template>
 <div class="card card-block block">
-    <div class="row">
-        <h5 class="card-title">2. Cluster genes</h5>
+    <h6 class="block-title">GENE CLUSTERING</h6>
 
-        <span class="fa fa-cog fa-spin fa-2x" v-if="loading"></span>
-
-        <div v-else>
-            <div class="float-right">
-                <form class="form-inline" enctype="multipart/form-data" @submit.prevent="cut">
-                    <div class="form-group">
-                        <label>Minimum module size</label>
-                        <input type="number" class="form-control" name="minModuleSize">
-                    </div>
-                    <div class="form-group">
-                        <label>Deep split</label>
-                        <input type="number" class="form-control" name="deepSplit" min="0" max="5" value="2">
-                    </div>
-                  <button type="submit" class="btn btn-primary" :disabled="cutting">Cut</button>
-                </form>
+    <div style="position: absolute; right: 1rem" class="">
+        <form class="form-inline" enctype="multipart/form-data" @submit.prevent="cut">
+            <div class="form-group">
+                <label>Minimum module size</label>
+                <input type="number" class="form-control" name="minModuleSize">
             </div>
-
-            <img v-if="imgSrc" :src="imgSrc" :class="{ 'cutting': cutting }" />
-        </div>
+            <div class="form-group" style="display: none">
+                <label>Deep split</label>
+                <input type="number" class="form-control" name="deepSplit" min="0" max="5" value="2">
+            </div>
+            <button type="submit" class="btn btn-primary" :disabled="cutting">Cut</button>
+        </form>
     </div>
+
+    <span class="fa fa-cog fa-spin fa-2x" v-if="loading"></span>
+    <dendrogram :cluster-data="clusterData" :ratio="0.4" :colors="colors" v-else></dendrogram>
 </div>
 </template>
 
 <script>
+import Dendrogram from 'charts/Dendrogram'
+
 export default {
     data() {
         return {
             loading: true,
-            imgSrc: null,
-            cutting: false
+            cutting: false,
+            clusterData: null,
+            colors: null
         }
+    },
+
+    components: {
+        Dendrogram
     },
 
     props: ['project'],
@@ -41,27 +43,29 @@ export default {
     methods: {
         cluster() {
             this.loading = true
-            // const endpoint = this.step < 4 ? 'clustergenes' : 'cutgenes'
-            // $.get(`${ROOTURL}/${endpoint}/${this.name}`).then(data => {
-            //     this.imgSrc = `data:image/png;base64,${data.base64}`
-            //     this.loading = false
-            // })
+            $.get(`${ROOTURL}/projects/${this.project.id}/clustergenes`).then(data => {
+                this.clusterData = data
+                this.loading = false
+            })
         },
         cut(event) {
             this.cutting = true
             this.$emit('cutting')
             const formData = new FormData(event.srcElement)
             $.post({
-                url: `${ROOTURL}/cutgenes/${this.name}`,
+                url: `${ROOTURL}/projects/${this.project.id}/clustergenes`,
                 data: formData,
                 async: true,
                 cache: false,
                 contentType: false,
                 processData: false
             }).then(data => {
-                this.imgSrc = `data:image/png;base64,${data.base64}`
+                console.log(data)
+                this.colors = data
                 this.cutting = false
-                this.$emit('done')
+                // this.$emit('done')
+            }, () => {
+                this.cutting = false
             })
         }
     },

@@ -5,7 +5,7 @@ import router from '../router'
 Vue.use(Vuex)
 
 const state = {
-    projects: null, // when null, app not initialized yet
+    projects: [], // when null, app not initialized yet
     projectIndex: null,
     names: [],
     name: null

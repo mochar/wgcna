@@ -2,9 +2,10 @@
 <svg :width="width" :height="height">
     <g :transform="`translate(${margin.left}, ${margin.top})`">
         <g class="axis axis--y"></g>
-        <line id="cutline" stroke="red" opacity="0.8" x1="0" :x2="width"></line>
-        <line id="cutlineset" stroke="red" stroke-width="2" v-if="cutHeight" x1="0" :x2="width"
+        <line id="cutline" stroke="red" opacity="0.8" x1="0" :x2="width" v-if="cuttable"></line>
+        <line id="cutlineset" stroke="red" stroke-width="2" v-if="cuttable && cutHeight" x1="0" :x2="width"
             :y1="cutHeight" :y2="cutHeight"></line>
+        <g id="clusters"></g>
     </g>
 </svg>
 </template>
@@ -27,13 +28,12 @@ export default {
             axis: d3.axisLeft(this.y),
             zoom: d3.zoom(),
             margin: {top: 10, right: 5, bottom: 15, left: 25},
-            colors: d3.scaleOrdinal(d3.schemeCategory10),
             clusters: null,
             largestCluster: null
         }
     },
 
-    props: ['clusterData', 'cuttable'],
+    props: ['clusterData', 'cuttable', 'labels', 'ratio', 'colors'],
 
     methods: {
         updateCutLine() {
@@ -104,7 +104,7 @@ export default {
         },
         resize() {
             this.width = $(this.$el).parent().width() - this.margin.left - this.margin.right
-            this.height = (0.60 * this.width) - this.margin.top - this.margin.bottom
+            this.height = (this.ratio * this.width) - this.margin.top - this.margin.bottom
         },
         zoomed() {
             const yt = d3.event.transform.rescaleY(this.y)
@@ -113,12 +113,12 @@ export default {
         updatePlot() {
             this.x
                 .domain(this.clusterData.ordered)
-                .range([0, this.width-10])
+                .range([0, this.width-25])
 
             this.y
-                .domain([Math.max(d3.min(this.clusterData.height)-5, 0), d3.max(this.clusterData.height)])
+                .domain([Math.max(d3.min(this.clusterData.height), 0), d3.max(this.clusterData.height)])
                 // .domain([0, d3.max(this.clusterData.height)])
-                .range([this.height, 0])
+                .range([this.height * 0.9, 0])
             
             this.axis.scale(this.y)
             this.g.select('.axis--y').call(this.axis)
@@ -159,16 +159,18 @@ export default {
                                                this.clusters.mergeClusters[d[0] - 1]
                     return cluster === this.largestCluster ? 'red' : 'black'
                 })
-            groupEnter.append('text')
-                .attr('transform', (d, i) => {
-                    const x = d[0] < 0 ? this.x(labels[-d[0]-1]) : positions[d[0]-1]
-                    const y = this.y(this.clusterData.height[i])
-                    return `translate(${x-3},${y+10})rotate(90)`
-                })
-                .text((d, i) => {
-                    if (d[0] > 0) return ''
-                    return this.clusterData.labels[-d[0] - 1]
-                })
+            if (this.labels) {
+                groupEnter.append('text')
+                    .attr('transform', (d, i) => {
+                        const x = d[0] < 0 ? this.x(labels[-d[0]-1]) : positions[d[0]-1]
+                        const y = this.y(this.clusterData.height[i])
+                        return `translate(${x-3},${y+10})rotate(90)`
+                    })
+                    .text((d, i) => {
+                        if (d[0] > 0) return ''
+                        return this.clusterData.labels[-d[0] - 1]
+                    })
+            }
             // Right
             groupEnter.append('line') 
                 .attr('x1', d => d[1] < 0 ? this.x(labels[-d[1]-1]) : positions[d[1]-1])
@@ -184,16 +186,37 @@ export default {
                                                this.clusters.mergeClusters[d[1] - 1]
                     return cluster === this.largestCluster ? 'red' : 'black'
                 })
-            groupEnter.append('text')
-                .attr('transform', (d, i) => {
-                    const x = d[1] < 0 ? this.x(labels[-d[1]-1]) : positions[d[1]-1]
-                    const y = this.y(this.clusterData.height[i])
-                    return `translate(${x-3},${y+10})rotate(90)`
-                })
-                .text((d, i) => {
-                    if (d[1] > 0) return ''
-                    return this.clusterData.labels[-d[1] - 1]
-                })
+            if (this.labels) {
+                groupEnter.append('text')
+                    .attr('transform', (d, i) => {
+                        const x = d[1] < 0 ? this.x(labels[-d[1]-1]) : positions[d[1]-1]
+                        const y = this.y(this.clusterData.height[i])
+                        return `translate(${x-3},${y+10})rotate(90)`
+                    })
+                    .text((d, i) => {
+                        if (d[1] > 0) return ''
+                        return this.clusterData.labels[-d[1] - 1]
+                    })
+            }
+
+            if (this.colors) this.updateColors()
+        },
+        updateColors() {
+            const xCluster = d3.scaleBand()
+                .domain(this.x.domain())
+                .range(this.x.range())
+            const yCluster = d3.scaleLinear()
+                .domain([0, 1])
+                .range([this.height, this.height * 0.93])
+            const rect = this.g.select('g#clusters').selectAll('rect')
+                .data(this.colors.hex, d => d)
+            rect.exit().remove()
+            const rectEnter = rect.enter().append('rect')
+                .attr('fill', d => d)
+                .attr('x', (d, i) => xCluster(this.clusterData.ordered[i]))
+                .attr('y', yCluster(1))
+                .attr('width', xCluster.bandwidth())
+                .attr('height', yCluster(1))
         }
     },
 
@@ -219,6 +242,9 @@ export default {
         clusterData() {
             if (!this.clusterData) return
             this.updatePlot()
+        },
+        colors() {
+            this.updateColors()
         }
     }
 }
