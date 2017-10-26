@@ -28,7 +28,8 @@ export default {
             zoom: d3.zoom(),
             margin: {top: 10, right: 5, bottom: 15, left: 25},
             colors: d3.scaleOrdinal(d3.schemeCategory10),
-            clusters: null
+            clusters: null,
+            largestCluster: null
         }
     },
 
@@ -47,10 +48,11 @@ export default {
             const reverseY = d3.scaleLinear()
                 .domain(this.y.range())
                 .range(this.y.domain())
-            const cutHeightTree = reverseY(this.cutHeight)
-
+            this.generateClusters(reverseY(this.cutHeight))
+        },
+        generateClusters(cutHeight) {
             const cutMerges = this.clusterData.merge.reduce((prevs, cur, i) => {
-                if (this.clusterData.height[i] >= cutHeightTree) {
+                if (this.clusterData.height[i] >= cutHeight) {
                     if (!prevs.includes(i + 1)) prevs.push(i + 1)
                     if (cur[0] > 0 && !prevs.includes(cur[0])) prevs.push(cur[0])
                     if (cur[1] > 0 && !prevs.includes(cur[1])) prevs.push(cur[1])
@@ -74,17 +76,21 @@ export default {
                 const merge = this.clusterData.merge[i]
                 if (merge[0] < 0) {
                     labelClusters[-merge[0] - 1] = cluster
-                } else if (this.clusterData.height[merge[0]-1] <= cutHeightTree) {
+                } else if (this.clusterData.height[merge[0]-1] <= cutHeight) {
                     mergeClusters[merge[0] - 1] = cluster
                 }
                 if (merge[1] < 0) {
                     labelClusters[-merge[1] - 1] = cluster
-                } else if (this.clusterData.height[merge[1]-1] <= cutHeightTree) {
+                } else if (this.clusterData.height[merge[1]-1] <= cutHeight) {
                     mergeClusters[merge[1] - 1] = cluster
                 }
             }
 
             this.clusters = {labelClusters, mergeClusters}
+            this.largestCluster = this.$helpers.mode([...labelClusters])
+            this.$emit('cutted', this.clusterData.labels.filter((d, i) => {
+                return this.clusters.labelClusters[i] !== this.largestCluster
+            }))
             this.updatePlot()
         },
         buildPositions() {
@@ -98,7 +104,7 @@ export default {
         },
         resize() {
             this.width = $(this.$el).parent().width() - this.margin.left - this.margin.right
-            this.height = (0.75 * this.width) - this.margin.top - this.margin.bottom
+            this.height = (0.60 * this.width) - this.margin.top - this.margin.bottom
         },
         zoomed() {
             const yt = d3.event.transform.rescaleY(this.y)
@@ -135,7 +141,8 @@ export default {
                                                    this.clusters.mergeClusters[d[0] - 1]
                     const rightCluster = d[1] < 0 ? this.clusters.labelClusters[-d[1] - 1] : 
                                                     this.clusters.mergeClusters[d[1] - 1]
-                    return leftCluster === rightCluster ? this.colors(leftCluster) : 'black'
+                    if (leftCluster !== rightCluster) return 'black'
+                    return leftCluster === this.largestCluster ? 'red' : 'black'
                 })
             // Left
             groupEnter.append('line')
@@ -150,7 +157,7 @@ export default {
                     if (!this.clusters) return 'black'
                     const cluster = d[0] < 0 ? this.clusters.labelClusters[-d[0] - 1] : 
                                                this.clusters.mergeClusters[d[0] - 1]
-                    return this.colors(cluster)
+                    return cluster === this.largestCluster ? 'red' : 'black'
                 })
             groupEnter.append('text')
                 .attr('transform', (d, i) => {
@@ -175,7 +182,7 @@ export default {
                     if (!this.clusters) return 'black'
                     const cluster = d[1] < 0 ? this.clusters.labelClusters[-d[1] - 1] : 
                                                this.clusters.mergeClusters[d[1] - 1]
-                    return this.colors(cluster)
+                    return cluster === this.largestCluster ? 'red' : 'black'
                 })
             groupEnter.append('text')
                 .attr('transform', (d, i) => {

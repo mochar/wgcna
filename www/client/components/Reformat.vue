@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import ListEditor from '../components/ListEditor'
+import ListEditor from 'components/ListEditor'
 
 export default {
     data() {
@@ -38,16 +38,18 @@ export default {
         }
     },
 
-    props: ['name'],
+    props: ['project'],
 
     components: {
         ListEditor
     },
 
     created() {
-        $.get(`${ROOTURL}/expression/${this.name}`).then(data => {
+        $.get(`${ROOTURL}/projects/${this.project.id}/expression`).then(data => {
             this.rowNames = data.rowNames
             this.colNames = data.colNames
+            this.loading = false
+        }, () => {
             this.loading = false
         })
     },
@@ -59,7 +61,7 @@ export default {
             formData.append('col', this.removedColNames)
             formData.append('transpose', this.transpose)
             $.ajax({
-                url: `${ROOTURL}/expression/${this.name}`,
+                url: `${ROOTURL}/projects/${this.project.id}/expression`,
                 type: 'PUT',
                 data: formData,
                 async: true,

@@ -6,7 +6,7 @@
 
         <h5 style="margin-top: 2rem">Bad samples</h5>
         <div class="row" v-if="badSamples.length">
-            <span v-for="sample in badSamples" style="display: list-item" class="col-2">
+            <span v-for="sample in badSamples" :key="sample" style="display: list-item" class="col-2">
                 {{ sample }}
             </span>
         </div>
@@ -14,7 +14,7 @@
 
         <h5 style="margin-top: 2rem">Bad genes</h5>
         <div class="row" v-if="badGenes.length">
-            <span v-for="gene in badGenes" style="display: list-item" class="col-2">
+            <span v-for="gene in badGenes" :key="gene" style="display: list-item" class="col-2">
                 {{ gene }}
             </span>
         </div>
@@ -38,10 +38,10 @@ export default {
         }
     },
 
-    props: ['name'],
+    props: ['project'],
 
     created() {
-        $.get(`${ROOTURL}/goodgenes/${this.name}`).then(data => {
+        $.get(`${ROOTURL}/projects/${this.project.id}/goodsamplesgenes`).then(data => {
             this.allOK = data.allOK
             this.badSamples = data.badSamples
             this.badGenes = data.badGenes

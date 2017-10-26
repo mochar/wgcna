@@ -4,15 +4,24 @@ import subprocess
 import base64
 import json
 import itertools
+import uuid
 from collections import Counter
 
 from flask import Flask, request, jsonify, send_file, make_response
+from flask import session as flask_session
 from flask_cors import CORS
 from scipy.stats.stats import pearsonr
+from redis import StrictRedis
 import pandas as pd
+
+from app.session import RedisSessionInterface
+import app.rscripts as rscripts
+
 
 app = Flask(__name__)
 app.config.from_object('config')
+redis = StrictRedis(db=app.config['REDIS_DB'], decode_responses=False)
+app.session_interface = RedisSessionInterface(redis=redis)
 CORS(app, supports_credentials=True, expose_headers=['Location'])
 
 
@@ -44,24 +53,62 @@ def create_file_response(contents, filename):
     return response
 
 
-@app.route('/expression/', methods=['GET', 'POST'])
-def expression_list():
+#--------------------------------------------------------
+
+def project_id_to_folder(project_id):
+    return os.path.join(app.config['STORAGE_FOLDER'], project_id)
+
+
+def user_projects():
+    user_id = flask_session.get('id')
+    if user_id is None:
+        return []
+    projects = redis.smembers('projects:{}'.format(user_id))
+    return projects
+
+
+def create_user():
+    user_id = uuid.uuid4().hex
+    flask_session['id'] = user_id
+    flask_session.permanent = True
+    return user_id
+
+
+def create_project(user_id, name, description, file):
+    project_id = uuid.uuid4().hex
+    project = {'name': name, 'description': description, 'id': project_id, 'step': 1}
+    project_folder = project_id_to_folder(project_id)
+    os.makedirs(project_folder)
+    file.save(os.path.join(project_folder, 'expression.csv'))
+    redis.sadd('projects:{}'.format(user_id), project_id)
+    redis.hmset('project:{}'.format(project_id), project)
+    return project
+
+
+@app.route('/projects/', methods=['GET', 'POST'])
+def projects():
     if request.method == 'GET':
-        names = [name for name in os.listdir('data/') 
-                 if os.path.isdir(os.path.join('data', name))]
-        return jsonify({'names': names})
+        return jsonify({'projects': user_projects()})
     elif request.method == 'POST':
-        file = request.files['expression']
-        name = request.form['name']
-        os.makedirs('data/{}'.format(name))
-        write_info(name, {'step': 1})
-        file.save('data/{}/expression.csv'.format(name))
-        return jsonify({'name': name})
+        file = request.files.get('expression')
+        name = request.form.get('name')
+        description = request.form.get('description', '')
+        if file is None or name is None:
+            return {'error': 'File or name not supplied.'}, 403
+        user_id = flask_session.get('id')
+        if user_id is None:
+            user_id = create_user()
+        project = create_project(user_id, name, description, file)
+        return jsonify({'project': project})
 
 
-@app.route('/expression/<name>', methods=['GET', 'PUT'])
-def expression(name):
-    df = pd.read_csv('data/{}/expression.csv'.format(name), index_col=0)
+@app.route('/projects/<project_id>/expression', methods=['GET', 'POST', 'PUT'])
+def expression(project_id):
+    if not redis.sismember('projects:{}'.format(flask_session['id']), project_id):
+        return {}, 404
+    # project = redis.hgetall('project:{}'.format(project_id))
+    expression_path = os.path.join(project_id_to_folder(project_id), 'expression.csv')
+    df = pd.read_csv(expression_path, index_col=0)
     if request.method == 'GET':
         response = {'colNames': df.columns.tolist(), 'rowNames': df.index.tolist()}
         return jsonify(response)
@@ -72,61 +119,45 @@ def expression(name):
             df = df.T
         df.drop(removed_col_names, axis=1, inplace=True)
         df.drop(removed_row_names, axis=0, inplace=True)
-        df.to_csv('data/{}/expression.csv'.format(name))
+        df.to_csv(expression_path)
         return jsonify({}), 200
 
+
+@app.route('/projects/<project_id>/goodsamplesgenes')
+def goodsamplesgenes(project_id):
+    if not redis.sismember('projects:{}'.format(flask_session['id']), project_id):
+        return {}, 404
+    expression_path = os.path.join(project_id_to_folder(project_id), 'expression.csv')
+    results = rscripts.goodSamplesGenes(expression_path)
+    return jsonify(results)
+
+
+@app.route('/projects/<project_id>/clustersamples', methods=['GET', 'POST'])
+def cluster(project_id):
+    if not redis.sismember('projects:{}'.format(flask_session['id']), project_id):
+        return {}, 404
+    project_folder = project_id_to_folder(project_id)
+    expression_path = os.path.join(project_folder, 'expression.csv')
+    sampletree_path = os.path.join(project_folder, 'sampletree.csv')
+    if request.method == 'GET':
+        # TODO save to file and use as cache?
+        cluster_data = rscripts.hclust(expression_path)
+        app.logger.debug(len(cluster_data['labels']))
+        return jsonify(cluster_data)
+    elif request.method == 'POST':
+        outlier_samples = request.form.getlist('samples[]')
+        df = pd.read_csv(expression_path, index_col=0)
+        df.drop(outlier_samples, axis=0, inplace=True)
+        df.to_csv(expression_path)
+        return jsonify({})
+
+
+#--------------------------------------------------------
 
 @app.route('/info/<name>')
 def info(name):
     info = read_info(name)
     return jsonify(info)
-
-
-@app.route('/traits', methods=['GET', 'POST'])
-def traits():
-    if request.method == 'POST':
-        file = request.files['traits']
-        file.save('data/traits.csv')
-        return jsonify({}), 200
-    elif request.method == 'GET':
-        response = {}
-        return jsonify(response)
-
-
-@app.route('/goodgenes/<name>')
-def goodgenes(name):
-    cmd = ['Rscript', '--no-init-file', 'scripts/goodGenes.R', name]
-    output = subprocess.check_output(cmd, universal_newlines=True)
-    output = output.split('\n\n\n')[-1] # Remove WGCNA message
-    output = output.split('\t')
-    response = {
-        'allOK': output[0] == 'TRUE', 
-        'badSamples': [x for x in output[1].split(',') if x != ''], 
-        'badGenes': [x for x in output[2].split(',') if x != '']
-    }
-    return jsonify(response)
-
-
-@app.route('/cluster/<name>/')
-@app.route('/cluster/<name>/<height>')
-def cluster(name, height='0'):
-    path = 'data/{}'.format(name)
-    if not os.path.isfile('{}/cluster.RData'.format(path)):
-        cmd = ['Rscript', 'scripts/cluster.R', name]
-        subprocess.check_output(cmd, universal_newlines=True)
-    cmd = ['Rscript', 'scripts/dendrogram.R', name, height]
-    subprocess.check_output(cmd, universal_newlines=True)
-    return jsonify({'base64': base64_encode_image('{}/sample-clustering.png'.format(path))})
-
-
-@app.route('/cut/<name>/<height>')
-def cut(name, height='0'):
-    path = 'data/{}'.format(name)
-    cmd = ['Rscript', '--no-init-file', 'scripts/cut.R', name, height]
-    subprocess.check_output(cmd, universal_newlines=True)
-    os.remove('{}/cluster.RData'.format(path))
-    os.remove('{}/sample-clustering.png'.format(path))
-    return jsonify({})
 
 
 @app.route('/tresholds/<name>', methods=['GET', 'POST'])

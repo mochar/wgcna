@@ -1,54 +1,71 @@
 <template>
 <div>
-    <div v-if="!loading">
-        <input placeholder="cut height" v-model="cutHeight" />
-        <button class="btn btn-secondary" :disabled="!cutHeight || cutting" @click="cut">
-            <span class="fa fa-cog fa-spin fa-fw" v-if="cutting"></span>
-            Cut
-        </button>
-        <img v-if="imgSrc" :src="imgSrc" :class="{ 'cutting': cutting }" />
-
-        <button class="btn btn-primary" id="done" @click="done">Done</button>
-    </div>
-
+    <dendrogram 
+        v-if="!loading" 
+        :cluster-data="clusterData"
+        :cuttable="true"
+        @cutted="d => outlierSamples = d">
+    </dendrogram>
     <span class="fa fa-cog fa-spin fa-2x fa-fw" v-else></span>
+
+    <button class="btn btn-primary" :disabled="loading" @click="done">
+        <span class="fa fa-check"></span>
+        Done
+    </button>
 </div>
 </template>
 
 <script>
+import Dendrogram from 'charts/Dendrogram'
+
 export default {
     data() {
         return {
             imgSrc: null,
             cutHeight: null,
             loading: true,
-            cutting: false
+            cutting: false,
+            clusterData: null,
+            outlierSamples: []
         }
     },
 
-    props: ['name'],
+    components: {
+        Dendrogram
+    },
+
+    props: ['project'],
 
     methods: {
-        cut() {
-            this.cutting = true
-            return $.get(`${ROOTURL}/cluster/${this.name}/${this.cutHeight}`).then(data => {
-                this.imgSrc = `data:image/png;base64,${data.base64}`
-                this.cutting = false
+        getClusterData() {
+            return $.get(`${ROOTURL}/projects/${this.project.id}/clustersamples`).then(data => {
+                this.clusterData = data
             })
         },
         done() {
-            if (this.cutHeight) {
-                $.get(`${ROOTURL}/cut/${this.name}/${this.cutHeight}`).then(() => { 
-                    this.$emit('done')
-                })
-            } else {
+            this.loading = true
+            const formData = new FormData()
+            this.outlierSamples.forEach(sample => formData.append('samples[]', sample))
+            $.post({
+                url: `${ROOTURL}/projects/${this.project.id}/clustersamples`,
+                data: formData,
+                async: true,
+                cache: false,
+                contentType: false,
+                processData: false
+            }).then(data => {
+                console.log('success')
+                this.loading = false
                 this.$emit('done')
-            }
+            }, () => {
+                console.log('fail')
+                this.loading = false
+            })
         }
     },
 
     created() {
-        this.cut().then(() => this.loading = false)
+        this.getClusterData().then(() => this.loading = false)
     }
 }
 </script>

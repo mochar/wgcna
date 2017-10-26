@@ -17,6 +17,7 @@ Vue.filter('round', function(value, decimals) {
 export default {
     created() {
         this.$store.dispatch('getNames')
+        this.$store.dispatch('getProjects')
     }
 }
 </script>

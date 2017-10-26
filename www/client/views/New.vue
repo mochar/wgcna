@@ -3,7 +3,7 @@
     <div class="d-flex justify-content-between align-items-center top">
         <h3>WGCNA</h3>
 
-        <h5 v-if="name">
+        <h5 v-if="project">
             <span :class="current === 'Reformat' ? 'text-primary' : 'text-muted'">
                 1. Edit expression matrix
             </span>
@@ -17,23 +17,34 @@
             </span>
         </h5>
 
-        <div id="upload-form" class="card" v-else>
-            <form class="d-flex align-items-center" enctype="multipart/form-data" @submit.prevent="loadExpression">
-                <input type="text" class="form-control" name="name" placeholder="Name">
-                <input type="file" name="expression" style="width: 100%">
-                <button type="submit" class="btn btn-primary" :disabled="loading">Load</button>
-            </form>
-        </div>
-
         <router-link to="/" class="btn btn-secondary">
             Cancel
         </router-link>
     </div>
 
+    <div id="upload-form" class="card" v-if="!project" style="margin-top: 1rem">
+        <form enctype="multipart/form-data" @submit.prevent="loadExpression">
+            <div class="row">
+                <div class="col-2">
+                    <input type="text" class="form-control" name="name" placeholder="Name">
+                </div>
+                <div class="col-6">
+                    <input type="text" class="form-control" name="description" placeholder="Short description">
+                </div>
+                <div class="col-3 d-flex align-items-center">
+                    <input type="file" name="expression" style="width: 100%">
+                </div>
+                <div class="col-1">
+                    <button type="submit" class="btn btn-primary" :disabled="loading">Load</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
     <component 
-        v-if="name"
+        v-else
         :is="current" 
-        :name="name"
+        :project="project"
         @done="next" 
         style="margin-top: 1rem">
     </component>
@@ -41,15 +52,15 @@
 </template>
 
 <script>
-import Reformat from '../components/Reformat'
-import GoodGenes from '../components/GoodGenes'
-import Outliers from '../components/Outliers'
+import Reformat from 'components/Reformat'
+import GoodGenes from 'components/GoodGenes'
+import Outliers from 'components/Outliers'
 
 export default {
     data() {
         return {
             current: 'Reformat',
-            name: null,
+            project: null,
             loading: false
         }
     },
@@ -65,14 +76,16 @@ export default {
             this.loading = true
             const formData = new FormData(event.srcElement)
             $.post({
-                url: `${ROOTURL}/expression/`,
+                url: `${ROOTURL}/projects/`,
                 data: formData,
                 async: true,
                 cache: false,
                 contentType: false,
                 processData: false
             }).then(data => {
-                this.name = data.name
+                this.project = data.project
+                this.loading = false
+            }, () => {
                 this.loading = false
             })
         },
@@ -100,8 +113,7 @@ export default {
 #upload-form {
     padding: .15rem;
 }
-
-#upload-form input[type="file"] {
-    margin: 0 .25rem;
+#upload-form .row > div {
+    padding-right: 0;
 }
 </style>
