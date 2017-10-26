@@ -103,7 +103,7 @@ export default {
     },
 
     watch: {
-        name() {
+        project() {
             this.getValues()
         }
     },

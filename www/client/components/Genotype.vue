@@ -109,9 +109,9 @@ export default {
             })
         },
         getSamples() {
-            $.get(`${ROOTURL}/expression/${this.name}`).then(data => {
-                this.samples = data.rowNames
-            })
+            // $.get(`${ROOTURL}/expression/${this.name}`).then(data => {
+            //     this.samples = data.rowNames
+            // })
         },
         getPvalues() {
             $.get(`${ROOTURL}/genotype/${this.name}`).then(data => {

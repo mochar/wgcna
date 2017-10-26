@@ -7,7 +7,8 @@
                     <span v-if="project">{{ project.name }}</span>
                 </button>
                 <div class="dropdown-menu">
-                    <a class="dropdown-item" href="#" v-for="project in projects" :key="project.id">
+                    <a class="dropdown-item" href="#" v-for="(project, i) in projects" :key="project.id"
+                        @click="selectProject(i)">
                         <span>{{ project.name }}</span><br>
                         <small class="text-muted">{{ project.description}}</small>
                     </a>
@@ -40,7 +41,7 @@
         </div>
     </div>
 
-    <div v-if="project">
+    <div v-if="project || loading">
         <treshold 
             :project="project" 
             v-if="project.step > 0" 
@@ -73,7 +74,8 @@ import ExportModal from 'components/ExportModal'
 export default {
     data() {
         return {
-            modules: []
+            modules: [],
+            loading: false
         }
     },
 
@@ -108,6 +110,9 @@ export default {
             //     })
             // }
         },
+        selectProject(index) {
+            this.$store.commit('setProjectIndex', index)
+        }
     },
 
     computed: {

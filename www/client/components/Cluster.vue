@@ -43,6 +43,8 @@ export default {
     methods: {
         cluster() {
             this.loading = true
+            this.clusterData = null
+            this.colors = null
             $.get(`${ROOTURL}/projects/${this.project.id}/clustergenes`).then(data => {
                 this.clusterData = data
                 this.loading = false
@@ -63,7 +65,7 @@ export default {
                 console.log(data)
                 this.colors = data
                 this.cutting = false
-                // this.$emit('done')
+                this.$emit('done')
             }, () => {
                 this.cutting = false
             })
@@ -71,7 +73,7 @@ export default {
     },
 
     watch: {
-        power() {
+        project() {
             this.cluster()
         }
     },

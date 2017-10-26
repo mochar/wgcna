@@ -198,7 +198,7 @@ def cluster_genes(project_id):
             cluster_data = rscripts.tom(expression_path, diss_tom_path, int(power))
             with open(genetree_path, 'w') as f:
                 json.dump(cluster_data, f)
-            redis.hset('project:{}'.format(project_id), 'step', 2)
+            redis.hset('project:{}'.format(project_id), 'step', 3)
         return jsonify(cluster_data)
     elif request.method == 'POST':
         min_module_size = request.form.get('minModuleSize')
@@ -209,6 +209,7 @@ def cluster_genes(project_id):
         with open(genetree_path, 'r') as f:
             cluster_data = json.load(f)
         r = rscripts.cut_genes(cluster_data, diss_tom_path, int(min_module_size))
+        redis.hset('project:{}'.format(project_id), 'step', 4)
         return jsonify(r)
 
 #--------------------------------------------------------
