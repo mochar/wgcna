@@ -43,17 +43,20 @@
     <div v-if="project || loading">
         <treshold 
             :project="project" 
+            :update="shouldUpdate"
             v-if="project.step > 0" 
             @done="tresholdDone">
         </treshold>
         <cluster 
             :project="project" 
+            :update="shouldUpdate || project.step == 2"
             v-if="project.step > 1"
             @cutting="$store.commit('editProject', {step: 3})"
             @done="clusterDone">
         </cluster>
         <genotype
             :project="project" 
+            :update="shouldUpdate || project.step == 4"
             @done="genotypeDone"
             v-if="project.step > 3">
         </genotype>
@@ -76,7 +79,9 @@ export default {
     data() {
         return {
             modules: [],
-            loading: false
+            loading: false,
+            previousProject: null,
+            shouldUpdate: true
         }
     },
 
@@ -121,7 +126,10 @@ export default {
             return this.$store.state.projects
         },
         project() {
-            return this.$store.getters.project
+            const project = this.$store.getters.project
+            this.shouldUpdate = !this.previousProject || this.previousProject.id != project.id
+            this.previousProject = project
+            return project
         }
     },
 

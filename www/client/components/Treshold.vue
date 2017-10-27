@@ -70,7 +70,7 @@ export default {
         Scatter
     },
 
-    props: ['project', 'selected'],
+    props: ['project', 'selected', 'update'],
 
     methods: {
         pick(power) {
@@ -91,7 +91,6 @@ export default {
             })
         },
         getValues() {
-            this.loading = true
             $.get(`${ROOTURL}/projects/${this.project.id}/tresholds`).then(data => {
                 this.powers = data.powers
                 this.scaleindep = data.scaleindep
@@ -107,7 +106,10 @@ export default {
 
     watch: {
         project() {
-            this.getValues()
+            if (this.update) {
+                this.loading = true
+                this.getValues()
+            }
         }
     },
 
@@ -120,7 +122,7 @@ export default {
             } else {
                 return null
             }
-        }
+        },
     }
 }
 </script>

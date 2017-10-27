@@ -40,7 +40,7 @@ export default {
         Dendrogram
     },
 
-    props: ['project'],
+    props: ['project', 'update'],
 
     methods: {
         cluster() {
@@ -76,7 +76,7 @@ export default {
 
     watch: {
         project() {
-            this.cluster()
+            if (this.update) this.cluster()
         }
     },
 
