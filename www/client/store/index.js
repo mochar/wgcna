@@ -25,7 +25,8 @@ const mutations = {
         state.projectIndex = index
     },
     editProject(state, edits) {
-        state.projects[state.projectIndex] = {...state.projects[state.projectIndex], ...edits}
+        Vue.set(state.projects, state.projectIndex, 
+            {...state.projects[state.projectIndex], ...edits})
     }
 }
 

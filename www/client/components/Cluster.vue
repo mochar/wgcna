@@ -1,6 +1,9 @@
 <template>
 <div class="card card-block block">
-    <h6 class="block-title">GENE CLUSTERING</h6>
+    <h6 class="block-title">
+        GENE CLUSTERING
+        <span class="fa fa-cog fa-spin" v-if="loading"></span>
+    </h6>
 
     <div style="position: absolute; right: 1rem" class="">
         <form class="form-inline" enctype="multipart/form-data" @submit.prevent="cut">
@@ -16,8 +19,7 @@
         </form>
     </div>
 
-    <span class="fa fa-cog fa-spin fa-2x" v-if="loading"></span>
-    <dendrogram :cluster-data="clusterData" :ratio="0.4" :colors="colors" v-else></dendrogram>
+    <dendrogram :cluster-data="clusterData" :ratio="0.4" :colors="colors" v-if="!loading"></dendrogram>
 </div>
 </template>
 

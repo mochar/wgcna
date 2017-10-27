@@ -13,9 +13,6 @@
                         <small class="text-muted">{{ project.description}}</small>
                     </a>
                 </div>
-                <!-- <router-link to="/new" class="btn btn-secondary" tag="button">
-                    <span class="fa fa-plus"></span>
-                </router-link> -->
                 <button class="btn btn-secondary" data-toggle="modal" data-target="#new-modal">
                     <span class="fa fa-plus"></span>
                 </button>
@@ -52,7 +49,7 @@
         <cluster 
             :project="project" 
             v-if="project.step > 1"
-            @cutting="project.step = 3"
+            @cutting="$store.commit('editProject', {step: 3})"
             @done="clusterDone">
         </cluster>
         <genotype
@@ -101,11 +98,10 @@ export default {
             this.$store.commit('editProject', {step: 2, power})
         },
         clusterDone() {
-            // this.step = 4
-            // this.getColors()
+            this.$store.commit('editProject', {step: 4})
         },
         genotypeDone() {
-            // this.step = 5
+            this.$store.commit('editProject', {step: 5})
             // this.getColors()
         },
         getColors() {

@@ -1,9 +1,11 @@
 <template>
 <div class="card card-block block">
-    <h6 class="block-title">SOFT TRESHOLD</h6>
+    <h6 class="block-title">
+        SOFT TRESHOLD
+        <span class="fa fa-cog fa-spin" v-if="loading"></span>
+    </h6>
 
-    <span class="fa fa-cog fa-spin fa-2x fa-fw" v-if="loading"></span>
-    <div class="row" v-else>
+    <div class="row" v-if="!loading">
         <div class="col-4">
             <table class="table table-hover table-sm">
                 <thead>
@@ -89,6 +91,7 @@ export default {
             })
         },
         getValues() {
+            this.loading = true
             $.get(`${ROOTURL}/projects/${this.project.id}/tresholds`).then(data => {
                 this.powers = data.powers
                 this.scaleindep = data.scaleindep
