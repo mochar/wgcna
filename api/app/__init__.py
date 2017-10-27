@@ -74,8 +74,6 @@ def user_projects():
 def create_user():
     user_id = uuid.uuid4().hex
     session['id'] = user_id
-    app.logger.debug('kekked')
-    app.logger.debug(session['id'])
     return user_id
 
 

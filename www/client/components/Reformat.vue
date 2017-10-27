@@ -38,14 +38,14 @@ export default {
         }
     },
 
-    props: ['project'],
+    props: ['projectId'],
 
     components: {
         ListEditor
     },
 
     created() {
-        $.get(`${ROOTURL}/projects/${this.project.id}/expression`).then(data => {
+        $.get(`${ROOTURL}/projects/${this.projectId}/expression`).then(data => {
             this.rowNames = data.rowNames
             this.colNames = data.colNames
             this.loading = false
@@ -61,7 +61,7 @@ export default {
             formData.append('col', this.removedColNames)
             formData.append('transpose', this.transpose)
             $.ajax({
-                url: `${ROOTURL}/projects/${this.project.id}/expression`,
+                url: `${ROOTURL}/projects/${this.projectId}/expression`,
                 type: 'PUT',
                 data: formData,
                 async: true,

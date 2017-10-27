@@ -36,11 +36,11 @@ export default {
         Dendrogram
     },
 
-    props: ['project'],
+    props: ['projectId'],
 
     methods: {
         getClusterData() {
-            return $.get(`${ROOTURL}/projects/${this.project.id}/clustersamples`).then(data => {
+            return $.get(`${ROOTURL}/projects/${this.projectId}/clustersamples`).then(data => {
                 this.clusterData = data
             })
         },
@@ -49,7 +49,7 @@ export default {
             const formData = new FormData()
             this.outlierSamples.forEach(sample => formData.append('samples[]', sample))
             $.post({
-                url: `${ROOTURL}/projects/${this.project.id}/clustersamples`,
+                url: `${ROOTURL}/projects/${this.projectId}/clustersamples`,
                 data: formData,
                 async: true,
                 cache: false,

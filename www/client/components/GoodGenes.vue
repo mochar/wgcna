@@ -38,10 +38,10 @@ export default {
         }
     },
 
-    props: ['project'],
+    props: ['projectId'],
 
     created() {
-        $.get(`${ROOTURL}/projects/${this.project.id}/goodsamplesgenes`).then(data => {
+        $.get(`${ROOTURL}/projects/${this.projectId}/goodsamplesgenes`).then(data => {
             this.allOK = data.allOK
             this.badSamples = data.badSamples
             this.badGenes = data.badGenes

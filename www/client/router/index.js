@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from '../views/Home'
-import New from '../views/New'
-import Integrate from '../views/Integrate'
+import Home from 'views/Home'
+import Preprocess from 'views/Preprocess'
+import Integrate from 'views/Integrate'
 
 Vue.use(Router)
 
@@ -14,8 +14,9 @@ export default new Router({
             component: Home
 		},
         {
-            path: '/new',
-            component: New
+            name: 'preprocess',
+            path: '/preprocess/:id',
+            component: Preprocess
         },
         {
             path: '/integrate',

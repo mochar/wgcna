@@ -13,10 +13,12 @@
                         <small class="text-muted">{{ project.description}}</small>
                     </a>
                 </div>
-                <router-link to="/new" class="btn btn-secondary" tag="button">
+                <!-- <router-link to="/new" class="btn btn-secondary" tag="button">
                     <span class="fa fa-plus"></span>
-                    <!-- New -->
-                </router-link>
+                </router-link> -->
+                <button class="btn btn-secondary" data-toggle="modal" data-target="#new-modal">
+                    <span class="fa fa-plus"></span>
+                </button>
             </div>
         </div>
         <div class="col-3">
@@ -61,6 +63,7 @@
     </div>
 
     <!-- <export-modal :name="name" :step="step" :modules="modules" v-if="step > 3"></export-modal> -->
+    <new-project-modal></new-project-modal>
 </div>
 </template>
 
@@ -70,6 +73,7 @@ import Cluster from 'components/Cluster'
 import Genotype from 'components/Genotype'
 import Annotation from 'components/Annotation'
 import ExportModal from 'components/ExportModal'
+import NewProjectModal from 'components/NewProjectModal'
 
 export default {
     data() {
@@ -84,7 +88,8 @@ export default {
         Cluster,
         Genotype,
         Annotation,
-        ExportModal
+        ExportModal,
+        NewProjectModal
     },
 
     methods: {
