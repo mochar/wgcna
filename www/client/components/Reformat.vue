@@ -1,21 +1,21 @@
 <template>
 <div>
-    <div class="row" v-if="!loading">
-        <div class="col-6">
-            <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" v-model="transpose"> Transpose
-            </label>
-            <br/>
-        </div>
+    <div v-if="!loading">
+        <button class="btn btn-secondary" @click="transpose = !transpose">
+            <span class="fa fa-retweet fa-lg"></span>
+            Swap rows and columns
+        </button>
 
-        <div class="col-3">
-            <h5>Rows</h5>
-            <list-editor :list="rowNames" @removed="updateRemovedRowNames"></list-editor>
-        </div>
+        <div class="d-flex">
+            <div class="m-5">
+                <h5>Samples</h5>
+                <list-editor :list="rowNames" @removed="updateRemovedRowNames"></list-editor>
+            </div>
 
-        <div class="col-3">
-            <h5>Columns</h5>
-            <list-editor :list="colNames" @removed="updateRemovedColNames"></list-editor>
+            <div class="m-5">
+                <h5>Genes</h5>
+                <list-editor :list="colNames" @removed="updateRemovedColNames"></list-editor>
+            </div>
         </div>
     </div>
 
@@ -86,6 +86,7 @@ export default {
 
     watch: {
         transpose() {
+            console.log('kekd')
             const rowNames = this.rowNames
             this.rowNames = this.colNames
             this.colNames = rowNames

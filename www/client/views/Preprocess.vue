@@ -3,9 +3,9 @@
     <div class="d-flex justify-content-between align-items-center top">
         <h3>WGCNA</h3>
 
-        <h5 v-if="project">
+        <h5>
             <span :class="current === 'Reformat' ? 'text-primary' : 'text-muted'">
-                1. Edit expression matrix
+                1. Define data
             </span>
             <span> | </span>
             <span :class="current === 'GoodGenes' ? 'text-primary' : 'text-muted'">

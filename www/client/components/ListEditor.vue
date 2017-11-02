@@ -1,15 +1,17 @@
 <template>
 <div>
     <div v-if="list">
-        <input class="form-control" type="text" placeholder="search" v-model="searchTerm">
+        <div class="input-group ">
+            <input class="form-control" type="text" placeholder="search" v-model="searchTerm">
+            <button 
+                class="btn btn-danger " 
+                :disabled="!selected.length"
+                @click="removeSelected">
+                <span class="fa fa-trash"></span>
+            </button>
+        </div>
 
-        <button 
-            class="btn btn-danger btn-block" 
-            :disabled="!selected.length"
-            @click="removeSelected">Remove
-        </button>
-
-        <div v-for="item in paginatedList" class="item">
+        <div v-for="item in paginatedList" :key="item" class="item">
             <label class="form-check-label">
                 <input 
                     class="form-check-input" 

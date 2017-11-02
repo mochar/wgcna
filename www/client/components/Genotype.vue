@@ -1,7 +1,10 @@
 <template>
 <div class="card card-block block">
     <div class="card-title d-flex justify-content-between">
-        <h5>3. Module-genotype significance</h5>
+        <h6 class="block-title">
+            Module-genotype significance
+            <!-- <span class="fa fa-cog fa-spin" v-if="loading"></span> -->
+        </h6>
         <button @click.prevent="showPvalues = false" class="btn btn-link" v-if="showPvalues">
             Return
         </button>
@@ -13,7 +16,7 @@
             </div>
 
             <div class="col-5">
-                <div v-for="(sample, i) in samples" style="display: flex; text-align: center">
+                <div v-for="(sample, i) in samples" :key="sample" style="display: flex; text-align: center">
                     <span style="flex: 1">{{ sample }}</span>
                     <input style="flex: 1" :value="groups[i]" @keydown="e => change(e, i)" />
                 </div>
@@ -36,11 +39,29 @@
             </div>
         </div>
 
-        <div id="heatmap" class="row" v-else>
+        <div v-else>
+            <ul class="nav justify-content-center">
+                <li class="nav-item" v-for="column in columns" :key="column">
+                    <a class="nav-link" :class="{'active': column == selectedColumn}" 
+                        href="#" @click.prevent="selectedColumn = column">{{ column }}</a>
+                </li>
+            </ul>
+            <significance
+                :pvalues="pvalues" 
+                :eigengenes="eigengenes"
+                :samples="samples"
+                :modules="modules"
+                :groups="groups"
+                :column="selectedColumn">
+            </significance>
+        </div>
+
+        <!-- <div id="heatmap" class="row" v-else>
             <div class="col-2">
                 <span class="flex col row-label" 
                       :title="module.substring(2)"
                       v-for="(module, i) in modules"
+                      :key="module"
                       :style="{ 'border-right': `5px solid ${module.substring(2)}` }">
                     {{ module.substring(2) }}
                     <span v-if="pvalues['significance'][i] < 0.05" style="position: absolute">*</span>
@@ -48,31 +69,34 @@
             </div>
             <div class="col-10">
                 <div>
-                    <div v-for="(module, i) in modules" class="flex">
+                    <div v-for="(module, i) in modules" :key="module" class="flex">
                         <span class="col sig-cell">
                             {{ pvalues['significance'][i] | round(3) }}
                         </span>
                         <span 
                             class="col"
                             :style="pvalToStyle(pvalues[column][i])" 
-                            v-for="column in columns">
+                            v-for="column in columns"
+                            :key="column">
                             <span v-if="pvalues[column][i] !== 'NA'">{{ pvalues[column][i] | round(3) }}</span>
                         </span>
                     </div>
                 </div>
                 <div class="flex">
                     <span class="col-label">Significance</span>
-                    <span class="col-label" v-for="column in columns">
+                    <span class="col-label" v-for="column in columns" :key="column">
                         {{ column }}
                     </span>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 </div> 
 </template>
 
 <script>
+import Significance from 'charts/Significance'
+
 export default {
     data() {
         return {
@@ -82,11 +106,17 @@ export default {
             calculating: false,
             modules: null,
             pvalues: null,
-            showPvalues: false
+            eigengenes: null,
+            showPvalues: false,
+            selectedColumn: null
         }
     },
 
-    props: ['name', 'step'],
+    components: {
+        Significance
+    },
+
+    props: ['project', 'update'],
 
     methods: {
         calculate() {
@@ -94,7 +124,7 @@ export default {
             const formData = new FormData()
             formData.append('groups', this.groups)
             $.post({
-                url: `${ROOTURL}/genotype/${this.name}`,
+                url: `${ROOTURL}/projects/${this.project.id}/genotype`,
                 data: formData,
                 async: true,
                 cache: false,
@@ -104,14 +134,17 @@ export default {
                 this.calculating = false
                 this.modules = data.modules
                 this.pvalues = data.pvalues
+                this.eigengenes = data.eigengenes
                 this.showPvalues = true
-                this.$emit('done')
+                // this.$emit('done')
+            }, () => {
+                this.calculating = false
             })
         },
         getSamples() {
-            // $.get(`${ROOTURL}/expression/${this.name}`).then(data => {
-            //     this.samples = data.rowNames
-            // })
+            $.get(`${ROOTURL}/projects/${this.project.id}/expression`).then(data => {
+                this.samples = data.rowNames
+            })
         },
         getPvalues() {
             $.get(`${ROOTURL}/genotype/${this.name}`).then(data => {

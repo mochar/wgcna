@@ -109,7 +109,6 @@ def projects():
 def expression(project_id):
     if not redis.sismember('projects:{}'.format(session['id']), project_id):
         return {}, 404
-    # project = redis.hgetall('project:{}'.format(project_id))
     expression_path = os.path.join(project_id_to_folder(project_id), 'expression.csv')
     df = pd.read_csv(expression_path, index_col=0)
     if request.method == 'GET':
@@ -186,18 +185,23 @@ def cluster_genes(project_id):
     project_folder = project_id_to_folder(project_id)
     genetree_path = os.path.join(project_folder, 'genetree.csv')
     diss_tom_path = os.path.join(project_folder, 'diss_tom.csv')
+    module_path = os.path.join(project_folder, 'modules.csv')
+    eigengene_path = os.path.join(project_folder, 'eigengenes.csv')
+    expression_path = os.path.join(project_folder, 'expression.csv')
     if request.method == 'GET':
         if os.path.isfile(genetree_path):
             with open(genetree_path, 'r') as f:
                 cluster_data = json.load(f)
         else:
-            expression_path = os.path.join(project_folder, 'expression.csv')
             power = redis.hget('project:{}'.format(project_id), 'power')
             cluster_data = rscripts.tom(expression_path, diss_tom_path, int(power))
             with open(genetree_path, 'w') as f:
                 json.dump(cluster_data, f)
             redis.hset('project:{}'.format(project_id), 'step', 3)
-        return jsonify(cluster_data)
+        response = {'clusterData': cluster_data}
+        if os.path.isfile(module_path):
+            response['colors'] = pd.read_csv(module_path).to_dict(orient='list')
+        return jsonify(response)
     elif request.method == 'POST':
         min_module_size = request.form.get('minModuleSize')
         if min_module_size is None:
@@ -207,37 +211,32 @@ def cluster_genes(project_id):
         with open(genetree_path, 'r') as f:
             cluster_data = json.load(f)
         r = rscripts.cut_genes(cluster_data, diss_tom_path, int(min_module_size))
+        pd.DataFrame(r).to_csv(module_path)
+        rscripts.generate_eigengenes(expression_path, module_path).to_csv(eigengene_path)
         redis.hset('project:{}'.format(project_id), 'step', 4)
         return jsonify(r)
 
-#--------------------------------------------------------
 
-@app.route('/cutgenes/<name>', methods=['GET', 'POST'])
-def cutgenes(name):
+@app.route('/projects/<project_id>/genotype', methods=['GET', 'POST'])
+def genotype(project_id):
+    if not redis.sismember('projects:{}'.format(session['id']), project_id):
+        return {}, 404
+    project_folder = project_id_to_folder(project_id)
+    eigengene_path = os.path.join(project_folder, 'eigengenes.csv')
+    pvalues_path = os.path.join(project_folder, 'pvalues.csv')
     if request.method == 'POST':
-        min_module_size = request.form['minModuleSize']
-        deep_split = request.form['deepSplit']
-        cmd = ['Rscript', '--no-init-file', 'scripts/cutGenes.R', name, min_module_size, deep_split]
+        groups = request.form.get('groups')
+        if groups is None:
+            return {'error': 'Please specify the groups.'}, 403
+        cmd = ['Rscript', '--no-init-file', 'scripts/genotype.R', project_folder, groups]
         subprocess.check_output(cmd, universal_newlines=True)
-        update_info(name, 'step', 4)
-        update_info(name, 'min_module_size', min_module_size)
-        update_info(name, 'deep_split', deep_split)
-    response = {'base64': base64_encode_image('data/{}/tom-colors.png'.format(name))}
-    return jsonify(response)
-
-
-@app.route('/genotype/<name>', methods=['GET', 'POST'])
-def genotype(name):
-    if request.method == 'POST':
-        groups = request.form['groups']
-        cmd = ['Rscript', '--no-init-file', 'scripts/genotype.R', name, groups]
-        subprocess.check_output(cmd, universal_newlines=True)
-        update_info(name, 'step', 5)
-        update_info(name, 'groups', groups)
-    df = pd.read_csv('data/{}/pvalues.csv'.format(name), index_col=0, keep_default_na=False, na_values=[''])
+        # redis.hset('project:{}'.format(project_id), 'step', 4)
+        # redis.hset('project:{}'.format(project_id), 'step', 4)
+    df = pd.read_csv(pvalues_path, index_col=0, keep_default_na=False, na_values=[''])
     response = {}
     response['pvalues'] = df.to_dict(orient='list')
     response['modules'] = df.index.tolist()
+    response['eigengenes'] = pd.read_csv(eigengene_path, index_col=0).to_dict(orient='list')
     return jsonify(response)
 
 

@@ -54,7 +54,7 @@ export default {
     },
 
     methods: {
-        submit() {
+        submit(event) {
             this.loading = true
             const formData = new FormData(event.srcElement)
             $.post({

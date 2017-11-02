@@ -5,8 +5,9 @@
         <span class="fa fa-cog fa-spin" v-if="loading"></span>
     </h6>
 
-    <div style="position: absolute; right: 1rem" class="">
-        <form class="form-inline" enctype="multipart/form-data" @submit.prevent="cut">
+    <div v-if="!loading">
+        <dendrogram :cluster-data="clusterData" :ratio="0.4" :colors="colors" v-if="!loading"></dendrogram>
+        <form class="form-inline float-right" style="margin-top: 1rem" enctype="multipart/form-data" @submit.prevent="cut">
             <div class="form-group">
                 <label>Minimum module size</label>
                 <input type="number" class="form-control" name="minModuleSize">
@@ -15,11 +16,12 @@
                 <label>Deep split</label>
                 <input type="number" class="form-control" name="deepSplit" min="0" max="5" value="2">
             </div>
-            <button type="submit" class="btn btn-primary" :disabled="cutting">Cut</button>
+            <button type="submit" class="btn btn-primary" :disabled="cutting">
+                <span class="fa fa-scissors"></span>
+                Cut
+            </button>
         </form>
     </div>
-
-    <dendrogram :cluster-data="clusterData" :ratio="0.4" :colors="colors" v-if="!loading"></dendrogram>
 </div>
 </template>
 
@@ -48,7 +50,8 @@ export default {
             this.clusterData = null
             this.colors = null
             $.get(`${ROOTURL}/projects/${this.project.id}/clustergenes`).then(data => {
-                this.clusterData = data
+                this.clusterData = data.clusterData
+                this.colors = data.colors
                 this.loading = false
             })
         },

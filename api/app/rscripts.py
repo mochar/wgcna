@@ -79,8 +79,19 @@ def cut_genes(cluster_data, diss_tom_path, min_module_size):
     diss_tom = np.loadtxt(diss_tom_path)
     modules = robjects.r.cutreeHybrid(dendro=tree, distM=diss_tom, deepSplit=2,
         pamRespectsDendro=False, minClusterSize=min_module_size)
-    colors = WGCNA.labels2colors(modules[0])
+    labels = pandas2ri.ri2py(modules.rx2('labels'))[tree.rx2('order')]
+    colors = WGCNA.labels2colors(labels)
     rgb = robjects.r.col2rgb(colors)
     hex = robjects.r.rgb(rgb.rx(1, True), rgb.rx(2, True), 
         rgb.rx(3, True), maxColorValue=255)
     return {'modules': list(colors), 'hex': list(hex)}
+
+
+def generate_eigengenes(expression_path, modules_path):
+    df = pd.read_csv(expression_path, index_col=0)
+    modules = pd.read_csv(modules_path)['modules']
+    eigengenes = WGCNA.moduleEigengenes(df, modules).rx2('eigengenes')
+    eigengenes = pandas2ri.ri2py(WGCNA.orderMEs(eigengenes))
+    eigengenes.drop(['MEgrey'], axis=1, inplace=True)
+    eigengenes.index = df.index
+    return eigengenes

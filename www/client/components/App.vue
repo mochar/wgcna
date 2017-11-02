@@ -20,7 +20,6 @@ export default {
     created() {
         this.$store.dispatch('getProjects').then(data => {
             if (data.length > 0) this.$store.commit('setProjectIndex', 0)
-            else this.$router.push('/new')
         })
     }
 }
