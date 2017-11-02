@@ -41,7 +41,7 @@
                     <ul class="nav justify-content-left">
                         <li class="nav-item" v-for="column in columns" :key="column">
                             <a class="nav-link" :class="{'active': column == selectedColumn}" 
-                                href="#" @click.prevent="selectedColumn = column">{{ column }}</a>
+                                href="#" @click.prevent="selectColumn(column)">{{ column }}</a>
                         </li>
                     </ul>
                 </dd>
@@ -191,6 +191,9 @@ export default {
         },
         change(e, i) {
             this.groups[i] = e.srcElement.value
+        },
+        selectColumn(column) {
+            this.selectedColumn = this.selectedColumn == column ? null : column
         }
     },
 

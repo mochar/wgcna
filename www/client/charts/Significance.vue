@@ -82,11 +82,20 @@ export default {
                     return this.columnGroups.includes(d.group) ? color : 'grey'
                 })
             const circle = groupAll.datum((d, i) => i).append('circle')
-                .attr('cx', this.width * .9)
+                .attr('cx', this.width * .85)
                 .attr('cy', 0)
                 .attr('r', d => {
                     const p = this.column ? this.pvalues[this.column][d] : this.pvalues.significance[d]
-                    return p === 'NA' ? r(2) :  r(-Math.log10(p))
+                    return p === 'NA' ? 0 :  r(-Math.log10(p))
+                })
+            const text = groupAll.datum((d, i) => i).append('text')
+                .attr('x', this.width * .9)
+                .attr('y', 0)
+                .attr('fill', 'grey')
+                .style('font-size', '1rem')
+                .text(d => {
+                    const p = this.column ? this.pvalues[this.column][d] : this.pvalues.significance[d]
+                    return p === 'NA' ? p : p.toFixed(4)
                 })
             
             const axis = d3.axisBottom(x).tickSizeInner(-this.height)
