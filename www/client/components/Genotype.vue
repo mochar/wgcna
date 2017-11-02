@@ -1,14 +1,9 @@
 <template>
 <div class="card card-block block">
-    <div class="card-title d-flex justify-content-between">
-        <h6 class="block-title">
-            Module-genotype significance
-            <!-- <span class="fa fa-cog fa-spin" v-if="loading"></span> -->
-        </h6>
-        <button @click.prevent="showPvalues = false" class="btn btn-link" v-if="showPvalues">
-            Return
-        </button>
-    </div>
+    <h6 class="block-title">
+        Module-genotype significance
+        <!-- <span class="fa fa-cog fa-spin" v-if="loading"></span> -->
+    </h6>
 
     <div>
         <div class="row" v-if="!showPvalues">
@@ -40,20 +35,46 @@
         </div>
 
         <div v-else>
-            <ul class="nav justify-content-center">
-                <li class="nav-item" v-for="column in columns" :key="column">
-                    <a class="nav-link" :class="{'active': column == selectedColumn}" 
-                        href="#" @click.prevent="selectedColumn = column">{{ column }}</a>
-                </li>
-            </ul>
+            <dl class="row" style="margin: 1rem">
+                <dt class="col-2">Comparison</dt>
+                <dd class="col-10">
+                    <ul class="nav justify-content-left">
+                        <li class="nav-item" v-for="column in columns" :key="column">
+                            <a class="nav-link" :class="{'active': column == selectedColumn}" 
+                                href="#" @click.prevent="selectedColumn = column">{{ column }}</a>
+                        </li>
+                    </ul>
+                </dd>
+                <dt class="col-2">Options</dt>
+                <dd class="col-10">
+                    <div class="form-check form-check-inline">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="checkbox" value="" v-model="sigOnly">
+                            Show signficant modules only
+                        </label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="checkbox" value="" v-model="columnOnly">
+                            Show comparsion groups only
+                        </label>
+                    </div>
+                </dd>
+            </dl>
             <significance
                 :pvalues="pvalues" 
                 :eigengenes="eigengenes"
                 :samples="samples"
                 :modules="modules"
                 :groups="groups"
-                :column="selectedColumn">
+                :column="selectedColumn"
+                :sigOnly="sigOnly"
+                :columnOnly="columnOnly">
             </significance>
+            <button @click.prevent="showPvalues = false" class="btn btn-link float-right" v-if="showPvalues">
+                <span class="fa fa-angle-double-left"></span>
+                Return
+            </button>
         </div>
 
         <!-- <div id="heatmap" class="row" v-else>
@@ -108,7 +129,9 @@ export default {
             pvalues: null,
             eigengenes: null,
             showPvalues: false,
-            selectedColumn: null
+            selectedColumn: null,
+            sigOnly: false,
+            columnOnly: false
         }
     },
 
@@ -173,7 +196,9 @@ export default {
 
     computed: {
         columns() {
-            return this.pvalues ? Object.keys(this.pvalues).filter(x => x !='significance') : []
+            const columns = this.pvalues ? Object.keys(this.pvalues).filter(x => x !='significance') : []
+            // this.selectedColumn = columns[0]
+            return columns
         }
     },
 
