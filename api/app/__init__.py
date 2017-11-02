@@ -60,6 +60,11 @@ def project_id_to_folder(project_id):
     return os.path.join(app.config['STORAGE_FOLDER'], project_id)
 
 
+def remove_file_if_exists(path):
+    if os.path.exists(path):
+        os.remove(path)
+
+
 def user_projects():
     user_id = session.get('id')
     if user_id is None:
@@ -157,8 +162,8 @@ def cluster_samples(project_id):
 def tresholds(project_id):
     if not redis.sismember('projects:{}'.format(session['id']), project_id):
         return {}, 404
+    project_folder = project_id_to_folder(project_id)
     if request.method == 'GET':
-        project_folder = project_id_to_folder(project_id)
         expression_path = os.path.join(project_folder, 'expression.csv')
         tresholds_path = os.path.join(project_folder, 'tresholds.csv') 
         if os.path.isfile(tresholds_path):
@@ -175,6 +180,8 @@ def tresholds(project_id):
         pipe.hset('project:{}'.format(project_id), 'power', power)
         pipe.hset('project:{}'.format(project_id), 'step', 2)
         pipe.execute()
+        remove_file_if_exists(os.path.join(project_folder, 'genetree.csv'))
+        remove_file_if_exists(os.path.join(project_folder, 'modules.csv'))
         return jsonify({})
 
 
