@@ -46,12 +46,15 @@ export default {
                 const significance = this.pvalues.significance[i]
                 if (this.sigOnly && significance > 0.05) return build
                 const eigengene = this.eigengenes[module]
-                // TODO: filter if columnOnly is true
-                const values = this.sortIndices.map(j => {
-                    return { val: eigengene[j], group: this.groups[j], sample: this.samples[j] }
-                })
                 let p = this.column ? this.pvalues[this.column][i] : significance
                 p = p === 'NA' ? null : p
+
+                const values = this.sortIndices
+                    .map(j => {
+                        return { val: eigengene[j], group: this.groups[j], sample: this.samples[j] }
+                    })
+                    .filter(d => this.filteredSamples.includes(d.sample))
+
                 build.push({ module, significance, values, i, p })
                 return build
             }, [])
@@ -67,30 +70,33 @@ export default {
                 .domain([-1, 1])
                 .range([(this.size / 2) * -1, this.size / 2])
             const x = d3.scaleBand() // Eigengene region
-                .domain(this.sortedSamples)
+                .domain(this.filteredSamples)
                 .range([0, this.width * .8])
                 .paddingInner(0.05)
             const r = d3.scaleLinear() // P-value circle size
                 .domain([0, 3])
-                .range([1, 10])
+                .range([1, 15])
 
             // Build plot
             const group = this.g.selectAll('g.eigengene').data(data)
             group.exit().remove()
             const groupEnter = group.enter().append('g').classed('eigengene', true)
                 .attr('transform', d => `translate(0,${y(d.module) + this.size / 2})`)
-            console.log(groupEnter.size())
             const groupAll = groupEnter.merge(group)
             const rect = groupAll.selectAll('rect').data(d => d.values, d => d.sample)
+            rect.transition()
+                .attr('x', d => x(d.sample))
+                .attr('width', x.bandwidth())
+                .attr('height', d => Math.abs(y1(d.val) - y1(0)))
             rect.exit().remove()
             rect.enter().append('rect')
                 // .attr('stroke', ' black')
                 .attr('stroke', d => d3.rgb(this.color(d.group)).darker(3))
-              .merge(rect)
                 .attr('x', d => x(d.sample))
-                .attr('y', d => y1(Math.min(0, d.val)))
                 .attr('width', x.bandwidth())
                 .attr('height', d => Math.abs(y1(d.val) - y1(0)))
+              .merge(rect)
+                .attr('y', d => y1(Math.min(0, d.val)))
                 .attr('fill', (d, i) => {
                     const color = this.color(d.group)
                     if (!this.column) return color
@@ -105,7 +111,7 @@ export default {
             const text = groupAll.selectAll('text').data(d => [d], d => `${d.module}_${this.column}`)
             text.enter().append('text')
                 .attr('x', this.width * .9)
-                .attr('y', 0)
+                .attr('y', 5)
               .merge(text)
                 .attr('fill', d => d.p && d.p < 0.05 ? '#333' : 'grey' )
                 .style('font-size', '1rem')
@@ -113,14 +119,14 @@ export default {
             
             // Axes and labels
             const axis = d3.axisBottom(x).tickSizeInner(-this.height)
-            this.g.select('#axis-bottom').call(axis)
+            this.g.select('#axis-bottom').transition().call(axis)
               .selectAll("text")  
                 .style("text-anchor", "end")
                 .attr("dx", "-.8em")
                 .attr("dy", ".15em")
                 .attr("transform", "rotate(-45)")
                 .attr('textLength', this.size * 0.75)
-            this.g.select('#axis-top').call(d3.axisTop(x))
+            this.g.select('#axis-top').transition().call(d3.axisTop(x))
               .selectAll("text")  
                 .style("text-anchor", "start")
                 .attr("dx", ".8em")
@@ -160,6 +166,11 @@ export default {
         },
         columnGroups() {
             return this.column ? this.column.split(' vs ') : []
+        },
+        filteredSamples() {
+            if (!this.column || !this.columnOnly) return this.sortedSamples
+            return this.sortedSamples
+                .filter((d, i) => this.columnGroups.includes(this.sortedGroups[i]))
         }
     },
 
@@ -168,6 +179,9 @@ export default {
             this.updatePlot()
         },
         sigOnly() {
+            this.updatePlot()
+        },
+        columnOnly() {
             this.updatePlot()
         }
     }

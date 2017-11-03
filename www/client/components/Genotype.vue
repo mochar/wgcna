@@ -71,7 +71,7 @@
                 :sigOnly="sigOnly"
                 :columnOnly="columnOnly">
             </significance>
-            <button @click.prevent="showPvalues = false" class="btn btn-link float-right" v-if="showPvalues">
+            <button @click.prevent="showPvalues = false" class="btn btn-secondary float-right" v-if="showPvalues">
                 <span class="fa fa-angle-double-left"></span>
                 Return
             </button>
