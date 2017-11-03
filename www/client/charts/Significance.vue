@@ -3,6 +3,9 @@
     <g :transform="`translate(${margin.left}, ${margin.top})`">
         <g id="axis-top" class="axis axis--x"></g>
         <g id="axis-bottom" class="axis axis--x" :transform="`translate(0, ${height})`"></g>
+        <text :transform="`translate(${width * .9}, -15)`" text-anchor="middle" style="font-size: 1rem">
+            {{ column ? 'Wilcoxon' : 'Kruskal-Wallis' }}
+        </text>
     </g>
 </svg>
 </template>
@@ -23,7 +26,7 @@ export default {
             svg: null,
             g: null,
             size: 75,
-            margin: {top: 80, right: 5, bottom: 80, left: 35},
+            margin: {top: 60, right: 5, bottom: 60, left: 35},
             color: d3.scaleOrdinal(d3.schemeCategory20c)
         }
     },
@@ -31,16 +34,34 @@ export default {
     props: ['eigengenes', 'modules', 'pvalues', 'samples', 'groups', 'column', 'sigOnly', 'columnOnly'],
 
     methods: {
-        resize() {
+        resize(length) {
             this.width_ = $(this.$el).parent().width()
-            this.height_ = this.modules.length * this.size
             this.width = this.width_ - this.margin.left - this.margin.right
-            this.height = this.height_ - this.margin.top - this.margin.bottom
+            this.height = length * this.size
+            this.height_ = this.height + this.margin.top + this.margin.bottom
         },
         updatePlot() {
+            // Build data
+            const data = this.modules.reduce((build, module, i) => {
+                const significance = this.pvalues.significance[i]
+                if (this.sigOnly && significance > 0.05) return build
+                const eigengene = this.eigengenes[module]
+                // TODO: filter if columnOnly is true
+                const values = this.sortIndices.map(j => {
+                    return { val: eigengene[j], group: this.groups[j], sample: this.samples[j] }
+                })
+                let p = this.column ? this.pvalues[this.column][i] : significance
+                p = p === 'NA' ? null : p
+                build.push({ module, significance, values, i, p })
+                return build
+            }, [])
+
+            this.resize(data.length)
+
+            // Set up scales
             this.color.domain(this.group)
             const y = d3.scaleBand() // placement module eigengene
-                .domain(this.modules)
+                .domain(data.map(d => d.module))
                 .range([this.height, 0])
             const y1 = d3.scaleLinear() // placement y value 
                 .domain([-1, 1])
@@ -53,51 +74,44 @@ export default {
                 .domain([0, 3])
                 .range([1, 10])
 
-            const data = this.modules.map(module => {
-                const eigengene = this.eigengenes[module]
-                const values = this.sortIndices.map(i => {
-                    return { val: eigengene[i], group: this.groups[i], sample: this.samples[i] }
-                })
-                return { module, values }
-            })
-
-            const group = this.g.selectAll('g.eigengene').data(data, d => `${d.module}:${this.column}`)
+            // Build plot
+            const group = this.g.selectAll('g.eigengene').data(data)
             group.exit().remove()
-            const groupAll = group.enter().append('g').classed('eigengene', true)
+            const groupEnter = group.enter().append('g').classed('eigengene', true)
                 .attr('transform', d => `translate(0,${y(d.module) + this.size / 2})`)
-              .merge(group)
+            console.log(groupEnter.size())
+            const groupAll = groupEnter.merge(group)
             const rect = groupAll.selectAll('rect').data(d => d.values, d => d.sample)
             rect.exit().remove()
             rect.enter().append('rect')
                 // .attr('stroke', ' black')
                 .attr('stroke', d => d3.rgb(this.color(d.group)).darker(3))
               .merge(rect)
-                .attr('x', (d, i) => x(this.sortedSamples[i]))
-                .attr('y', (d, i) => y1(Math.min(0, d.val)))
+                .attr('x', d => x(d.sample))
+                .attr('y', d => y1(Math.min(0, d.val)))
                 .attr('width', x.bandwidth())
-                .attr('height', (d, i) => Math.abs(y1(d.val) - y1(0)))
+                .attr('height', d => Math.abs(y1(d.val) - y1(0)))
                 .attr('fill', (d, i) => {
                     const color = this.color(d.group)
                     if (!this.column) return color
                     return this.columnGroups.includes(d.group) ? color : 'grey'
                 })
-            const circle = groupAll.datum((d, i) => i).append('circle')
+            const circle = groupAll.selectAll('circle').data(d => [d], d => `${d.module}_${this.column}`)
+            circle.enter().append('circle')
                 .attr('cx', this.width * .85)
                 .attr('cy', 0)
-                .attr('r', d => {
-                    const p = this.column ? this.pvalues[this.column][d] : this.pvalues.significance[d]
-                    return p === 'NA' ? 0 :  r(-Math.log10(p))
-                })
-            const text = groupAll.datum((d, i) => i).append('text')
+              .merge(circle).transition()
+                .attr('r', d => d.p ? r(-Math.log10(d.p)) : 0)
+            const text = groupAll.selectAll('text').data(d => [d], d => `${d.module}_${this.column}`)
+            text.enter().append('text')
                 .attr('x', this.width * .9)
                 .attr('y', 0)
-                .attr('fill', 'grey')
+              .merge(text)
+                .attr('fill', d => d.p && d.p < 0.05 ? '#333' : 'grey' )
                 .style('font-size', '1rem')
-                .text(d => {
-                    const p = this.column ? this.pvalues[this.column][d] : this.pvalues.significance[d]
-                    return p === 'NA' ? p : p.toFixed(4)
-                })
+                .text(d => d.p ? parseFloat(d.p).toFixed(4) : 'NA')
             
+            // Axes and labels
             const axis = d3.axisBottom(x).tickSizeInner(-this.height)
             this.g.select('#axis-bottom').call(axis)
               .selectAll("text")  
@@ -118,7 +132,7 @@ export default {
 
     mounted() {
         this.svg = d3.select(this.$el)
-        this.resize()
+        this.resize(this.modules.length)
         this.g = this.svg.select('g')
         this.updatePlot()
     },
@@ -153,6 +167,9 @@ export default {
         column() {
             this.updatePlot()
         },
+        sigOnly() {
+            this.updatePlot()
+        }
     }
 }
 </script>

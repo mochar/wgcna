@@ -237,13 +237,14 @@ def genotype(project_id):
             return {'error': 'Please specify the groups.'}, 403
         cmd = ['Rscript', '--no-init-file', 'scripts/genotype.R', project_folder, groups]
         subprocess.check_output(cmd, universal_newlines=True)
-        # redis.hset('project:{}'.format(project_id), 'step', 4)
-        # redis.hset('project:{}'.format(project_id), 'step', 4)
+        redis.hset('project:{}'.format(project_id), 'groups', groups)
+        redis.hset('project:{}'.format(project_id), 'step', 5)
     df = pd.read_csv(pvalues_path, index_col=0, keep_default_na=False, na_values=[''])
     response = {}
     response['pvalues'] = df.to_dict(orient='list')
     response['modules'] = df.index.tolist()
     response['eigengenes'] = pd.read_csv(eigengene_path, index_col=0).to_dict(orient='list')
+    response['groups'] = redis.hget('project:{}'.format(project_id), 'groups').split(',')
     return jsonify(response)
 
 
