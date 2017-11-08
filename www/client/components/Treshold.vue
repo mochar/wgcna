@@ -17,8 +17,8 @@
                     <tr v-for="(power, i) in powers" 
                         :key="i"
                         :style="{ 'font-weight': power == highlight ? 'bold' : 'normal',
-                                  'color': power == highlight ? 'red' : 'black' }"
-                        @click="pick(power)"
+                                  'color': power == highlight || power == project.power ? 'red' : 'black' }"
+                        @click="selected = power"
                         @mouseover="hovered = power"
                         @mouseout="hovered = null">
                         <td>{{ power }}</td>
@@ -49,11 +49,18 @@
             </scatter>
         </div>
     </div>
+
+    <div>
+        <button class="btn btn-primary float-right" @click="pick">
+            <span class="fa fa-check"></span>
+            Select
+        </button>
+    </div>
 </div>
 </template>
 
 <script>
-import Scatter from '../charts/Scatter'
+import Scatter from 'charts/Scatter'
 
 export default {
     data() {
@@ -62,7 +69,8 @@ export default {
             scaleindep: null,
             meank: null,
             loading: true,
-            hovered: null
+            hovered: null,
+            selected: null
         }
     },
 
@@ -70,12 +78,12 @@ export default {
         Scatter
     },
 
-    props: ['project', 'selected', 'update'],
+    props: ['project', 'update'],
 
     methods: {
-        pick(power) {
+        pick() {
             const formData = new FormData()
-            formData.append('power', power)
+            formData.append('power', this.selected)
             $.ajax({
                 type: 'POST',
                 url: `${ROOTURL}/projects/${this.project.id}/tresholds`,
@@ -85,7 +93,7 @@ export default {
                 contentType: false,
                 processData: false
             }).then(() => {
-                this.$emit('done', power)
+                this.$emit('done', this.selected)
             }, () => {
                 console.log('error')
             })
@@ -117,12 +125,17 @@ export default {
         highlight() {
             if (this.hovered) {
                 return this.hovered
+            } else if (this.selected) {
+                return this.selected
             } else if (this.project.power) {
                 return this.project.power
             } else {
                 return null
             }
         },
+        buttonReady() {
+            return this.selected && this.project.power != this.selected
+        }
     }
 }
 </script>
