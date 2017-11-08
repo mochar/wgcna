@@ -32,29 +32,11 @@ def base64_encode_image(image):
     return encoded.decode()
 
 
-def read_info(name):
-    with open('data/{}/info.json'.format(name), 'r') as f:
-        return json.load(f)
-
-
-def write_info(name, info):
-    with open('data/{}/info.json'.format(name), 'w') as f:
-        return json.dump(info, f)
-
-
-def update_info(name, key, value):
-    info = read_info(name)
-    info[key] = value
-    write_info(name, info)
-
-
 def create_file_response(contents, filename):
     response = make_response(contents)
     response.headers['Content-Disposition'] = 'attachment; filename={}'.format(filename)
     return response
 
-
-#--------------------------------------------------------
 
 def project_id_to_folder(project_id):
     return os.path.join(app.config['STORAGE_FOLDER'], project_id)
