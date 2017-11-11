@@ -1,9 +1,13 @@
 <template>
-<div class="card card-block block">
-    <h6 class="block-title">
-        SOFT TRESHOLD
-        <span class="fa fa-cog fa-spin" v-if="loading"></span>
-    </h6>
+<div class="card card-body block">
+    <div class="d-flex justify-content-between">
+        <h6 class="block-title">
+            SOFT TRESHOLD
+            <span class="fa fa-cog fa-spin" v-if="loading"></span>
+        </h6>
+
+        <span class="fa fa-info text-muted"></span>
+    </div>
 
     <div class="row" v-if="!loading">
         <div class="col-4">
@@ -51,7 +55,7 @@
     </div>
 
     <div>
-        <button class="btn btn-primary float-right" @click="pick">
+        <button class="btn btn-primary" :disabled="!buttonReady" @click="pick">
             <span class="fa fa-check"></span>
             Select
         </button>

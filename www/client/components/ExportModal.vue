@@ -6,7 +6,7 @@
 
     <h5 class="modal-title">Export modules</h5>
 
-    <div class="card-block">
+    <div class="card-body">
         <div class="d-flex justify-content-center">
             <div class="btn-group">
                 <button class="btn btn-secondary format" :class="{active: format == 'A'}" 

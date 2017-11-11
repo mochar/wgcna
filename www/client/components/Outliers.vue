@@ -1,5 +1,9 @@
 <template>
-<div>
+<div class="card card-body">
+    <h6 class="block-title">
+        Remove Outliers
+    </h6>
+
     <dendrogram 
         v-if="!loading" 
         :ratio="0.6"
@@ -10,10 +14,12 @@
     </dendrogram>
     <span class="fa fa-cog fa-spin fa-2x fa-fw" v-else></span>
 
-    <button class="btn btn-primary" :disabled="loading" @click="done">
-        <span class="fa fa-check"></span>
-        Done
-    </button>
+    <div class="mt-3">
+        <button class="btn btn-primary" :disabled="loading" @click="done">
+            <span class="fa fa-check"></span>
+            Done
+        </button>
+    </div>
 </div>
 </template>
 

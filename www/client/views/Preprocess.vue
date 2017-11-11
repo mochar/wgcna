@@ -1,9 +1,7 @@
 <template>
 <div>
-    <div class="d-flex justify-content-between align-items-center top">
-        <h3>WGCNA</h3>
-
-        <h5>
+    <div class="d-flex justify-content-between align-items-center">
+        <!-- <h5>
             <span :class="current === 'Reformat' ? 'text-primary' : 'text-muted'">
                 1. Define data
             </span>
@@ -17,17 +15,16 @@
             </span>
         </h5>
 
-        <router-link to="/" class="btn btn-secondary">
+        <router-link to="/" class="btn btn-light">
             Cancel
-        </router-link>
+        </router-link> -->
     </div>
 
     <component 
         v-if="this.$route.params.id"
         :is="current" 
         :projectId="this.$route.params.id"
-        @done="next" 
-        style="margin-top: 1rem">
+        @done="next">
     </component>
 </div>
 </template>

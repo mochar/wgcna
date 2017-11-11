@@ -1,5 +1,5 @@
 <template>
-<div class="card card-block">
+<div class="card card-body">
     <h5 class="card-title">4. Annotation</h5>
     
     <div class="row">

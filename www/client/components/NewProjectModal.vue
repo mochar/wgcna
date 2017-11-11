@@ -8,7 +8,7 @@
 
     <h5 class="block-title">New project</h5>
 
-    <div class="card-block">
+    <div class="card-body">
         <div class="form-group">
             <label>Name</label>
             <input class="form-control" name="name" placeholder="required">

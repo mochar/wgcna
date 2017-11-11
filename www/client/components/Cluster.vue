@@ -1,22 +1,25 @@
 <template>
-<div class="card card-block block">
+<div class="card card-body block">
     <h6 class="block-title">
         GENE CLUSTERING
-        <span class="fa fa-cog fa-spin" v-if="loading"></span>
+        <span class="fa fa-lg fa-cog fa-spin float-right" v-if="loading"></span>
     </h6>
 
     <div v-if="!loading">
         <dendrogram :cluster-data="clusterData" :ratio="0.4" :colors="colors" v-if="!loading"></dendrogram>
-        <form class="form-inline float-right" style="margin-top: 1rem" enctype="multipart/form-data" @submit.prevent="cut">
-            <div class="form-group">
-                <label>Minimum module size</label>
-                <input type="number" class="form-control" name="minModuleSize">
+        <form class="form-inline" style="margin-top: 1rem" enctype="multipart/form-data" @submit.prevent="cut">
+            <label class="mr-2">Minimum module size</label>
+
+            <div class="form-group mr-2">
+                <input type="number" class="form-control" name="minModuleSize" :placeholder="project.minModuleSize">
             </div>
-            <div class="form-group" style="display: none">
+
+            <!-- <div class="form-group" style="display: none">
                 <label>Deep split</label>
                 <input type="number" class="form-control" name="deepSplit" min="0" max="5" value="2">
-            </div>
-            <button type="submit" class="btn btn-primary" :disabled="cutting">
+            </div> -->
+
+            <button type="submit" class="btn btn-primary mr-2" :disabled="cutting">
                 <span class="fa fa-scissors"></span>
                 Cut
             </button>
@@ -59,6 +62,7 @@ export default {
             this.cutting = true
             this.$emit('cutting')
             const formData = new FormData(event.srcElement)
+            const minModuleSize = parseInt(formData.get('minModuleSize'))
             $.post({
                 url: `${ROOTURL}/projects/${this.project.id}/clustergenes`,
                 data: formData,
@@ -70,7 +74,7 @@ export default {
                 console.log(data)
                 this.colors = data
                 this.cutting = false
-                this.$emit('done')
+                this.$emit('done', minModuleSize)
             }, () => {
                 this.cutting = false
             })

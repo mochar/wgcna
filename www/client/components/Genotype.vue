@@ -1,7 +1,7 @@
 <template>
-<div class="card card-block block">
-    <h6 class="block-title">
-        Module-genotype significance
+<div class="card card-body block">
+    <h6 class="block-title text-uppercase">
+        Module Significance
         <span class="fa fa-cog fa-spin" v-if="loading"></span>
     </h6>
 
@@ -71,7 +71,7 @@
                 :sigOnly="sigOnly"
                 :columnOnly="columnOnly">
             </significance>
-            <button @click.prevent="showPvalues = false" class="btn btn-secondary float-right" v-if="showPvalues">
+            <button @click.prevent="showPvalues = false" class="btn btn-light" v-if="showPvalues">
                 <span class="fa fa-angle-double-left"></span>
                 Return
             </button>
