@@ -47,6 +47,14 @@ def remove_file_if_exists(path):
         os.remove(path)
 
 
+def is_number(string):
+    try:
+        float(string)
+        return True
+    except ValueError:
+        return False
+
+
 def user_projects():
     user_id = session.get('id')
     if user_id is None:
@@ -193,16 +201,18 @@ def cluster_genes(project_id):
         return jsonify(response)
     elif request.method == 'POST':
         min_module_size = request.form.get('minModuleSize')
-        if min_module_size is None:
-            return {'error': 'Please specify the minimum module size.'}, 403
+        if min_module_size is None or not is_number(min_module_size):
+            return {'error': 'Please specify a (correct) minimum module size.'}, 403
+        min_module_size = int(min_module_size)
         if not os.path.isfile(genetree_path):
             return {'error': 'Please cluster the genes first.'}, 403
         with open(genetree_path, 'r') as f:
             cluster_data = json.load(f)
-        r = rscripts.cut_genes(cluster_data, diss_tom_path, int(min_module_size))
+        r = rscripts.cut_genes(cluster_data, diss_tom_path, min_module_size)
         pd.DataFrame(r).to_csv(module_path)
         rscripts.generate_eigengenes(expression_path, module_path).to_csv(eigengene_path)
         redis.hset('project:{}'.format(project_id), 'step', 4)
+        redis.hset('project:{}'.format(project_id), 'minModuleSize', min_module_size)
         return jsonify(r)
 
 
