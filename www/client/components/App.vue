@@ -1,6 +1,31 @@
 <template>
-<div class="container" id="app">
-    <router-view></router-view>
+<div>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light" style="border-bottom: 2px solid #eaeaea">
+        <div class="container">
+            <router-link to="/" class="navbar-brand text-main font-weight-bold">WGCNA</router-link>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav">
+                    <router-link to="/analyze" class="nav-item nav-link" active-class="active" tag="a">
+                        <!-- <span class="fa fa-home"></span> -->
+                        Analyze
+                    </router-link>
+                    <router-link to="/integrate" class="nav-item nav-link" active-class="active" tag="a">
+                        <!-- <span class="fa fa-compress"></span> -->
+                        Integrate
+                    </router-link>
+                    <!-- <a class="nav-item nav-link disabled" href="#">Disabled</a> -->
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" id="app">
+        <router-view></router-view>
+    </div>
 </div>
 </template>
 
@@ -47,7 +72,7 @@ html {
             transition: initial;
 }
 
-.btn-primary, .btn-success, .btn-danger {
+/* .btn-primary, .btn-success, .btn-danger {
     border-width: 0 1px 2px 1px;
 }
 .btn-secondary { border-width: 1px 1px 2px 1px }
@@ -55,10 +80,14 @@ html {
 .btn-primary:active, .btn-success:active, .btn-danger:active {
     border-width: 2px 1px 0 1px;
 }
-.btn-secondary:active { border-width: 2px 1px 1px 1px }
+.btn-secondary:active { border-width: 2px 1px 1px 1px } */
 
-.btn-primary { border-color: #01549b; }
+.btn-primary { 
+    background-color: #0c7dd6;
+    border-color: #0c7dd6;
+}
 .btn-primary:hover, .btn-primary:focus { background-color: #0275d8; }
+
 .btn-success { border-color: #419641; }
 .btn-success:hover, .btn-success:focus { background-color: #5cb85c; }
 .btn-danger { border-color: #c12e2a; }
@@ -97,4 +126,8 @@ html {
 a:active, .btn-link:active {
     color: #333;
 } */
+
+.text-main {
+    color: #01549b !important;
+}
 </style>
