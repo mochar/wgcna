@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo lol",
     "build": "webpack --config build/webpack.prod.js",
-    "dev": "node build/server.js"  },
+    "dev": "node build/server.js"
+  },
   "author": "Mo Ch <mocharrout@gmail.com>",
   "license": "MIT",
   "dependencies": {
@@ -41,8 +42,9 @@
     "webpack": "2.2.0",
     "webpack-dev-middleware": "^1.8.1",
     "webpack-hot-middleware": "^2.12.2",
-
-    "bootstrap": "4.0.0-alpha.6",
+    "bootstrap": "4.0.0-beta.2",
+    "jquery": "3.2.1",
+    "popper.js": "1.12.6",
     "font-awesome": "^4.6.3",
     "d3": "latest"
   }
