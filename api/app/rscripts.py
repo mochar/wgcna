@@ -92,6 +92,7 @@ def generate_eigengenes(expression_path, modules_path):
     modules = pd.read_csv(modules_path)['modules']
     eigengenes = WGCNA.moduleEigengenes(df, modules).rx2('eigengenes')
     eigengenes = pandas2ri.ri2py(WGCNA.orderMEs(eigengenes))
-    eigengenes.drop(['MEgrey'], axis=1, inplace=True)
+    if 'MEgrey' in eigengenes.columns:
+        eigengenes.drop(['MEgrey'], axis=1, inplace=True)
     eigengenes.index = df.index
     return eigengenes
