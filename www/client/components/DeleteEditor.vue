@@ -83,8 +83,8 @@ export default {
 <style>
 .item {
     cursor: pointer;
-    margin-top: .15rem;
-    margin-bottom: .15rem;
+    padding-top: .3rem;
+    padding-bottom: .3rem;
 }
 .item:hover {
     background-color: #eee;
