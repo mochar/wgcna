@@ -7,7 +7,7 @@ import itertools
 import uuid
 from collections import Counter
 
-from flask import Flask, request, jsonify, send_file, make_response, session
+from flask import Flask, request, jsonify, send_file, make_response, session, g
 from flask_session import Session
 from flask_cors import CORS
 from scipy.stats.stats import pearsonr
@@ -83,6 +83,21 @@ def create_project(user_id, name, description, file):
     return project
 
 
+@app.before_request
+def setup_request_info():
+    project_id = request.view_args.get('project_id')
+    if project_id is not None:
+        project_folder = project_id_to_folder(project_id)
+        g.expression_path = os.path.join(project_folder, 'expression.csv')
+        g.sampletree_path = os.path.join(project_folder, 'sampletree.csv')
+        g.tresholds_path = os.path.join(project_folder, 'tresholds.csv') 
+        g.genetree_path = os.path.join(project_folder, 'genetree.csv')
+        g.diss_tom_path = os.path.join(project_folder, 'diss_tom.csv')
+        g.module_path = os.path.join(project_folder, 'modules.csv')
+        g.eigengene_path = os.path.join(project_folder, 'eigengenes.csv')
+        g.pvalues_path = os.path.join(project_folder, 'pvalues.csv')
+
+
 @app.route('/projects/', methods=['GET', 'POST', 'OPTIONS'])
 def projects():
     if request.method == 'GET':
@@ -104,8 +119,7 @@ def projects():
 def expression(project_id):
     if not redis.sismember('projects:{}'.format(session['id']), project_id):
         return {}, 404
-    expression_path = os.path.join(project_id_to_folder(project_id), 'expression.csv')
-    df = pd.read_csv(expression_path, index_col=0)
+    df = pd.read_csv(g.expression_path, index_col=0)
     if request.method == 'GET':
         response = {'colNames': df.columns.tolist(), 'rowNames': df.index.tolist()}
         return jsonify(response)
@@ -116,7 +130,7 @@ def expression(project_id):
             df = df.T
         df.drop(removed_col_names, axis=1, inplace=True)
         df.drop(removed_row_names, axis=0, inplace=True)
-        df.to_csv(expression_path)
+        df.to_csv(g.expression_path)
         return jsonify({}), 200
 
 
@@ -124,8 +138,7 @@ def expression(project_id):
 def goodsamplesgenes(project_id):
     if not redis.sismember('projects:{}'.format(session['id']), project_id):
         return {}, 404
-    expression_path = os.path.join(project_id_to_folder(project_id), 'expression.csv')
-    results = rscripts.goodSamplesGenes(expression_path)
+    results = rscripts.goodSamplesGenes(g.expression_path)
     return jsonify(results)
 
 
@@ -133,18 +146,15 @@ def goodsamplesgenes(project_id):
 def cluster_samples(project_id):
     if not redis.sismember('projects:{}'.format(session['id']), project_id):
         return {}, 404
-    project_folder = project_id_to_folder(project_id)
-    expression_path = os.path.join(project_folder, 'expression.csv')
-    sampletree_path = os.path.join(project_folder, 'sampletree.csv')
     if request.method == 'GET':
         # TODO save to file and use as cache?
-        cluster_data = rscripts.hclust(expression_path)
+        cluster_data = rscripts.hclust(g.expression_path)
         return jsonify(cluster_data)
     elif request.method == 'POST':
         outlier_samples = request.form.getlist('samples[]')
-        df = pd.read_csv(expression_path, index_col=0)
+        df = pd.read_csv(g.expression_path, index_col=0)
         df.drop(outlier_samples, axis=0, inplace=True)
-        df.to_csv(expression_path)
+        df.to_csv(g.expression_path)
         return jsonify({})
 
 
@@ -154,13 +164,11 @@ def tresholds(project_id):
         return {}, 404
     project_folder = project_id_to_folder(project_id)
     if request.method == 'GET':
-        expression_path = os.path.join(project_folder, 'expression.csv')
-        tresholds_path = os.path.join(project_folder, 'tresholds.csv') 
-        if os.path.isfile(tresholds_path):
-            df = pd.read_csv(tresholds_path)
+        if os.path.isfile(g.tresholds_path):
+            df = pd.read_csv(g.tresholds_path)
         else:
-            df = rscripts.soft_tresholds(expression_path)
-            df.to_csv(tresholds_path)
+            df = rscripts.soft_tresholds(g.expression_path)
+            df.to_csv(g.tresholds_path)
         return jsonify(df.to_dict(orient='list'))
     elif request.method == 'POST':
         power = request.form.get('power')
@@ -170,8 +178,8 @@ def tresholds(project_id):
         pipe.hset('project:{}'.format(project_id), 'power', power)
         pipe.hset('project:{}'.format(project_id), 'step', 2)
         pipe.execute()
-        remove_file_if_exists(os.path.join(project_folder, 'genetree.csv'))
-        remove_file_if_exists(os.path.join(project_folder, 'modules.csv'))
+        remove_file_if_exists(g.genetree_path)
+        remove_file_if_exists(g.module_path)
         return jsonify({})
 
 
@@ -179,38 +187,32 @@ def tresholds(project_id):
 def cluster_genes(project_id):
     if not redis.sismember('projects:{}'.format(session['id']), project_id):
         return {}, 404
-    project_folder = project_id_to_folder(project_id)
-    genetree_path = os.path.join(project_folder, 'genetree.csv')
-    diss_tom_path = os.path.join(project_folder, 'diss_tom.csv')
-    module_path = os.path.join(project_folder, 'modules.csv')
-    eigengene_path = os.path.join(project_folder, 'eigengenes.csv')
-    expression_path = os.path.join(project_folder, 'expression.csv')
     if request.method == 'GET':
-        if os.path.isfile(genetree_path):
-            with open(genetree_path, 'r') as f:
+        if os.path.isfile(g.genetree_path):
+            with open(g.genetree_path, 'r') as f:
                 cluster_data = json.load(f)
         else:
             power = redis.hget('project:{}'.format(project_id), 'power')
-            cluster_data = rscripts.tom(expression_path, diss_tom_path, int(power))
-            with open(genetree_path, 'w') as f:
+            cluster_data = rscripts.tom(g.expression_path, g.diss_tom_path, int(power))
+            with open(g.genetree_path, 'w') as f:
                 json.dump(cluster_data, f)
             redis.hset('project:{}'.format(project_id), 'step', 3)
         response = {'clusterData': cluster_data}
-        if os.path.isfile(module_path):
-            response['colors'] = pd.read_csv(module_path).to_dict(orient='list')
+        if os.path.isfile(g.module_path):
+            response['colors'] = pd.read_csv(g.module_path).to_dict(orient='list')
         return jsonify(response)
     elif request.method == 'POST':
         min_module_size = request.form.get('minModuleSize')
         if min_module_size is None or not is_number(min_module_size):
             return {'error': 'Please specify a (correct) minimum module size.'}, 403
         min_module_size = int(min_module_size)
-        if not os.path.isfile(genetree_path):
+        if not os.path.isfile(g.genetree_path):
             return {'error': 'Please cluster the genes first.'}, 403
-        with open(genetree_path, 'r') as f:
+        with open(g.genetree_path, 'r') as f:
             cluster_data = json.load(f)
-        r = rscripts.cut_genes(cluster_data, diss_tom_path, min_module_size)
-        pd.DataFrame(r).to_csv(module_path)
-        rscripts.generate_eigengenes(expression_path, module_path).to_csv(eigengene_path)
+        r = rscripts.cut_genes(cluster_data, g.diss_tom_path, min_module_size)
+        pd.DataFrame(r).to_csv(g.module_path)
+        rscripts.generate_eigengenes(g.expression_path, g.module_path).to_csv(g.eigengene_path)
         redis.hset('project:{}'.format(project_id), 'step', 4)
         redis.hset('project:{}'.format(project_id), 'minModuleSize', min_module_size)
         return jsonify(r)
@@ -221,8 +223,6 @@ def genotype(project_id):
     if not redis.sismember('projects:{}'.format(session['id']), project_id):
         return {}, 404
     project_folder = project_id_to_folder(project_id)
-    eigengene_path = os.path.join(project_folder, 'eigengenes.csv')
-    pvalues_path = os.path.join(project_folder, 'pvalues.csv')
     if request.method == 'POST':
         groups = request.form.get('groups')
         if groups is None:
@@ -231,11 +231,11 @@ def genotype(project_id):
         subprocess.check_output(cmd, universal_newlines=True)
         redis.hset('project:{}'.format(project_id), 'groups', groups)
         redis.hset('project:{}'.format(project_id), 'step', 5)
-    df = pd.read_csv(pvalues_path, index_col=0, keep_default_na=False, na_values=[''])
+    df = pd.read_csv(g.pvalues_path, index_col=0, keep_default_na=False, na_values=[''])
     response = {}
     response['pvalues'] = df.to_dict(orient='list')
     response['modules'] = df.index.tolist()
-    response['eigengenes'] = pd.read_csv(eigengene_path, index_col=0).to_dict(orient='list')
+    response['eigengenes'] = pd.read_csv(g.eigengene_path, index_col=0).to_dict(orient='list')
     response['groups'] = redis.hget('project:{}'.format(project_id), 'groups').split(',')
     return jsonify(response)
 
