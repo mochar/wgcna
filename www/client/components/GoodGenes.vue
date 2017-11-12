@@ -36,10 +36,12 @@
         </div>
         <span class="text-muted" v-else>None</span>
 
-        <button class="btn btn-primary" id="done" @click="done">
-            <span class="fa fa-check"></span>
-            Done
-        </button>
+        <div class="block-action-div">
+            <button class="btn btn-primary" @click="done">
+                <span class="fa fa-check"></span>
+                Done
+            </button>
+        </div>
     </div>
 
     <span class="fa fa-cog fa-spin fa-2x fa-fw" v-else></span>
@@ -90,10 +92,3 @@ export default {
     }
 }
 </script>
-
-<style scoped>
-#done {
-    display: block;
-    margin-top: 1rem;
-}
-</style>

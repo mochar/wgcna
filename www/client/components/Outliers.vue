@@ -14,7 +14,7 @@
     </dendrogram>
     <span class="fa fa-cog fa-spin fa-2x fa-fw" v-else></span>
 
-    <div class="mt-3">
+    <div class="block-action-div">
         <button class="btn btn-primary" :disabled="loading" @click="done">
             <span class="fa fa-check"></span>
             Done

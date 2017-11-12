@@ -7,23 +7,25 @@
 
     <div v-if="!loading">
         <dendrogram :cluster-data="clusterData" :ratio="0.4" :colors="colors" v-if="!loading"></dendrogram>
-        <form class="form-inline" style="margin-top: 1rem" enctype="multipart/form-data" @submit.prevent="cut">
-            <label class="mr-2">Minimum module size</label>
+        <div class="block-action-div">
+            <form class="form-inline" enctype="multipart/form-data" @submit.prevent="cut">
+                <label class="mr-2">Minimum module size</label>
 
-            <div class="form-group mr-2">
-                <input type="number" class="form-control" name="minModuleSize" :placeholder="project.minModuleSize">
-            </div>
+                <div class="form-group mr-2">
+                    <input type="number" class="form-control" name="minModuleSize" :placeholder="project.minModuleSize">
+                </div>
 
-            <!-- <div class="form-group" style="display: none">
-                <label>Deep split</label>
-                <input type="number" class="form-control" name="deepSplit" min="0" max="5" value="2">
-            </div> -->
+                <!-- <div class="form-group" style="display: none">
+                    <label>Deep split</label>
+                    <input type="number" class="form-control" name="deepSplit" min="0" max="5" value="2">
+                </div> -->
 
-            <button type="submit" class="btn btn-primary mr-2" :disabled="cutting">
-                <span class="fa fa-scissors"></span>
-                Cut
-            </button>
-        </form>
+                <button type="submit" class="btn btn-primary mr-2" :disabled="cutting">
+                    <span class="fa fa-scissors"></span>
+                    Cut
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 </template>

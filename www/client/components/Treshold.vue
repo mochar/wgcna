@@ -54,7 +54,7 @@
         </div>
     </div>
 
-    <div>
+    <div class="block-action-div">
         <button class="btn btn-primary" :disabled="!buttonReady" @click="pick">
             <span class="fa fa-check"></span>
             Select

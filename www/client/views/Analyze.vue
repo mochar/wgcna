@@ -155,6 +155,12 @@ export default {
     margin-bottom: 1rem;
 }
 
+.block-action-div {
+    border-top: 1px dashed #ccc;
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+
 #project-select button {
     background-color: #f8f9fa !important;
     border-color: #f8f9fa !important;
