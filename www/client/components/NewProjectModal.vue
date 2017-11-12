@@ -3,41 +3,34 @@
 <div class="modal-dialog">
 <div class="modal-content">
 <div class="modal-body">
+    <div class="d-flex justify-content-between align-items-baseline">
+        <h5 class="block-title">New project</h5>
+
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span>&times;</span>
+        </button>
+    </div>
 
     <form id="upload-form" enctype="multipart/form-data" @submit.prevent="submit">
 
-    <h5 class="block-title">New project</h5>
-
     <div class="card-body">
-        <div class="form-group">
-            <label>Name</label>
-            <input class="form-control" name="name" placeholder="required">
-            <!-- <small class="form-text text-muted">We'll never share your email with anyone else.</small> -->
-        </div>
-        <div class="form-group">
-            <label>Short description</label>
-            <input class="form-control" name="description">
-        </div>
-        <div class="form-group">
-            <label>Expression data</label>
-            <input type="file" class="form-control-file" name="expression">
-        </div>
-        <div class="form-check">
-            <label class="form-check-label">
-                <input type="checkbox" checked class="form-check-input">
-                Signed network
-            </label>
-        </div>
+        <first-step v-show="step == 'FirstStep'"></first-step>
+        <second-step v-show="step == 'SecondStep'"></second-step>
+        <third-step v-show="step == 'ThirdStep'"></third-step>
     </div>
 
-    <div class="d-flex justify-content-between">
-        <button class="btn btn-link" data-dismiss="modal">Cancel</button>
-        <button class="btn btn-primary" type="submit" :disabled="loading">
+    <div class="float-right">
+        <button class="btn btn-light" @click.prevent="back" :disabled="step == 'FirstStep'">
+            Back
+        </button>
+        <button class="btn btn-primary" @click.prevent="next" v-if="step != 'ThirdStep'">
+            Next
+        </button>
+        <button class="btn btn-primary" type="submit" :disabled="loading" v-else>
             <span class="fa fa-chevron-right"></span>
             Preprocess
         </button>
     </div>
-
     </form>
 </div>
 </div>
@@ -46,11 +39,22 @@
 </template>
 
 <script>
+import FirstStep from 'components/NewProjectSteps/FirstStep'
+import SecondStep from 'components/NewProjectSteps/SecondStep'
+import ThirdStep from 'components/NewProjectSteps/ThirdStep'
+
 export default {
     data() {
         return {
-            loading: false
+            loading: false,
+            step: 'FirstStep'
         }
+    },
+
+    components: {
+        FirstStep,
+        SecondStep,
+        ThirdStep
     },
 
     methods: {
@@ -72,13 +76,29 @@ export default {
             }, () => {
                 this.loading = false
             })
+        },
+        next() {
+            switch (this.step) {
+                case 'FirstStep':
+                    this.step = 'SecondStep'
+                    break;
+                case 'SecondStep':
+                    this.step = 'ThirdStep'
+                default:
+                    break
+            }
+        },
+        back() {
+            switch (this.step) {
+                case 'SecondStep':
+                    this.step = 'FirstStep'
+                    break;
+                case 'ThirdStep':
+                    this.step = 'SecondStep'
+                default:
+                    break
+            }
         }
-    },
-
-    computed: {
-    },
-
-    watch: {
     }
 }
 </script>

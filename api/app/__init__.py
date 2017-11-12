@@ -73,12 +73,15 @@ def create_user():
     return user_id
 
 
-def create_project(user_id, name, description, file):
+def create_project(user_id, name, description, omic, expression, trait=None):
     project_id = uuid.uuid4().hex
-    project = {'name': name, 'description': description, 'id': project_id, 'step': 1}
+    project = {'name': name, 'description': description, 'id': project_id, 'step': 1,
+        'omic': omic}
     project_folder = project_id_to_folder(project_id)
     os.makedirs(project_folder)
-    file.save(os.path.join(project_folder, 'expression.csv'))
+    expression.save(os.path.join(project_folder, 'expression.csv'))
+    if trait is not None:
+        trait.save(os.path.join(project_folder, 'trait.csv'))
     redis.sadd('projects:{}'.format(user_id), project_id)
     redis.hmset('project:{}'.format(project_id), project)
     return project
@@ -86,7 +89,7 @@ def create_project(user_id, name, description, file):
 
 @app.before_request
 def setup_request_info():
-    g.project_id = request.view_args.get('project_id')
+    g.project_id = request.view_args is not None and request.view_args.get('project_id') 
     if g.project_id is not None:
         project_folder = project_id_to_folder(g.project_id)
         g.expression_path = os.path.join(project_folder, 'expression.csv')
@@ -116,15 +119,17 @@ def projects():
     if request.method == 'GET':
         return jsonify({'projects': user_projects()})
     elif request.method == 'POST':
-        file = request.files.get('expression')
-        name = request.form.get('name')
+        expression = request.files.get('expression')
+        trait = request.files.get('trait')
+        name = request.form.get('name', '')
         description = request.form.get('description', '')
-        if file is None or name is None:
-            return {'error': 'File or name not supplied.'}, 403
+        omic = request.form.get('omic')
+        if expression.filename == '' or name == '':
+            return jsonify(error='Required fields not supplied.'), 403
         user_id = session.get('id')
         if user_id is None:
             user_id = create_user()
-        project = create_project(user_id, name, description, file)
+        project = create_project(user_id, name, description, omic, expression)
         return jsonify({'project': project})
 
 

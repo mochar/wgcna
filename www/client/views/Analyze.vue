@@ -73,9 +73,9 @@
 <script>
 import Annotation from 'components/Annotation'
 import ExportModal from 'components/ExportModal'
-import ModuleCreationTab from 'components/ModuleCreationTab'
-import ModuleInspectionTab from 'components/ModuleInspectionTab'
-import ModuleSignificanceTab from 'components/ModuleSignificanceTab'
+import ModuleCreationTab from 'components/AnalyzeTabs/ModuleCreationTab'
+import ModuleInspectionTab from 'components/AnalyzeTabs/ModuleInspectionTab'
+import ModuleSignificanceTab from 'components/AnalyzeTabs/ModuleSignificanceTab'
 
 export default {
     data() {
