@@ -6,8 +6,9 @@ import json
 import itertools
 import uuid
 from collections import Counter
+from functools import wraps
 
-from flask import Flask, request, jsonify, send_file, make_response, session, g
+from flask import Flask, request, jsonify, send_file, make_response, session, g, abort
 from flask_session import Session
 from flask_cors import CORS
 from scipy.stats.stats import pearsonr
@@ -85,9 +86,9 @@ def create_project(user_id, name, description, file):
 
 @app.before_request
 def setup_request_info():
-    project_id = request.view_args.get('project_id')
-    if project_id is not None:
-        project_folder = project_id_to_folder(project_id)
+    g.project_id = request.view_args.get('project_id')
+    if g.project_id is not None:
+        project_folder = project_id_to_folder(g.project_id)
         g.expression_path = os.path.join(project_folder, 'expression.csv')
         g.sampletree_path = os.path.join(project_folder, 'sampletree.csv')
         g.tresholds_path = os.path.join(project_folder, 'tresholds.csv') 
@@ -96,6 +97,18 @@ def setup_request_info():
         g.module_path = os.path.join(project_folder, 'modules.csv')
         g.eigengene_path = os.path.join(project_folder, 'eigengenes.csv')
         g.pvalues_path = os.path.join(project_folder, 'pvalues.csv')
+
+
+def project_exists(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        session_id = session.get('id')
+        if session_id is None:
+            abort(404)
+        if not redis.sismember('projects:{}'.format(session_id), g.project_id):
+            abort(404)
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 @app.route('/projects/', methods=['GET', 'POST', 'OPTIONS'])
@@ -116,9 +129,8 @@ def projects():
 
 
 @app.route('/projects/<project_id>/expression', methods=['GET', 'POST', 'PUT'])
+@project_exists
 def expression(project_id):
-    if not redis.sismember('projects:{}'.format(session['id']), project_id):
-        return {}, 404
     df = pd.read_csv(g.expression_path, index_col=0)
     if request.method == 'GET':
         response = {'colNames': df.columns.tolist(), 'rowNames': df.index.tolist()}
@@ -135,17 +147,15 @@ def expression(project_id):
 
 
 @app.route('/projects/<project_id>/goodsamplesgenes')
+@project_exists
 def goodsamplesgenes(project_id):
-    if not redis.sismember('projects:{}'.format(session['id']), project_id):
-        return {}, 404
     results = rscripts.goodSamplesGenes(g.expression_path)
     return jsonify(results)
 
 
 @app.route('/projects/<project_id>/clustersamples', methods=['GET', 'POST'])
+@project_exists
 def cluster_samples(project_id):
-    if not redis.sismember('projects:{}'.format(session['id']), project_id):
-        return {}, 404
     if request.method == 'GET':
         # TODO save to file and use as cache?
         cluster_data = rscripts.hclust(g.expression_path)
@@ -159,9 +169,8 @@ def cluster_samples(project_id):
 
 
 @app.route('/projects/<project_id>/tresholds', methods=['GET', 'POST'])
+@project_exists
 def tresholds(project_id):
-    if not redis.sismember('projects:{}'.format(session['id']), project_id):
-        return {}, 404
     project_folder = project_id_to_folder(project_id)
     if request.method == 'GET':
         if os.path.isfile(g.tresholds_path):
@@ -184,9 +193,8 @@ def tresholds(project_id):
 
 
 @app.route('/projects/<project_id>/clustergenes', methods=['GET', 'POST'])
+@project_exists
 def cluster_genes(project_id):
-    if not redis.sismember('projects:{}'.format(session['id']), project_id):
-        return {}, 404
     if request.method == 'GET':
         if os.path.isfile(g.genetree_path):
             with open(g.genetree_path, 'r') as f:
@@ -219,9 +227,8 @@ def cluster_genes(project_id):
 
 
 @app.route('/projects/<project_id>/genotype', methods=['GET', 'POST'])
+@project_exists
 def genotype(project_id):
-    if not redis.sismember('projects:{}'.format(session['id']), project_id):
-        return {}, 404
     project_folder = project_id_to_folder(project_id)
     if request.method == 'POST':
         groups = request.form.get('groups')
