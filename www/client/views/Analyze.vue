@@ -20,7 +20,7 @@
                         style="margin-right: -1px" data-toggle="dropdown">
                     <span v-if="project">
                         {{ project.name }}
-                        <span class="text-muted">{{ project.description }}</span>
+                        <span v-show="project.description" class="text-muted">- {{ project.description }}</span>
                     </span>
                 </button>
                 <div class="dropdown-menu">
