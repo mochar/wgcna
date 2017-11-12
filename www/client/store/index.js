@@ -7,8 +7,7 @@ Vue.use(Vuex)
 const state = {
     projects: [], // when null, app not initialized yet
     projectIndex: null,
-    names: [],
-    name: null
+    projectLoading: true
 }
 
 const getters = {
@@ -27,7 +26,10 @@ const mutations = {
     editProject(state, edits) {
         Vue.set(state.projects, state.projectIndex, 
             {...state.projects[state.projectIndex], ...edits})
-    }
+    },
+    setProjectLoading(state, loading) {
+        state.projectLoading = loading
+    },
 }
 
 const actions = {
@@ -35,6 +37,7 @@ const actions = {
         return $.getJSON(`${ROOTURL}/projects/`).then(data => {
             const projects = data.projects
             commit('setProjects', projects)
+            commit('setProjectLoading', false)
             return projects
         })
     }

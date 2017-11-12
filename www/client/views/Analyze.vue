@@ -4,13 +4,31 @@
         <div class="col-6">
             <ul class="nav nav-tabs top position-relative">
                 <li class="nav-item">
-                    <a class="nav-link active" href="#">Module creation</a>
+                    <a 
+                        class="nav-link" 
+                        :class="{ active: tab == 'ModuleCreationTab' }" 
+                        href="#" 
+                        @click.prevent="tab = 'ModuleCreationTab'">
+                        Module creation
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Module inspection</a>
+                    <a 
+                        class="nav-link" 
+                        :class="{ disabled: !hasModules, active: tab == 'ModuleInspectionTab' }" 
+                        href="#" 
+                        @click.prevent="tab = 'ModuleInspectionTab'">
+                        Module inspection
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Module significance</a>
+                    <a 
+                        class="nav-link" 
+                        :class="{ disabled: !hasModules, active: tab == 'ModuleSignificanceTab' }" 
+                        href="#" 
+                        @click.prevent="tab = 'ModuleSignificanceTab'">
+                        Module significance
+                    </a>
                 </li>
             </ul>
         </div>
@@ -18,10 +36,11 @@
             <div class="btn-group btn-block" id="project-select">
                 <button class="btn btn-light btn-block dropdown-toggle text-left d-flex justify-content-between align-items-center" 
                         style="margin-right: -1px" data-toggle="dropdown">
-                    <span v-if="project">
+                    <span v-if="!$store.state.projectLoading && project">
                         {{ project.name }}
                         <span v-show="project.description" class="text-muted">- {{ project.description }}</span>
                     </span>
+                    <span class="fa fa-cog fa-spin" v-else></span>
                 </button>
                 <div class="dropdown-menu">
                     <a class="dropdown-item" href="#" v-for="(project, i) in projects" :key="project.id"
@@ -37,26 +56,14 @@
         </div>
     </div>
 
-    <div v-if="project || loading">
-        <treshold 
-            :project="project" 
-            :update="shouldUpdate"
-            v-if="project.step > 0" 
-            @done="tresholdDone">
-        </treshold>
-        <cluster 
-            :project="project" 
-            :update="shouldUpdate || project.step == 2"
-            v-if="project.step > 1"
-            @cutting="$store.commit('editProject', {step: 3})"
-            @done="clusterDone">
-        </cluster>
-        <genotype
-            :project="project" 
-            :update="shouldUpdate || project.step == 4"
-            @done="genotypeDone"
-            v-if="project.step > 3">
-        </genotype>
+    <div v-if="project">
+        <keep-alive>
+            <component
+                :is="tab"
+                :project="project" 
+                :should-update="shouldUpdate || project.step == 4">
+            </component>
+        </keep-alive>
     </div>
 
     <!-- <export-modal :name="name" :step="step" :modules="modules" v-if="step > 3"></export-modal> -->
@@ -64,11 +71,11 @@
 </template>
 
 <script>
-import Treshold from 'components/Treshold'
-import Cluster from 'components/Cluster'
-import Genotype from 'components/Genotype'
 import Annotation from 'components/Annotation'
 import ExportModal from 'components/ExportModal'
+import ModuleCreationTab from 'components/ModuleCreationTab'
+import ModuleInspectionTab from 'components/ModuleInspectionTab'
+import ModuleSignificanceTab from 'components/ModuleSignificanceTab'
 
 export default {
     data() {
@@ -76,32 +83,23 @@ export default {
             modules: [],
             loading: false,
             previousProject: null,
-            shouldUpdate: true
+            shouldUpdate: true,
+            tab: 'ModuleCreationTab'
         }
     },
 
     components: {
-        Treshold,
-        Cluster,
-        Genotype,
         Annotation,
-        ExportModal
+        ExportModal,
+        ModuleCreationTab,
+        ModuleInspectionTab,
+        ModuleSignificanceTab
     },
 
     methods: {
         generateReport() {
             // const url = `${ROOTURL}/report/${this.name}`
             // window.open(url)
-        },
-        tresholdDone(power) {
-            this.$store.commit('editProject', {step: 2, power})
-        },
-        clusterDone(minModuleSize) {
-            this.$store.commit('editProject', {step: 4, minModuleSize })
-        },
-        genotypeDone() {
-            this.$store.commit('editProject', {step: 5})
-            // this.getColors()
         },
         getColors() {
             // if (this.name && this.step > 3) {
@@ -111,6 +109,7 @@ export default {
             // }
         },
         selectProject(index) {
+            this.tab = 'ModuleCreationTab'
             this.$store.commit('setProjectIndex', index)
         }
     },
@@ -124,6 +123,9 @@ export default {
             this.shouldUpdate = !this.previousProject || this.previousProject.id != project.id
             this.previousProject = project
             return project
+        },
+        hasModules() {
+            return this.project && this.project.step > 3
         }
     },
 
