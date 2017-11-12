@@ -17,21 +17,27 @@
                         <!-- <span class="fa fa-compress"></span> -->
                         Integrate
                     </router-link>
-                    <!-- <a class="nav-item nav-link disabled" href="#">Disabled</a> -->
                 </div>
             </div>
+            <button class="btn btn-light float-right" id="new-project-btn" data-toggle="modal" data-target="#new-modal">
+                <span class="fa fa-plus"></span>
+                New Project
+            </button>
         </div>
     </nav>
 
     <div class="container" id="app">
         <router-view></router-view>
     </div>
+
+    <new-project-modal></new-project-modal>
 </div>
 </template>
 
 <script>
 import 'bootstrap'
 import Vue from 'vue'
+import NewProjectModal from 'components/NewProjectModal'
 
 Vue.filter('round', function(value, decimals) {
   if(!value) value = 0
@@ -42,6 +48,10 @@ Vue.filter('round', function(value, decimals) {
 $.ajaxSetup({ xhrFields: { withCredentials: true } })
 
 export default {
+    components: {
+        NewProjectModal
+    },
+
     created() {
         this.$store.dispatch('getProjects').then(data => {
             if (data.length > 0) this.$store.commit('setProjectIndex', 0)
@@ -129,5 +139,11 @@ a:active, .btn-link:active {
 
 .text-main {
     color: #01549b !important;
+}
+
+#new-project-btn {
+    color: #111;
+    background-color: #e2e6ea4d;
+    border-color: #dae0e54d;
 }
 </style>

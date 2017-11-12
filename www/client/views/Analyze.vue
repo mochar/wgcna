@@ -1,9 +1,23 @@
 <template>
 <div>
-    <div class="row top">
-        <div class="col-7">
+    <div class="row">
+        <div class="col-6">
+            <ul class="nav nav-tabs top position-relative">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">Module creation</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Module inspection</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Module significance</a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-6">
             <div class="btn-group btn-block" id="project-select">
-                <button class="btn btn-light btn-block dropdown-toggle text-left" data-toggle="dropdown">
+                <button class="btn btn-light btn-block dropdown-toggle text-left d-flex justify-content-between align-items-center" 
+                        style="margin-right: -1px" data-toggle="dropdown">
                     <span v-if="project">
                         {{ project.name }}
                         <span class="text-muted">{{ project.description }}</span>
@@ -16,24 +30,8 @@
                         <small class="text-muted">{{ project.description}}</small>
                     </a>
                 </div>
-                <button class="btn btn-light" data-toggle="modal" data-target="#new-modal">
-                    <span class="fa fa-plus"></span>
-                </button>
-            </div>
-        </div>
-        <div class="col-2">
-        </div>
-        <div class="col-3">
-            <div class="btn-group">
-                <button class="btn btn-primary" style="border-top-width: 1px" 
-                        @click="generateReport">
-                    <span class="fa fa-book"></span>
-                    Generate report
-                </button>
-                <button class="btn btn-light" data-toggle="modal" data-target="#export-modal"
-                        :disabled="project && project.step < 4">
-                    <span class="fa fa-download"></span>
-                    Export modules
+                <button class="btn btn-light" style="margin-left: -1px">
+                    <span class="fa fa-edit"></span>
                 </button>
             </div>
         </div>
@@ -62,7 +60,6 @@
     </div>
 
     <!-- <export-modal :name="name" :step="step" :modules="modules" v-if="step > 3"></export-modal> -->
-    <new-project-modal></new-project-modal>
 </div>
 </template>
 
@@ -72,7 +69,6 @@ import Cluster from 'components/Cluster'
 import Genotype from 'components/Genotype'
 import Annotation from 'components/Annotation'
 import ExportModal from 'components/ExportModal'
-import NewProjectModal from 'components/NewProjectModal'
 
 export default {
     data() {
@@ -89,8 +85,7 @@ export default {
         Cluster,
         Genotype,
         Annotation,
-        ExportModal,
-        NewProjectModal
+        ExportModal
     },
 
     methods: {
@@ -163,5 +158,6 @@ export default {
 #project-select button {
     background-color: #f8f9fa !important;
     border-color: #f8f9fa !important;
+    border: 1px solid #e2e6ea4d !important;
 }
 </style>
