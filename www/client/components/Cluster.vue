@@ -63,7 +63,7 @@ export default {
         cut(event) {
             this.cutting = true
             this.$emit('cutting')
-            const formData = new FormData(event.srcElement)
+            const formData = new FormData(event.target)
             const minModuleSize = parseInt(formData.get('minModuleSize'))
             $.post({
                 url: `${ROOTURL}/projects/${this.project.id}/clustergenes`,

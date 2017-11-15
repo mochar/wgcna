@@ -13,24 +13,24 @@
 
     <form id="upload-form" enctype="multipart/form-data" @submit.prevent="submit">
 
-    <div class="card-body">
-        <first-step v-show="step == 'FirstStep'"></first-step>
-        <second-step v-show="step == 'SecondStep'"></second-step>
-        <third-step v-show="step == 'ThirdStep'"></third-step>
-    </div>
+        <div class="card-body">
+            <first-step v-show="step == 'FirstStep'"></first-step>
+            <second-step v-show="step == 'SecondStep'"></second-step>
+            <third-step v-show="step == 'ThirdStep'"></third-step>
+        </div>
 
-    <div class="float-right">
-        <button class="btn btn-light" @click.prevent="back" :disabled="step == 'FirstStep'">
-            Back
-        </button>
-        <button class="btn btn-primary" @click.prevent="next" v-if="step != 'ThirdStep'">
-            Next
-        </button>
-        <button class="btn btn-primary" type="submit" :disabled="loading" v-else>
-            <span class="fa fa-chevron-right"></span>
-            Preprocess
-        </button>
-    </div>
+        <div class="float-right">
+            <button class="btn btn-light" @click.prevent="back" :disabled="step == 'FirstStep'">
+                Back
+            </button>
+            <button class="btn btn-primary" @click.prevent="next" v-if="step != 'ThirdStep'">
+                Next
+            </button>
+            <button class="btn btn-primary" type="submit" :disabled="loading" v-else>
+                <span class="fa fa-chevron-right"></span>
+                Preprocess
+            </button>
+        </div>
     </form>
 </div>
 </div>
@@ -60,7 +60,7 @@ export default {
     methods: {
         submit(event) {
             this.loading = true
-            const formData = new FormData(event.srcElement)
+            const formData = new FormData(event.target)
             $.post({
                 url: `${ROOTURL}/projects/`,
                 data: formData,

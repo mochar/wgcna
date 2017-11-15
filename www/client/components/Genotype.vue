@@ -154,7 +154,7 @@ export default {
             }
         },
         change(e, i) {
-            this.groups[i] = e.srcElement.value
+            this.groups[i] = e.target.value
         },
         selectColumn(column) {
             this.selectedColumn = this.selectedColumn == column ? null : column
