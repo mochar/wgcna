@@ -43,13 +43,14 @@
                     <span class="fa fa-cog fa-spin" v-else></span>
                 </button>
                 <div class="dropdown-menu">
+                    <!-- <span class="m-3">Projects</span> -->
                     <a class="dropdown-item" href="#" v-for="(project, i) in projects" :key="project.id"
                         @click.prevent="selectProject(i)">
                         <span>{{ project.name }}</span><br>
                         <small class="text-muted">{{ project.description}}</small>
                     </a>
                 </div>
-                <button class="btn btn-light" style="margin-left: -1px">
+                <button class="btn btn-light" style="margin-left: -1px" data-toggle="modal" data-target="#edit-modal">
                     <span class="fa fa-edit"></span>
                 </button>
             </div>
