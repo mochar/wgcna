@@ -121,6 +121,10 @@ input[type=text] {
     border-radius: 0 !important;
 }
 
+.custom-radio .custom-control-indicator {
+    border-radius: 50% !important;
+}
+
 /* .btn-primary { border-color: #01549b; }
 .btn-primary:hover, .btn-primary:active { background-color: #0275d8; }
 .btn-success { border-color: #419641; }

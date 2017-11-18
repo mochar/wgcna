@@ -48,15 +48,17 @@
                 <dt class="col-2">Options</dt>
                 <dd class="col-10">
                     <div class="form-check form-check-inline">
-                        <label class="form-check-label">
-                            <input class="form-check-input" type="checkbox" value="" v-model="sigOnly">
-                            Show signficant modules only
+                        <label class="custom-control custom-checkbox">
+                            <input class="custom-control-input" type="checkbox" v-model="sigOnly">
+                            <span class="custom-control-indicator"></span>
+                            <span class="custom-control-description">Show signficant modules only</span>
                         </label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <label class="form-check-label">
-                            <input class="form-check-input" type="checkbox" value="" v-model="columnOnly">
-                            Show comparsion groups only
+                        <label class="custom-control custom-checkbox">
+                            <input class="custom-control-input" type="checkbox" v-model="columnOnly">
+                            <span class="custom-control-indicator"></span>
+                            <span class="custom-control-description">Show comparsion groups only</span>
                         </label>
                     </div>
                 </dd>

@@ -1,6 +1,6 @@
 <template>
 <div class="card card-body">
-    <h6 class="block-title">
+    <h6 class="block-title text-uppercase">
         Good Samples &amp; Genes 
     </h6>
 

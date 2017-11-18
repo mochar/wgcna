@@ -1,7 +1,7 @@
 <template>
 <div class="card card-body">
-    <h6 class="block-title">
-        Remove Outliers
+    <h6 class="block-title text-uppercase">
+        Outlier removal
     </h6>
 
     <dendrogram 
