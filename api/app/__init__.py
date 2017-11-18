@@ -5,6 +5,7 @@ import base64
 import json
 import itertools
 import uuid
+import shutil
 from collections import Counter
 from functools import wraps
 
@@ -87,19 +88,30 @@ def create_project(user_id, name, description, omic, expression, trait=None):
     return project
 
 
+def delete_project(user_id, project_id):
+    project_folder = project_id_to_folder(project_id)
+    if os.path.exists(project_folder):
+        shutil.rmtree(project_folder)
+    redis.srem('projects:{}'.format(user_id), project_id)
+    redis.delete('project:{}'.format(project_id))
+
+
 @app.before_request
 def setup_request_info():
     g.project_id = request.view_args is not None and request.view_args.get('project_id') 
     if g.project_id is not None:
-        project_folder = project_id_to_folder(g.project_id)
-        g.expression_path = os.path.join(project_folder, 'expression.csv')
-        g.sampletree_path = os.path.join(project_folder, 'sampletree.csv')
-        g.tresholds_path = os.path.join(project_folder, 'tresholds.csv') 
-        g.genetree_path = os.path.join(project_folder, 'genetree.csv')
-        g.diss_tom_path = os.path.join(project_folder, 'diss_tom.csv')
-        g.module_path = os.path.join(project_folder, 'modules.csv')
-        g.eigengene_path = os.path.join(project_folder, 'eigengenes.csv')
-        g.pvalues_path = os.path.join(project_folder, 'pvalues.csv')
+        g.project_folder = project_id_to_folder(g.project_id)
+        g.expression_path = os.path.join(g.project_folder, 'expression.csv')
+        g.sampletree_path = os.path.join(g.project_folder, 'sampletree.csv')
+        g.tresholds_path = os.path.join(g.project_folder, 'tresholds.csv') 
+        g.genetree_path = os.path.join(g.project_folder, 'genetree.csv')
+        g.diss_tom_path = os.path.join(g.project_folder, 'diss_tom.csv')
+        g.module_path = os.path.join(g.project_folder, 'modules.csv')
+        g.eigengene_path = os.path.join(g.project_folder, 'eigengenes.csv')
+        g.pvalues_path = os.path.join(g.project_folder, 'pvalues.csv')
+    user_id = session.get('id')
+    if user_id is not None:
+        g.user_id = user_id
 
 
 def project_exists(f):
@@ -131,6 +143,14 @@ def projects():
             user_id = create_user()
         project = create_project(user_id, name, description, omic, expression)
         return jsonify({'project': project})
+
+
+@app.route('/projects/<project_id>', methods=['GET', 'DELETE'])
+@project_exists
+def delete(project_id):
+    if request.method == 'DELETE':
+        delete_project(g.user_id, project_id)
+    return jsonify({})
 
 
 @app.route('/projects/<project_id>/expression', methods=['GET', 'POST', 'PUT'])

@@ -1,6 +1,6 @@
 <template>
 <div>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light" style="border-bottom: 2px solid #eaeaea">
+    <nav class="navbar navbar-expand-lg navbar-light" id="navbar-main">
         <div class="container">
             <router-link to="/" class="navbar-brand text-main font-weight-bold">WGCNA</router-link>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,7 @@
     </div>
 
     <new-project-modal></new-project-modal>
+    <edit-project-modal v-if="$store.getters.project"></edit-project-modal>
 </div>
 </template>
 
@@ -38,6 +39,7 @@
 import 'bootstrap'
 import Vue from 'vue'
 import NewProjectModal from 'components/NewProjectModal'
+import EditProjectModal from 'components/EditProjectModal'
 
 Vue.filter('round', function(value, decimals) {
   if(!value) value = 0
@@ -49,7 +51,8 @@ $.ajaxSetup({ xhrFields: { withCredentials: true } })
 
 export default {
     components: {
-        NewProjectModal
+        NewProjectModal,
+        EditProjectModal
     },
 
     created() {
@@ -150,9 +153,21 @@ a:active, .btn-link:active {
     color: #01549b !important;
 }
 
+.text-normal {
+    color: #5a5a5a !important;
+}
+
 #new-project-btn {
     color: #111;
-    background-color: #e2e6ea4d;
+    background-color: #f8f8f8;
     border-color: #dae0e54d;
+    background: -moz-linear-gradient(hsl(0, 0, 100%), hsl(0, 0, 30%));  */
+    background: linear-gradient(hsl(0, 0%, 97%), hsl(0, 0%, 95%)); 
+}
+
+#navbar-main {
+    border-bottom: 1px solid #eaeaea;
+    border-top: 2px solid #01549b;
+    background-color: #fcfcfc66;
 }
 </style>
