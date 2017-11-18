@@ -20,14 +20,14 @@
         </div>
         <div class="form-check form-check-inline">
             <label class="custom-control custom-radio">
-                <input class="custom-control-input" type="radio" name="omic" value="metabolomics" checked>
+                <input class="custom-control-input" type="radio" name="omic" value="metabolomics">
                 <span class="custom-control-indicator"></span>
                 <span class="custom-control-description">Metabolomics</span>
             </label>
         </div>
         <div class="form-check form-check-inline">
             <label class="custom-control custom-radio">
-                <input class="custom-control-input" type="radio" name="omic" value="lipidomics" checked>
+                <input class="custom-control-input" type="radio" name="omic" value="lipidomics">
                 <span class="custom-control-indicator"></span>
                 <span class="custom-control-description">Lipidomics</span>
             </label>

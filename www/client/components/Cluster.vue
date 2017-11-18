@@ -20,7 +20,7 @@
                     <input type="number" class="form-control" name="deepSplit" min="0" max="5" value="2">
                 </div> -->
 
-                <button type="submit" class="btn btn-primary mr-2" :disabled="cutting">
+                <button type="submit" class="btn btn-light mr-2" :disabled="cutting">
                     <span class="fa fa-scissors"></span>
                     Cut
                 </button>

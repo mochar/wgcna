@@ -37,7 +37,7 @@
         <span class="text-muted" v-else>None</span>
 
         <div class="block-action-div">
-            <button class="btn btn-primary" @click="done">
+            <button class="btn btn-light" @click="done">
                 <span class="fa fa-check"></span>
                 Done
             </button>

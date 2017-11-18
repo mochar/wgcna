@@ -5,10 +5,6 @@
 <div class="modal-body">
     <div class="d-flex justify-content-between align-items-baseline">
         <h5 class="block-title">New project</h5>
-
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span>&times;</span>
-        </button>
     </div>
 
     <form id="upload-form" enctype="multipart/form-data" @submit.prevent="submit">
@@ -19,9 +15,12 @@
             <third-step v-show="step == 'ThirdStep'"></third-step>
         </div>
 
+        <button class="btn btn-link text-normal" data-dismiss="modal">
+            Cancel
+        </button>
         <div class="float-right">
-            <button class="btn btn-light" @click.prevent="back" :disabled="step == 'FirstStep'">
-                Back
+            <button class="btn btn-light text-normal" @click.prevent="back" :disabled="step == 'FirstStep'">
+                Previous
             </button>
             <button class="btn btn-primary" @click.prevent="next" v-if="step != 'ThirdStep'">
                 Next
@@ -104,4 +103,7 @@ export default {
 </script>
 
 <style>
+#new-modal .modal-body {
+    /* border-top: 3px solid #01549b; */
+}
 </style>

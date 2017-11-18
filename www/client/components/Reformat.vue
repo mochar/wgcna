@@ -27,7 +27,7 @@
     </div>
 
     <div class="block-action-div">
-        <button class="btn btn-primary" @click="done" v-if="!loading">
+        <button class="btn btn-light" @click="done" v-if="!loading">
             <span class="fa fa-check"></span>
             Done
         </button>
