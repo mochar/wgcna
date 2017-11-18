@@ -13,14 +13,14 @@
             <div class="col-5">
                 <div v-for="(sample, i) in samples" :key="sample" style="display: flex; text-align: center">
                     <span style="flex: 1">{{ sample }}</span>
-                    <input style="flex: 1" :value="groups[i]" @keydown="e => change(e, i)" />
+                    <input type="text" style="flex: 1" :value="groups[i]" @keydown="e => change(e, i)" />
                 </div>
             </div>
 
             <div class="col-3">
                 <div class="well">
                     <strong>Apply regex</strong><br>
-                    <input placeholder="regex" v-model="pattern">
+                    <input type="text" placeholder="regex" v-model="pattern">
                     <button class="btn btn-secondary" style="margin-top: .5rem"
                             @click="applyRegex">Apply</button>
                 </div>

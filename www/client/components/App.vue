@@ -69,6 +69,11 @@ html {
     font-size: 14px;
 }
 
+input[type=text] {
+    border: 1px solid #ccc;
+    box-shadow: initial;
+}
+
 #app {
     margin-top: 1rem;
     color: #222 !important;
