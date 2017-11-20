@@ -6,7 +6,12 @@
     </h6>
 
     <div v-if="!loading">
-        <dendrogram :cluster-data="clusterData" :ratio="0.4" :colors="colors" v-if="!loading"></dendrogram>
+        <dendrogram 
+            :cluster-data="clusterData" 
+            :ratio="0.35" 
+            :colors="colors" 
+            v-if="!loading">
+        </dendrogram>
         <div class="block-action-div">
             <form class="form-inline" enctype="multipart/form-data" @submit.prevent="cut">
                 <label class="mr-2">Minimum module size</label>
@@ -56,7 +61,8 @@ export default {
             this.colors = null
             $.get(`${ROOTURL}/projects/${this.project.id}/clustergenes`).then(data => {
                 this.clusterData = data.clusterData
-                this.colors = data.colors
+                if (data.colors)
+                    this.colors = {Modules: data.colors.hex}
                 this.loading = false
             })
         },
@@ -73,7 +79,6 @@ export default {
                 contentType: false,
                 processData: false
             }).then(data => {
-                console.log(data)
                 this.colors = data
                 this.cutting = false
                 this.$emit('done', minModuleSize)

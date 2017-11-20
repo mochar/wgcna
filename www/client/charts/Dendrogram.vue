@@ -1,7 +1,8 @@
 <template>
-<svg :width="width" :height="height">
+<svg :width="width_" :height="height_">
     <g :transform="`translate(${margin.left}, ${margin.top})`">
-        <g class="axis axis--y"></g>
+        <g id="tree-axis" class="axis axis--y"></g>
+        <g id="colors-axis" class="axis axis--y" v-if="colors"></g>
         <line id="cutline" stroke="red" opacity="0.8" x1="0" :x2="width" v-if="cuttable"></line>
         <line id="cutlineset" stroke="red" stroke-width="2" v-if="cuttable && cutHeight" x1="0" :x2="width"
             :y1="cutHeight" :y2="cutHeight"></line>
@@ -16,20 +17,28 @@ import * as d3 from 'd3'
 export default {
     data() {
         return {
+            // Actual width/height of svg
+            height_: 100,
+            width_: 100,
+            // Margin-less 
+            height: 100,
+            width: 100,
+
             svg: null,
             g: null,
             cutline: null,
             cutlineset:null,
             cutHeight: null,
-            height: 100,
-            width: 100,
             x: d3.scalePoint().range([0, this.width]).padding(.4),
             y: d3.scaleLinear().range([this.height, 0]),
             axis: d3.axisLeft(this.y),
-            zoom: d3.zoom(),
-            margin: {top: 10, right: 5, bottom: 15, left: 25},
+            margin: {top: 10, right: 5, bottom: 5, left: 100},
             clusters: null,
-            largestCluster: null
+            largestCluster: null,
+
+            colorHeight: 20,
+            colorsHeight: 0,
+            colorsMargin: 50
         }
     },
 
@@ -45,6 +54,8 @@ export default {
         },
         cut(event) {
             this.cutHeight = d3.event.offsetY - this.margin.top
+            this.cutHeight = this.cutline.attr('y1')
+            console.log(this.cutHeight)
             const reverseY = d3.scaleLinear()
                 .domain(this.y.range())
                 .range(this.y.domain())
@@ -103,12 +114,13 @@ export default {
             }, [])
         },
         resize() {
-            this.width = $(this.$el).parent().width() - this.margin.left - this.margin.right
-            this.height = (this.ratio * this.width) - this.margin.top - this.margin.bottom
-        },
-        zoomed() {
-            const yt = d3.event.transform.rescaleY(this.y)
-            this.g.select('.axis--y').call(this.axis.scale(yt))
+            this.width_ = $(this.$el).parent().width()
+            this.width = this.width_ - this.margin.left - this.margin.right
+            if (this.colors)
+                this.colorsHeight = Object.keys(this.colors).length * this.colorHeight
+            this.height_ = this.ratio * this.width_ 
+            this.height_ += this.colorsHeight  + this.colorsMargin
+            this.height = this.height_ - this.margin.top - this.margin.bottom
         },
         updatePlot() {
             this.x
@@ -118,10 +130,10 @@ export default {
             this.y
                 .domain([Math.max(d3.min(this.clusterData.height), 0), d3.max(this.clusterData.height)])
                 // .domain([0, d3.max(this.clusterData.height)])
-                .range([this.height * 0.9, 0])
+                .range([this.height - this.colorsHeight - this.colorsMargin, 0])
             
             this.axis.scale(this.y)
-            this.g.select('.axis--y').call(this.axis)
+            this.g.select('#tree-axis').call(this.axis)
 
             const labels = this.clusterData.labels
             const positions = this.buildPositions()
@@ -205,18 +217,31 @@ export default {
             const xCluster = d3.scaleBand()
                 .domain(this.x.domain())
                 .range(this.x.range())
-            const yCluster = d3.scaleLinear()
-                .domain([0, 1])
-                .range([this.height, this.height * 0.93])
-            const rect = this.g.select('g#clusters').selectAll('rect')
-                .data(this.colors.hex, d => d)
+                .padding(this.x.padding())
+            const yCluster = d3.scaleBand()
+                .domain(Object.keys(this.colors))
+                .range([this.height, this.height - this.colorsHeight])
+            
+            const axis = d3.axisLeft(yCluster)
+            this.g.select('#colors-axis').call(axis)
+
+            const data = Object.keys(this.colors).map(color => { 
+                return { color, values: this.colors[color] }
+            })
+
+            const group = this.g.select('g#clusters').selectAll('g').data(data, d => d.color)
+            group.exit().remove()
+            const groupEnter = group.enter().append('g')
+                .attr('transform', d => `translate(0,${yCluster(d.color)})`)
+            const groupAll = groupEnter.merge(group)
+            const rect = groupAll.selectAll('rect').data(d => d.values, d => d)
             rect.exit().remove()
             const rectEnter = rect.enter().append('rect')
                 .attr('fill', d => d)
                 .attr('x', (d, i) => xCluster(this.clusterData.ordered[i]))
-                .attr('y', yCluster(1))
-                .attr('width', xCluster.bandwidth())
-                .attr('height', yCluster(1))
+                .attr('y', 0)
+                .attr('width', xCluster.bandwidth() + xCluster.padding() * 2)
+                .attr('height', this.colorHeight)
         }
     },
 
@@ -230,12 +255,8 @@ export default {
         }
         this.cutline = this.g.select('line#cutline')
         this.cutlineset = this.g.select('line#cutlineset')
-        this.zoom
-            .scaleExtent([1, 40])
-            .extent([[0, 0], [this.width, this.height]])
-            .on('zoom', this.zoomed)
-        // this.svg.call(this.zoom)
         this.updatePlot()
+        this.updateColors()
     },
 
     watch: {
@@ -244,7 +265,10 @@ export default {
             this.updatePlot()
         },
         colors() {
-            this.updateColors()
+            if (this.colors) {
+                this.resize()
+                this.updateColors()
+            }
         }
     }
 }
@@ -257,5 +281,9 @@ text {
 
 line {
     shape-rendering: crispEdges;
+}
+
+#colors-axis line {
+    stroke: #fff !important;
 }
 </style>

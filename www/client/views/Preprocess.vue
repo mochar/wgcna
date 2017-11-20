@@ -1,45 +1,82 @@
 <template>
-<div>
-    <div class="d-flex justify-content-between align-items-center">
-        <!-- <h5>
-            <span :class="current === 'Reformat' ? 'text-primary' : 'text-muted'">
-                1. Define data
-            </span>
-            <span> | </span>
-            <span :class="current === 'GoodGenes' ? 'text-primary' : 'text-muted'">
-                2. Good samples &amp; genes 
-            </span>
-            <span> | </span>
-            <span :class="current === 'Outliers' ? 'text-primary' : 'text-muted'">
-                3. Remove outliers
-            </span>
-        </h5>
+<div class="card card-body mb-5">
+    <h6 class="block-title">
+        PREPROCESS
+    </h6>
 
-        <router-link to="/" class="btn btn-light">
-            Cancel
-        </router-link> -->
+    <div v-if="!project">
+        <span class="fa fa-refresh fa-spin text-main"></span>
     </div>
+    <div v-else>
+        <span>
+            <span class="fa fa-circle-o text-secondary" v-if="step < 2"></span>
+            <span class="fa fa-check-circle-o text-main" v-else></span>
+            <span class="ml-1">Expression data format</span>
+        </span>
+        <div v-if="step > 1">
+            <div class="preprocess-component border-main"></div>
+            <span>
+                <span class="fa fa-circle-o text-secondary" v-if="step < 3"></span>
+                <span class="fa fa-check-circle-o text-main" v-else></span>
+                <span class="ml-1">Good genes and samples</span>
+            </span>
+        </div>
+        <div v-if="project.trait && step > 2">
+            <div class="preprocess-component border-main"></div>
+            <span>
+                <span class="fa fa-circle-o text-secondary" v-if="step < 4"></span>
+                <span class="fa fa-check-circle-o text-main" v-else></span>
+                <span class="ml-1">Trait data format</span>
+            </span>
+        </div>
+        <div v-if="project.trait ? step > 3 : step > 2">
+            <div class="preprocess-component border-main"></div>
+            <span>
+                <span class="fa fa-circle-o text-secondary" v-if="project.trait ? step < 5 : step < 4"></span>
+                <span class="fa fa-check-circle-o text-main" v-else></span>
+                <span class="ml-1">Outlier Removal</span>
+            </span>
+        </div>
+        <component 
+            class="preprocess-component"
+            v-if="project.id"
+            :go="go"
+            :is="current" 
+            :projectId="project.id"
 
-    <component 
-        v-if="this.$route.params.id"
-        :is="current" 
-        :projectId="this.$route.params.id"
-        @done="next">
-    </component>
+            :url="reformatUrl"
+            :cols="reformatCols"
+
+            @loaded="go = false"
+            @done="next">
+        </component>
+        <div class="mt-2">
+            <button class="btn btn-light" :disabled="go" @click="go = true" v-if="step <= steps.length">
+                <span class="fa fa-check"></span>
+                OK
+            </button>
+            <button class="btn btn-primary" :disabled="loading" @click="done" v-else>
+                <span class="fa fa-chevron-right"></span>
+                Analyze
+            </button>
+        </div>
+    </div>
 </div>
 </template>
 
 <script>
-import Reformat from 'components/Reformat'
-import GoodGenes from 'components/GoodGenes'
-import Outliers from 'components/Outliers'
+import Reformat from 'components/PreprocessSteps/Reformat'
+import GoodGenes from 'components/PreprocessSteps/GoodGenes'
+import Outliers from 'components/PreprocessSteps/Outliers'
 
 export default {
     data() {
         return {
-            current: 'Reformat',
+            step: 1,
             project: null,
-            loading: false
+            loading: false,
+            go: false,
+            finished: false
         }
     },
 
@@ -51,31 +88,54 @@ export default {
 
     methods: {
         next() {
-            switch(this.current) {
-                case 'Reformat':
-                    this.current = 'GoodGenes'
-                    break;
-                case 'GoodGenes':
-                    this.current = 'Outliers'
-                    break;
-                case 'Outliers':
-                    this.$router.push('/')
-            }
+            // this.go = false
+            this.step++
+            if (this.step > this.steps.length)
+                this.finished = true
+        },
+        done() {
+            this.$router.push('/')
+        },
+        setProject() {
+            const projectId = this.$route.params.id
+            $.getJSON(`${ROOTURL}/projects/${projectId}`).then(data => {
+                this.project = data.project
+            })
         }
     },
 
-    watch: {
-        '$route'(to, from) {
-            console.log(to)
-            console.log(from)
-            console.log(this.$route.params)
+    computed: {
+        current() {
+            return this.project ? this.steps[this.step - 1] : null
+        },
+        steps() {
+            if (!this.project) return null
+            let steps = ['Reformat', 'GoodGenes']
+            if (this.project.trait)
+                steps.push('Reformat')
+            steps.push('Outliers')
+            return steps
+        },
+        reformatUrl() {
+            if (!this.project.trait) return 'expression'
+            return this.step < 3 ? 'expression' : 'trait'
+        },
+        reformatCols() {
+            if (!this.project.trait) return 'Genes'
+            return this.step < 3 ? 'Genes' : 'Traits'
         }
     },
-
+    
     created() {
+        this.setProject()
     }
 }
 </script>
 
 <style>
+.preprocess-component {
+    border-left: 2px solid #ccc;
+    padding: 1.25rem 0 1rem 1rem;
+    margin-left: .4rem;
+}
 </style>

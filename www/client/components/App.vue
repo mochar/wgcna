@@ -63,10 +63,10 @@ export default {
 }
 </script>
 
+<style src="../../node_modules/font-awesome/css/font-awesome.min.css"></style>
+<style src="../../node_modules/bootstrap/dist/css/bootstrap.min.css"></style>
+<style src="../../node_modules/webui-popover/dist/jquery.webui-popover.min.css"></style>
 <style>
-@import "../../node_modules/bootstrap/dist/css/bootstrap.min.css";
-@import "../../node_modules/font-awesome/css/font-awesome.min.css";
-
 html {
     overflow-y: scroll;
     font-size: 14px;
@@ -151,6 +151,9 @@ a:active, .btn-link:active {
 
 .text-main {
     color: #01549b !important;
+}
+.border-main {
+    border-color: #01549b !important;
 }
 
 .text-normal {

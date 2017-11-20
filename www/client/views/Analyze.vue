@@ -161,7 +161,7 @@ export default {
 .block-action-div {
     border-top: 1px dashed #ccc;
     padding-top: 1rem;
-    margin-top: 1rem;
+    margin-top: .5rem;
 }
 
 #project-select button {

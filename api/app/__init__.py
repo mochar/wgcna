@@ -57,6 +57,17 @@ def is_number(string):
         return False
 
 
+def process_project(project):
+    project['trait'] = bool(int(project['trait']))
+    project['preprocessed'] = bool(int(project['preprocessed']))
+    return project
+
+
+def project_from_id(project_id):
+    project = redis.hgetall('project:{}'.format(project_id))
+    return process_project(project)
+
+
 def user_projects():
     user_id = session.get('id')
     if user_id is None:
@@ -65,7 +76,8 @@ def user_projects():
     pipe = redis.pipeline()
     for project_id in project_ids:
         pipe.hgetall('project:{}'.format(project_id))
-    return pipe.execute()
+    projects = pipe.execute()
+    return [process_project(p) for p in projects]
 
 
 def create_user():
@@ -77,14 +89,14 @@ def create_user():
 def create_project(user_id, name, description, omic, expression, trait=None):
     project_id = uuid.uuid4().hex
     project = {'name': name, 'description': description, 'id': project_id, 'step': 1,
-        'omic': omic}
+        'omic': omic, 'trait': 0 if trait is None else 1, 'preprocessed': 0}
     project_folder = project_id_to_folder(project_id)
     os.makedirs(project_folder)
     expression.save(os.path.join(project_folder, 'expression.csv'))
     if trait is not None:
         trait.save(os.path.join(project_folder, 'trait.csv'))
     redis.sadd('projects:{}'.format(user_id), project_id)
-    redis.hmset('project:{}'.format(project_id), project)
+    redis.hset('project:{}'.format(project_id), project)
     return project
 
 
@@ -109,6 +121,7 @@ def setup_request_info():
         g.module_path = os.path.join(g.project_folder, 'modules.csv')
         g.eigengene_path = os.path.join(g.project_folder, 'eigengenes.csv')
         g.pvalues_path = os.path.join(g.project_folder, 'pvalues.csv')
+        g.trait_path = os.path.join(g.project_folder, 'trait.csv')
     user_id = session.get('id')
     if user_id is not None:
         g.user_id = user_id
@@ -141,14 +154,18 @@ def projects():
         user_id = session.get('id')
         if user_id is None:
             user_id = create_user()
-        project = create_project(user_id, name, description, omic, expression)
+        project = create_project(user_id, name, description, omic, expression,
+            trait=None if trait.filename == '' else trait)
         return jsonify({'project': project})
 
 
 @app.route('/projects/<project_id>', methods=['GET', 'DELETE'])
 @project_exists
-def delete(project_id):
-    if request.method == 'DELETE':
+def project(project_id):
+    if request.method == 'GET':
+        project = project_from_id(project_id)
+        return jsonify({'project': project})
+    elif request.method == 'DELETE':
         delete_project(g.user_id, project_id)
     return jsonify({})
 
@@ -168,6 +185,24 @@ def expression(project_id):
         df.drop(removed_col_names, axis=1, inplace=True)
         df.drop(removed_row_names, axis=0, inplace=True)
         df.to_csv(g.expression_path)
+        return jsonify({}), 200
+
+
+@app.route('/projects/<project_id>/trait', methods=['GET', 'POST', 'PUT'])
+@project_exists
+def trait(project_id):
+    df = pd.read_csv(g.trait_path, index_col=0)
+    if request.method == 'GET':
+        response = {'colNames': df.columns.tolist(), 'rowNames': df.index.tolist()}
+        return jsonify(response)
+    elif request.method == 'PUT':
+        removed_row_names = [x for x in request.form['row'].split(',') if x != '']
+        removed_col_names = [x for x in request.form['col'].split(',') if x != '']
+        if request.form['transpose'] == 'true':
+            df = df.T
+        df.drop(removed_col_names, axis=1, inplace=True)
+        df.drop(removed_row_names, axis=0, inplace=True)
+        df.to_csv(g.trait_path)
         return jsonify({}), 200
 
 

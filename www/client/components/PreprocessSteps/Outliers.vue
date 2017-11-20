@@ -1,25 +1,15 @@
 <template>
-<div class="card card-body">
-    <h6 class="block-title text-uppercase">
-        Outlier removal
-    </h6>
-
+<div>
     <dendrogram 
         v-if="!loading" 
-        :ratio="0.6"
+        :ratio="0.3"
         :labels="true"
         :cluster-data="clusterData"
         :cuttable="true"
+        :colors="colors"
         @cutted="d => outlierSamples = d">
     </dendrogram>
-    <span class="fa fa-cog fa-spin fa-2x fa-fw" v-else></span>
-
-    <div class="block-action-div">
-        <button class="btn btn-light" :disabled="loading" @click="done">
-            <span class="fa fa-check"></span>
-            Done
-        </button>
-    </div>
+    <span class="fa fa-refresh fa-spin" v-else></span>
 </div>
 </template>
 
@@ -34,6 +24,7 @@ export default {
             loading: true,
             cutting: false,
             clusterData: null,
+            colors: null,
             outlierSamples: []
         }
     },
@@ -42,12 +33,13 @@ export default {
         Dendrogram
     },
 
-    props: ['projectId'],
+    props: ['projectId', 'go'],
 
     methods: {
         getClusterData() {
             return $.get(`${ROOTURL}/projects/${this.projectId}/clustersamples`).then(data => {
                 this.clusterData = data
+                // this.colors = {Kek: this.clusterData.ordered.map(d => Math.random() > 0.5 ? 'red' : 'white')}
             })
         },
         done() {
@@ -62,18 +54,24 @@ export default {
                 contentType: false,
                 processData: false
             }).then(data => {
-                console.log('success')
-                this.loading = false
                 this.$emit('done')
             }, () => {
-                console.log('fail')
-                this.loading = false
-            })
+                alert('fail')
+            }).then(() => this.loading = false)
+        }
+    },
+
+    watch: {
+        go() {
+            if (this.go) this.done()
         }
     },
 
     created() {
-        this.getClusterData().then(() => this.loading = false)
+        this.getClusterData().then(() => {
+            this.loading = false
+            this.$emit('loaded')
+        })
     }
 }
 </script>

@@ -1,71 +1,48 @@
 <template>
-<div class="card card-body">
-    <h6 class="block-title">
-        REFORMAT
-        <!-- <span class="fa fa-lg fa-cog fa-spin float-right" v-if="loading"></span> -->
-        <button class="btn btn-light float-right" @click="transpose = !transpose">
+<div>
+    <span class="fa fa-refresh fa-spin" v-if="loading"></span>
+    <div v-else>
+        <reformat-popover 
+            name="Samples"
+            :removedIndices="removedRowIndices"
+            :list="rowNames"
+            @selected="i => selectRemovedIndex('row', i)"
+            @removed="indices => removedRowIndices = indices">
+        </reformat-popover>
+        <reformat-popover 
+            :name="cols"
+            :removedIndices="removedColIndices"
+            :list="colNames"
+            @selected="i => selectRemovedIndex('col', i)"
+            @removed="indices => removedColIndices = indices">
+        </reformat-popover>
+        <button class="btn btn-light" @click="transpose = !transpose">
             <span class="fa fa-retweet fa-lg"></span>
             Swap rows and columns
         </button>
-    </h6>
-
-    <div class="d-flex" v-if="!loading">
-        <delete-editor 
-            :list="rowNames" 
-            :removedIndices="removedRowIndices" 
-            @selected="i => selectRemovedIndex('row', i)"
-            @removed="indices => removedRowIndices = indices">
-            Samples
-        </delete-editor>
-        <delete-editor 
-            :list="colNames" 
-            :removedIndices="removedColIndices"
-            @selected="i => selectRemovedIndex('col', i)"
-            @removed="indices => removedColIndices = indices">
-            Genes
-        </delete-editor>
     </div>
-
-    <div class="block-action-div">
-        <button class="btn btn-light" @click="done" v-if="!loading">
-            <span class="fa fa-check"></span>
-            Done
-        </button>
-    </div>
-
-    <span class="fa fa-cog fa-spin fa-2x fa-fw" v-if="loading"></span>
 </div>
 </template>
 
 <script>
-import DeleteEditor from 'components/DeleteEditor'
+import ReformatPopover from 'components/PreprocessSteps/ReformatPopover'
 
 export default {
     data() {
         return {
             loading: true,
             transpose: false,
-            rowNames: [],
-            colNames: [],
+            rowNames: null,
+            colNames: null,
             removedRowIndices: [],
             removedColIndices: []
         }
     },
 
-    props: ['projectId'],
+    props: ['projectId', 'go', 'url', 'cols'],
 
     components: {
-        DeleteEditor
-    },
-
-    created() {
-        $.get(`${ROOTURL}/projects/${this.projectId}/expression`).then(data => {
-            this.rowNames = data.rowNames
-            this.colNames = data.colNames
-            this.loading = false
-        }, () => {
-            this.loading = false
-        })
+        ReformatPopover
     },
 
     methods: {
@@ -75,7 +52,7 @@ export default {
             formData.append('col', this.removedColIndices.map(i => this.colNames[i]))
             formData.append('transpose', this.transpose)
             $.ajax({
-                url: `${ROOTURL}/projects/${this.projectId}/expression`,
+                url: `${ROOTURL}/projects/${this.projectId}/${this.url}`,
                 type: 'PUT',
                 data: formData,
                 async: true,
@@ -83,11 +60,19 @@ export default {
                 contentType: false,
                 processData: false
             }).then(() => {
-                console.log('success')
                 this.$emit('done')
             }, () => {
-                console.log('nope')
                 alert('nope')
+            })
+        },
+        getSamplesGenes() {
+            $.get(`${ROOTURL}/projects/${this.projectId}/${this.url}`).then(data => {
+                this.rowNames = data.rowNames
+                this.colNames = data.colNames
+            }, () => {
+            }).then(() => {
+                this.loading = false
+                this.$emit('loaded')
             })
         },
         selectRemovedIndex(dim, index) {
@@ -112,7 +97,14 @@ export default {
             const rowIndices = this.removedRowIndices
             this.removedRowIndices = this.removedColIndices
             this.removedColIndices = rowIndices
+        },
+        go() {
+            if (this.go) this.done()
         }
+    },
+
+    created() {
+        this.getSamplesGenes()
     }
 }
 </script>
