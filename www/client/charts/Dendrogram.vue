@@ -1,6 +1,9 @@
 <template>
 <svg :width="width_" :height="height_">
     <g :transform="`translate(${margin.left}, ${margin.top})`">
+        <text text-anchor="middle" :transform="`translate(-45,${height/2})rotate(-90)`" style="font-size: 1rem">
+            Height
+        </text>
         <g id="tree-axis" class="axis axis--y"></g>
         <g id="colors-axis" class="axis axis--y" v-if="colors"></g>
         <line id="cutline" stroke="red" opacity="0.8" x1="0" :x2="width" v-if="cuttable"></line>

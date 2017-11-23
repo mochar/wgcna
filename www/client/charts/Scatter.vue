@@ -7,6 +7,9 @@
                 <line id="x-line" x1="0"></line>
                 <line id="y-line" :y1="height"></line>
             </g>
+            <text text-anchor="middle" :transform="`translate(${-(margin.left/1.25)},${height/2})rotate(-90)`" style="font-size: 1rem">
+                {{ yLabel }}
+            </text>
             <text
                 v-for="(yVal, i) in this.yData"
                 v-show="yVal > 0 && xData[i] > 0"
@@ -35,11 +38,11 @@ export default {
             y: d3.scaleLinear(),
             height: 100,
             width: 100,
-            margin: {top: 20, right: 20, bottom: 30, left: 50},
+            margin: {top: 20, right: 20, bottom: 20, left: 60},
         }
     },
 
-    props: ['xData', 'yData', 'highlight'],
+    props: ['xData', 'yData', 'highlight', 'yLabel'],
 
     computed: {
         indexHighlight() {
@@ -65,9 +68,9 @@ export default {
     },
 
     mounted() {
-        this.width = parseInt(d3.select(this.$el).style('width'), 10)
+        this.width = $(this.$el).parent().width()
+        this.height = this.width * 1.5
         this.width = this.width - this.margin.left - this.margin.right
-        this.height = this.width * 2 * .9
         this.height = this.height - this.margin.top - this.margin.bottom
         this.svg = d3.select(this.$el).select('svg').select('g')
         this.xLine = this.svg.select('#x-line')

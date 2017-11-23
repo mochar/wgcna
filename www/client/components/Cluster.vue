@@ -12,9 +12,9 @@
                     <span class="fa fa-ellipsis-v"></span>
                 </button>
                 <div class="dropdown-menu  dropdown-menu-right">
+                    <h6 class="dropdown-header">Download plot</h6>
                     <a class="dropdown-item" href="#" @click.prevent="downloadPlot">
-                        <span class="fa fa-download"></span>
-                        Download plot
+                        Gene tree
                     </a>
                 </div>
             </div>

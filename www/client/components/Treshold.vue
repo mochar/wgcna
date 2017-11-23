@@ -1,6 +1,6 @@
 <template>
 <div class="card card-body block">
-    <div class="d-flex justify-content-between">
+    <div class="d-flex justify-content-between align-items-start">
         <h6 class="block-title">
             SOFT TRESHOLD
             <span class="fa fa-cog fa-spin" v-if="loading"></span>
@@ -12,10 +12,13 @@
                 <button class="btn btn-link text-muted pr-1 pt-0 pb-0" data-toggle="dropdown">
                     <span class="fa fa-ellipsis-v"></span>
                 </button>
-                <div class="dropdown-menu  dropdown-menu-right">
-                    <a class="dropdown-item" href="#" @click.prevent="downloadPlot">
-                        <span class="fa fa-download"></span>
-                        Download plot
+                <div class="dropdown-menu dropdown-menu-right">
+                    <h6 class="dropdown-header">Download plot</h6>
+                    <a class="dropdown-item" href="#" @click.prevent="downloadPlot(0)">
+                        Scale independence
+                    </a>
+                    <a class="dropdown-item" href="#" @click.prevent="downloadPlot(1)">
+                        Mean connectivity
                     </a>
                 </div>
             </div>
@@ -47,9 +50,9 @@
         </div>
 
         <div class="col-4">
-            <span class="h5">Scale independence</span>
             <scatter 
                 v-if="powers"
+                yLabel="Scale independence"
                 :highlight="highlight"
                 :xData="powers" 
                 :yData="scaleindep">
@@ -57,9 +60,9 @@
         </div>
 
         <div class="col-4">
-            <span class="h5">Mean connectivity</span>
             <scatter 
                 v-if="powers"
+                yLabel="Mean connectivity"
                 :highlight="highlight"
                 :xData="powers" 
                 :yData="meank">
@@ -123,8 +126,8 @@ export default {
                 this.loading = false
             })
         },
-        downloadPlot() {
-            const svgEl = $(this.$el).find('svg')[0]
+        downloadPlot(svgIndex) {
+            const svgEl = $(this.$el).find('svg')[svgIndex]
             this.$helpers.downloadSvg(svgEl, 'scale_independence.svg')
         }
     },
