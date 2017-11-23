@@ -1,9 +1,25 @@
 <template>
 <div class="card card-body block">
-    <h6 class="block-title text-uppercase">
-        Module Significance
-        <span class="fa fa-cog fa-spin" v-if="loading"></span>
-    </h6>
+    <div class="d-flex justify-content-between align-items-start">
+        <h6 class="block-title text-uppercase">
+            Module Significance
+            <span class="fa fa-cog fa-spin" v-if="loading"></span>
+        </h6>
+        <div class="text-muted d-flex align-items-center">
+            <!-- <span class="fa fa-info text-muted"></span> -->
+            <div class="dropdown ml-2">
+                <button class="btn btn-link text-muted pr-1 pt-0 pb-0" data-toggle="dropdown">
+                    <span class="fa fa-ellipsis-v"></span>
+                </button>
+                <div class="dropdown-menu  dropdown-menu-right">
+                    <h6 class="dropdown-header">Download plot</h6>
+                    <a class="dropdown-item" href="#" @click.prevent="downloadPlot">
+                        Significance
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div v-if="!loading">
         <div class="row" v-if="!showPvalues">
@@ -172,6 +188,10 @@ export default {
                     this.loading = false
                 }
             })
+        },
+        downloadPlot() {
+            const svgEl = $(this.$el).find('svg')[0]
+            this.$helpers.downloadSvg(svgEl, 'significance.svg')
         }
     },
 
