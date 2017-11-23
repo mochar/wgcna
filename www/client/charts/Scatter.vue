@@ -9,6 +9,7 @@
             </g>
             <text
                 v-for="(yVal, i) in this.yData"
+                v-show="yVal > 0 && xData[i] > 0"
                 :key="i"
                 text-anchor="middle"
                 :x="x(xData[i])"
