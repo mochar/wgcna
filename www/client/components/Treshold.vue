@@ -6,7 +6,20 @@
             <span class="fa fa-cog fa-spin" v-if="loading"></span>
         </h6>
 
-        <span class="fa fa-info text-muted"></span>
+        <div class="text-muted d-flex align-items-center">
+            <span class="fa fa-info text-muted"></span>
+            <div class="dropdown ml-2">
+                <button class="btn btn-link text-muted pr-1 pt-0 pb-0" data-toggle="dropdown">
+                    <span class="fa fa-ellipsis-v"></span>
+                </button>
+                <div class="dropdown-menu  dropdown-menu-right">
+                    <a class="dropdown-item" href="#" @click.prevent="downloadPlot">
+                        <span class="fa fa-download"></span>
+                        Download plot
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row" v-if="!loading">
@@ -34,7 +47,7 @@
         </div>
 
         <div class="col-4">
-            <h5 class="">Scale independence</h5>
+            <span class="h5">Scale independence</span>
             <scatter 
                 v-if="powers"
                 :highlight="highlight"
@@ -44,7 +57,7 @@
         </div>
 
         <div class="col-4">
-            <h5 class="">Mean connectivity</h5>
+            <span class="h5">Mean connectivity</span>
             <scatter 
                 v-if="powers"
                 :highlight="highlight"
@@ -109,6 +122,10 @@ export default {
                 this.meank = data.meank
                 this.loading = false
             })
+        },
+        downloadPlot() {
+            const svgEl = $(this.$el).find('svg')[0]
+            this.$helpers.downloadSvg(svgEl, 'scale_independence.svg')
         }
     },
 

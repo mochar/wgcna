@@ -1,9 +1,25 @@
 <template>
 <div class="card card-body block">
-    <h6 class="block-title">
-        GENE CLUSTERING
-        <span class="fa fa-lg fa-cog fa-spin float-right" v-if="loading"></span>
-    </h6>
+    <div class="d-flex justify-content-between align-items-start">
+        <h6 class="block-title">
+            GENE CLUSTERING
+            <span class="fa fa-lg fa-cog fa-spin float-right" v-if="loading"></span>
+        </h6>
+        <div class="text-muted d-flex align-items-center">
+            <span class="fa fa-info text-muted"></span>
+            <div class="dropdown ml-2">
+                <button class="btn btn-link text-muted pr-1 pt-0 pb-0" data-toggle="dropdown">
+                    <span class="fa fa-ellipsis-v"></span>
+                </button>
+                <div class="dropdown-menu  dropdown-menu-right">
+                    <a class="dropdown-item" href="#" @click.prevent="downloadPlot">
+                        <span class="fa fa-download"></span>
+                        Download plot
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div v-if="!loading">
         <dendrogram 
@@ -85,6 +101,10 @@ export default {
             }, () => {
                 this.cutting = false
             })
+        },
+        downloadPlot() {
+            const svgEl = $(this.$el).find('svg')[0]
+            this.$helpers.downloadSvg(svgEl, 'gene_clusters.svg')
         }
     },
 

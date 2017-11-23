@@ -1,4 +1,5 @@
-<script>
+import svgDownload from './SvgDownload'
+
 let helpers = {
     mode: function(arr) {
         // Return the most frequent item in an array.
@@ -11,6 +12,9 @@ let helpers = {
         const _start = end ? start : 0
         const _step = step || 1
         return Array((_end - _start) / _step).fill(0).map((v, i) => _start + (i * _step))
+    },
+    downloadSvg: function(svgEl, filename) {
+        svgDownload(svgEl, filename)
     }
 }
 
@@ -19,4 +23,3 @@ export default {
         Vue.prototype.$helpers = helpers
     }
 }
-</script>
