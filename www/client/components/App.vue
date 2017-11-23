@@ -77,6 +77,11 @@ input[type=text] {
     box-shadow: initial;
 }
 
+svg {
+    font-family: sans-serif;
+    font-size: 10pt;
+}
+
 #app {
     margin-top: 1rem;
     color: #222 !important;
