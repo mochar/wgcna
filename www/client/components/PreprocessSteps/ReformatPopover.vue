@@ -12,14 +12,18 @@
             <input type="text" placeholder="Search" class="bg-light w-100 p-1"
                 v-model="searchTerm" />
             <div class="d-flex flex-column p-1">
-                <span v-for="(item, i) in paginatedList" :key="item" class="reformat-item" @click="$emit('selected', i)">
-                    <span class="fa fa-trash fa-fw"
-                        :class="removedIndices.includes(i) ? 'text-danger' : 'text-secondary'"></span>
-                    {{ item }}
-                    <!-- <div>
-                        <a href="#" @click.prevent>nominal</a> | <span>continous</span>
-                    </div> -->
-                </span>
+                <div v-for="(item, i) in paginatedList" :key="item" class="d-flex align-items-center">
+                    <div class="reformat-item w-100" @click="$emit('selected', ((page-1) * items) + i)">
+                        <span class="fa fa-trash fa-fw"
+                            :class="removedIndices.includes(((page-1) * items) + i) ? 'text-danger' : 'text-light'">
+                        </span>
+                        {{ item }}
+                    </div>
+                    <!-- <select class="custom-select form-control-sm" @click.stop>
+                        <option value="categorical" selected>Categorical</option>
+                        <option value="continous">Continous</option>
+                    </select> -->
+                </div>
             </div>
             <div style="border-top: 1px solid #eee" class="w-100">
                 <button class="btn btn-link" @click="prevPage" :disabled="!canPrev">Previous</button>
@@ -67,7 +71,7 @@ export default {
             return (this.page - 1) * this.items
         },
         paginatedList() {
-            return this.searchedList.slice(this.offset, this.offset + this.items + 1)
+            return this.searchedList.slice(this.offset, this.offset + this.items)
         },
         canPrev() {
             return this.page > 1
