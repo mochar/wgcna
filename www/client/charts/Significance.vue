@@ -67,13 +67,13 @@ export default {
             this.color.domain(this.group)
             const y = d3.scaleBand() // placement module eigengene
                 .domain(data.map(d => d.module))
-                .range([this.height, 0])
+                .rangeRound([this.height, 0])
             const y1 = d3.scaleLinear() // placement y value 
                 .domain([-1, 1])
                 .range([(this.size / 2) * -1, this.size / 2])
             const x = d3.scaleBand() // Eigengene region
                 .domain(this.groupShow)
-                .range([0, this.width * .8])
+                .rangeRound([0, this.width * .8])
                 .paddingInner(0.1)
             const r = d3.scaleLinear() // P-value circle size
                 .domain([0, 3])
@@ -83,8 +83,8 @@ export default {
                 const groupValues = data[0].valuesByGroup[index]
                 const scale = d3.scaleBand()
                     .domain(groupValues.values.map(x => x.sample))
-                    .range([0, x.bandwidth()])
-                    .paddingInner(0.04)
+                    .rangeRound([0, x.bandwidth()])
+                    .paddingInner(0.05)
                 xScaleByGroup[groupValues.group] = scale
             }
 
