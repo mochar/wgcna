@@ -26,7 +26,7 @@ export default {
             svg: null,
             g: null,
             size: 75,
-            margin: {top: 60, right: 5, bottom: 60, left: 35},
+            margin: {top: 30, right: 5, bottom: 25, left: 35},
             color: d3.scaleOrdinal(d3.schemeCategory20c)
         }
     },
@@ -41,7 +41,7 @@ export default {
             this.height_ = this.height + this.margin.top + this.margin.bottom
         },
         updatePlot() {
-            // Build data
+            /// Build data
             const data = this.modules.reduce((build, module, i) => {
                 const significance = this.pvalues.significance[i]
                 if (this.sigOnly && significance > 0.05) return build
@@ -49,19 +49,21 @@ export default {
                 let p = this.column ? this.pvalues[this.column][i] : significance
                 p = p === 'NA' ? null : p
 
-                const values = this.sortIndices
-                    .map(j => {
-                        return { val: eigengene[j], group: this.groups[j], sample: this.samples[j] }
-                    })
-                    .filter(d => this.filteredSamples.includes(d.sample))
+                let valuesByGroup = this.groupShow.map(group => ({ group, values: []}))
+                for (let index = 0; index < this.sortIndices.length; index++) {
+                    const j = this.sortIndices[index]
+                    const item = { val: eigengene[j], group: this.groups[j], sample: this.samples[j] }
+                    if (this.groupShow.includes(item.group))
+                        valuesByGroup[this.groupShow.indexOf(item.group)].values.push(item)
+                }
 
-                build.push({ module, significance, values, i, p })
+                build.push({ module, significance, valuesByGroup, i, p })
                 return build
             }, [])
 
             this.resize(data.length)
 
-            // Set up scales
+            /// Set up scales
             this.color.domain(this.group)
             const y = d3.scaleBand() // placement module eigengene
                 .domain(data.map(d => d.module))
@@ -70,30 +72,50 @@ export default {
                 .domain([-1, 1])
                 .range([(this.size / 2) * -1, this.size / 2])
             const x = d3.scaleBand() // Eigengene region
-                .domain(this.filteredSamples)
+                .domain(this.groupShow)
                 .range([0, this.width * .8])
-                .paddingInner(0.05)
+                .paddingInner(0.1)
             const r = d3.scaleLinear() // P-value circle size
                 .domain([0, 3])
                 .range([1, 15])
+            const xScaleByGroup = {} 
+            for (let index = 0; index < data[0].valuesByGroup.length; index++) {
+                const groupValues = data[0].valuesByGroup[index]
+                const scale = d3.scaleBand()
+                    .domain(groupValues.values.map(x => x.sample))
+                    .range([0, x.bandwidth()])
+                    .paddingInner(0.04)
+                xScaleByGroup[groupValues.group] = scale
+            }
 
-            // Build plot
-            const group = this.g.selectAll('g.eigengene').data(data)
+            /// Build plot
+            // Each row is one eigengene
+            const group = this.g.selectAll('g.eigengene').data(data, d => d.module)
             group.exit().remove()
             const groupEnter = group.enter().append('g').classed('eigengene', true)
                 .attr('transform', d => `translate(0,${y(d.module) + this.size / 2})`)
             const groupAll = groupEnter.merge(group)
-            const rect = groupAll.selectAll('rect').data(d => d.values, d => d.sample)
+
+            // Each main column is one group
+            const colgroup = groupAll.selectAll('g').data(d => d.valuesByGroup, d => d.group)
+            colgroup.transition()
+                .attr('transform', d => `translate(${x(d.group)}, 0)`)
+            colgroup.exit().remove()
+            const colgroupEnter = colgroup.enter().append('g')
+                .attr('transform', d => `translate(${x(d.group)}, 0)`)
+            const colgroupAll = colgroupEnter.merge(colgroup)
+
+            // Each rect (eigengene value) per sample
+            const rect = colgroupAll.selectAll('rect').data(d => d.values, d => d.sample)
             rect.transition()
-                .attr('x', d => x(d.sample))
-                .attr('width', x.bandwidth())
+                .attr('x', d => xScaleByGroup[d.group](d.sample))
+                .attr('width', d => xScaleByGroup[d.group].bandwidth())
                 .attr('height', d => Math.abs(y1(d.val) - y1(0)))
             rect.exit().remove()
             rect.enter().append('rect')
-                // .attr('stroke', ' black')
-                .attr('stroke', d => d3.rgb(this.color(d.group)).darker(3))
-                .attr('x', d => x(d.sample))
-                .attr('width', x.bandwidth())
+                .attr('stroke', d => d3.rgb(this.color(d.group)).darker(2))
+                .attr('x', d => xScaleByGroup[d.group](d.sample))
+                .attr('width', d => xScaleByGroup[d.group].bandwidth())
                 .attr('height', d => Math.abs(y1(d.val) - y1(0)))
               .merge(rect)
                 .attr('y', d => y1(Math.min(0, d.val)))
@@ -102,6 +124,8 @@ export default {
                     if (!this.column) return color
                     return this.columnGroups.includes(d.group) ? color : 'grey'
                 })
+            
+            // p-val circles
             const circle = groupAll.selectAll('circle').data(d => [d], d => `${d.module}_${this.column}`)
             circle.enter().append('circle')
                 .attr('cx', this.width * .85)
@@ -117,22 +141,14 @@ export default {
                 .style('font-size', '1rem')
                 .text(d => d.p ? parseFloat(d.p).toFixed(4) : 'NA')
             
-            // Axes and labels
+            /// Axes and labels
             const axis = d3.axisBottom(x).tickSizeInner(-this.height)
             this.g.select('#axis-bottom').transition().call(axis)
-              .selectAll("text")  
-                .style("text-anchor", "end")
-                .attr("dx", "-.8em")
-                .attr("dy", ".15em")
-                .attr("transform", "rotate(-45)")
-                .attr('textLength', this.size * 0.75)
+              .selectAll('text')  
+                .style('text-anchor', 'middle')
             this.g.select('#axis-top').transition().call(d3.axisTop(x))
-              .selectAll("text")  
-                .style("text-anchor", "start")
-                .attr("dx", ".8em")
-                .attr("dy", ".15em")
-                .attr("transform", "rotate(-45)")
-                .attr('textLength', this.size * 0.75)
+              .selectAll('text')  
+                .style('text-anchor', 'middle')
         }
     },
 
@@ -167,10 +183,10 @@ export default {
         columnGroups() {
             return this.column ? this.column.split(' vs ') : []
         },
-        filteredSamples() {
-            if (!this.column || !this.columnOnly) return this.sortedSamples
-            return this.sortedSamples
-                .filter((d, i) => this.columnGroups.includes(this.sortedGroups[i]))
+        groupShow() {
+            // We use group.filter instead of columnGroups because we want to keep the order
+            return this.columnOnly && this.columnGroups.length > 0 ? 
+                this.group.filter(g => this.columnGroups.includes(g)) : this.group
         }
     },
 
