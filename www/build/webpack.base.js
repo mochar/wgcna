@@ -39,8 +39,14 @@ module.exports = {
       },
       {
         test: /\.js$/,
-        loaders: ['babel-loader'],
-        exclude: [/node_modules/]
+        // loaders: ['babel-loader'],
+        exclude: [/node_modules/],
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['vue-app']
+          }
+        }
       },
       {
         test: /\.es6$/,
