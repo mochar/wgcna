@@ -12,7 +12,7 @@ const state = {
 
 const getters = {
     project: state => {
-        return state.projects[state.projectIndex]
+        return state.projectIndex === null ? null : state.projects[state.projectIndex]
     }
 }
 

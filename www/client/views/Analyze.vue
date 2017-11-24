@@ -45,7 +45,7 @@
                 <div class="dropdown-menu">
                     <!-- <span class="m-3">Projects</span> -->
                     <a class="dropdown-item" href="#" v-for="(project, i) in projects" :key="project.id"
-                        @click.prevent="selectProject(i)">
+                        @click.prevent="selectProject(project, i)">
                         <span>{{ project.name }}</span><br>
                         <small class="text-muted">{{ project.description}}</small>
                     </a>
@@ -65,6 +65,14 @@
                 :should-update="shouldUpdate || project.step == 4">
             </component>
         </keep-alive>
+    </div>
+    <div class="w-100 h-100 d-flex flex-column justify-content-center align-items-center" style="color: rgba(0,0,0,.3)" v-else>
+        <div>
+            <span class="fa fa-circle fa-lg"></span>
+            <span class="fa fa-circle fa-lg ml-2 mr-2"></span>
+            <span class="fa fa-circle fa-lg"></span>
+        </div>
+        <strong class="d-flex mt-2">Loading</strong>
     </div>
 
     <!-- <export-modal :name="name" :step="step" :modules="modules" v-if="step > 3"></export-modal> -->
@@ -109,9 +117,10 @@ export default {
             //     })
             // }
         },
-        selectProject(index) {
+        selectProject(project, index) {
             this.tab = 'ModuleCreationTab'
-            this.$store.commit('setProjectIndex', index)
+            this.$router.push({ name: 'analyze', params: { id: project.id }})
+            // this.$store.commit('setProjectIndex', index)
         }
     },
 
@@ -130,10 +139,41 @@ export default {
         }
     },
 
-    watch: {
+    beforeRouteUpdate(to, from, next) {
+        let projectIndex = null
+        for (let index = 0; index < this.projects.length; index++) {
+            const project = this.projects[index]
+            if (project.id === to.params.id) {
+                projectIndex = index
+            }
+        }
+        this.$store.commit('setProjectIndex', projectIndex)
+        const project = this.$store.getters.project
+        if (projectIndex === null) {
+            next({ name: 'notfound' })
+        } else if (from.name === 'analyze') {
+            next()
+        } else {
+            next({ name: 'analyze', params: { id: project.id }})
+        }
     },
-
-    created() {
+    
+    watch: {
+        '$store.state.projectLoading'() {
+            if (!this.$store.state.projectLoading) {
+                console.log(this.$route.params)
+                let projectIndex = null
+                for (let index = 0; index < this.projects.length; index++) {
+                    const project = this.projects[index]
+                    if (project.id === this.$route.params.id) {
+                        projectIndex = index
+                    }
+                }
+                this.$store.commit('setProjectIndex', projectIndex)
+                const project = this.$store.getters.project
+                projectIndex === null && this.$router.push({ name: 'notfound' })
+            }
+        }
     }
 }
 </script>
@@ -164,9 +204,20 @@ export default {
     margin-top: .5rem;
 }
 
+#project-select {
+    /* height: 100%;
+    padding-bottom: .75rem; */
+}
+
 #project-select button {
     background-color: #f8f9fa !important;
     border-color: #f8f9fa !important;
     border: 1px solid #e2e6ea4d !important;
+}
+</style>
+
+<style scoped>
+.nav-link {
+    color: #999;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-<div>
+<div class="h-100">
     <nav class="navbar navbar-expand-lg navbar-light" id="navbar-main">
         <div class="container">
             <router-link to="/" class="navbar-brand text-main font-weight-bold">WGCNA</router-link>
@@ -9,12 +9,12 @@
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <div class="navbar-nav">
-                    <router-link to="/analyze" class="nav-item nav-link" active-class="active" tag="a">
-                        <!-- <span class="fa fa-home"></span> -->
+                    <router-link :to="`/analyze/${analyzeTo}`" class="nav-item nav-link" 
+                            active-class="active" tag="a" v-if="$store.getters.project">
                         Analyze
                     </router-link>
+                    <span class="nav-item nav-link text-muted" v-else>Analyze</span>
                     <router-link to="/integrate" class="nav-item nav-link" active-class="active" tag="a">
-                        <!-- <span class="fa fa-compress"></span> -->
                         Integrate
                     </router-link>
                 </div>
@@ -26,8 +26,8 @@
         </div>
     </nav>
 
-    <div class="container" id="app">
-        <router-view></router-view>
+    <div class="container h-100" id="app">
+        <router-view class="h-100"></router-view>
     </div>
 
     <new-project-modal></new-project-modal>
@@ -59,6 +59,13 @@ export default {
         this.$store.dispatch('getProjects').then(data => {
             if (data.length > 0) this.$store.commit('setProjectIndex', 0)
         })
+    },
+
+    computed: {
+        analyzeTo() {
+            const project = this.$store.getters.project
+            return project === null ? '' : project.id
+        }
     }
 }
 </script>
@@ -70,6 +77,11 @@ export default {
 html {
     overflow-y: scroll;
     font-size: 14px;
+    height: 100%;
+}
+
+body {
+    height: 100%;
 }
 
 input[type=text] {

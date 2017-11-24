@@ -4,6 +4,7 @@ import Home from 'views/Home'
 import Analyze from 'views/Analyze'
 import Preprocess from 'views/Preprocess'
 import Integrate from 'views/Integrate'
+import NotFound from 'views/NotFound'
 
 Vue.use(Router)
 
@@ -22,12 +23,17 @@ export default new Router({
         },
         {
             name: 'analyze',
-            path: '/analyze',
+            path: '/analyze/:id',
             component: Analyze
         },
         {
             path: '/integrate',
             component: Integrate
+        },
+        {
+            name: 'notfound',
+            path: '/notfound',
+            component: NotFound
         }
 	]
 })
