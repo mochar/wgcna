@@ -1,7 +1,7 @@
 <template>
 <svg :width="width_" :height="height_">
     <g :transform="`translate(${margin.left}, ${margin.top})`">
-        <text text-anchor="middle" :transform="`translate(-45,${(height - colorsHeight) /2})rotate(-90)`" style="font-size: 1rem">
+        <text text-anchor="middle" :transform="`translate(-55,${(height - colorsHeight) /2})rotate(-90)`" style="font-size: 1rem">
             Height
         </text>
         <g id="tree-axis" class="axis axis--y"></g>
@@ -133,12 +133,15 @@ export default {
                 .domain(this.clusterData.ordered)
                 .range([0, this.width-25])
 
+            const heightMin = d3.min(this.clusterData.height)
+            const heightMax = d3.max(this.clusterData.height)
             this.y
-                .domain([Math.max(d3.min(this.clusterData.height), 0), d3.max(this.clusterData.height)])
+                .domain([Math.max(heightMin - 0.1 * (heightMax - heightMin), 0), heightMax])
                 // .domain([0, d3.max(this.clusterData.height)])
                 .range([this.height - this.colorsHeight - this.colorsMargin, 0])
             
             this.axis.scale(this.y)
+            if (heightMin > 1000) this.axis.tickFormat(d3.formatPrefix('.0', 1e3))
             this.g.select('#tree-axis').call(this.axis)
 
             const labels = this.clusterData.labels

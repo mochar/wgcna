@@ -94,6 +94,10 @@ svg {
     color: #222 !important;
 }
 
+.badge-pill {
+    border-radius: 10rem !important;
+}
+
 .btn {
     cursor: pointer;
     position: relative;

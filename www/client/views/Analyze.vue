@@ -48,7 +48,7 @@
                         @click.prevent="selectProject(project, i)">
                         <div class="d-flex justify-content-between align-items-center">
                             <span>{{ project.name }}</span>
-                            <span class="badge badge-pill badge-light">{{ project.omic }}</span>
+                            <span class="badge badge-pill badge-light bg-main">{{ project.omic }}</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <small class="text-secondary">{{ project.description}}</small>
@@ -197,9 +197,9 @@ export default {
 }
 
 .block-action-div {
-    border-top: 1px dashed #ccc;
+    /* border-top: 1px dashed #ccc; */
     padding-top: 1rem;
-    margin-top: .5rem;
+    /* margin-top: .5rem; */
 }
 
 #project-select {
