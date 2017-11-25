@@ -1,7 +1,7 @@
 <template>
 <svg :width="width_" :height="height_">
     <g :transform="`translate(${margin.left}, ${margin.top})`">
-        <text text-anchor="middle" :transform="`translate(-45,${height/2})rotate(-90)`" style="font-size: 1rem">
+        <text text-anchor="middle" :transform="`translate(-45,${(height - colorsHeight) /2})rotate(-90)`" style="font-size: 1rem">
             Height
         </text>
         <g id="tree-axis" class="axis axis--y"></g>

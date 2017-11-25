@@ -46,8 +46,13 @@
                     <!-- <span class="m-3">Projects</span> -->
                     <a class="dropdown-item" href="#" v-for="(project, i) in projects" :key="project.id"
                         @click.prevent="selectProject(project, i)">
-                        <span>{{ project.name }}</span><br>
-                        <small class="text-muted">{{ project.description}}</small>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>{{ project.name }}</span>
+                            <span class="badge badge-pill badge-light">{{ project.omic }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-secondary">{{ project.description}}</small>
+                        </div>
                     </a>
                 </div>
                 <button class="btn btn-light" style="margin-left: -1px" data-toggle="modal" data-target="#edit-modal">
@@ -198,14 +203,27 @@ export default {
 }
 
 #project-select {
-    /* height: 100%;
-    padding-bottom: .75rem; */
+    box-shadow: 0 1px 1px 0 rgba(0,0,0,0.12),0 0 0 1px rgba(0,0,0,0.08);
+    transition: box-shadow 150ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+#project-select:hover {
+    box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),0 0 0 1px rgba(0,0,0,0.08);
 }
 
 #project-select button {
     background-color: #f8f9fa !important;
-    border-color: #f8f9fa !important;
-    border: 1px solid #e2e6ea4d !important;
+    /* border-color: #f8f9fa !important; */
+    /* border: 1px solid #e2e6ea4d !important; */
+    border: 0;
+}
+#project-select button:focus {
+    z-index: initial;
+    box-shadow: initial;
+    -webkit-box-shadow: initial;
+}
+
+#project-select .dropdown-item:hover {
+    background-color: #f8f9fa !important;
 }
 </style>
 
