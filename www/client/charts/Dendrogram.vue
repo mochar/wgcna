@@ -16,6 +16,7 @@
 
 <script>
 import * as d3 from 'd3'
+import { schemeAccent } from 'd3-scale-chromatic'
 
 export default {
     data() {
@@ -32,7 +33,7 @@ export default {
             cutline: null,
             cutlineset:null,
             cutHeight: null,
-            x: d3.scalePoint().range([0, this.width]).padding(.4),
+            x: d3.scaleBand().range([0, this.width]).paddingOuter(.5),
             y: d3.scaleLinear().range([this.height, 0]),
             axis: d3.axisLeft(this.y),
             margin: {top: 10, right: 5, bottom: 5, left: 100},
@@ -110,8 +111,8 @@ export default {
         buildPositions() {
             const labels = this.clusterData.labels
             return this.clusterData.merge.reduce((prev, cur, i) => {
-                const x1 = cur[0] < 0 ? this.x(labels[-cur[0]-1]) : prev[cur[0]-1]
-                const x2 = cur[1] < 0 ? this.x(labels[-cur[1]-1]) : prev[cur[1]-1]
+                const x1 = cur[0] < 0 ? this.toX(cur[0]) : prev[cur[0]-1]
+                const x2 = cur[1] < 0 ? this.toX(cur[1]) : prev[cur[1]-1]
                 prev.push(x1 + ((x2 - x1) / 2))
                 return prev
             }, [])
@@ -124,6 +125,9 @@ export default {
             this.height_ = this.ratio * this.width_ 
             this.height_ += this.colorsHeight  + this.colorsMargin
             this.height = this.height_ - this.margin.top - this.margin.bottom
+        },
+        toX(d) {
+            return this.x(this.clusterData.labels[-d - 1]) + (this.x.bandwidth() / 2)
         },
         updatePlot() {
             this.x
@@ -146,8 +150,8 @@ export default {
             group.exit().remove()
             const groupEnter = group.enter().append('g').classed('tree-line', true)
             groupEnter.append('line')
-                .attr('x1', d => d[0] < 0 ? this.x(labels[-d[0]-1]) : positions[d[0]-1])
-                .attr('x2', d => d[1] < 0 ? this.x(labels[-d[1]-1]) : positions[d[1]-1])
+                .attr('x1', d => d[0] < 0 ? this.toX(d[0]) : positions[d[0]-1])
+                .attr('x2', d => d[1] < 0 ? this.toX(d[1]) : positions[d[1]-1])
                 .attr('y1', (d, i) => this.y(this.clusterData.height[i]))
                 .attr('y2', (d, i) => this.y(this.clusterData.height[i]))
                 .attr('stroke', (d, i) => {
@@ -161,8 +165,8 @@ export default {
                 })
             // Left
             groupEnter.append('line')
-                .attr('x1', d => d[0] < 0 ? this.x(labels[-d[0]-1]) : positions[d[0]-1])
-                .attr('x2', d => d[0] < 0 ? this.x(labels[-d[0]-1]) : positions[d[0]-1])
+                .attr('x1', d => d[0] < 0 ? this.toX(d[0]) : positions[d[0]-1])
+                .attr('x2', d => d[0] < 0 ? this.toX(d[0]) : positions[d[0]-1])
                 .attr('y1', (d, i) => this.y(this.clusterData.height[i]))
                 .attr('y2', (d, i) => {
                     if (d[0] < 0) return this.y(this.clusterData.height[i])+5
@@ -177,7 +181,7 @@ export default {
             if (this.labels) {
                 groupEnter.append('text')
                     .attr('transform', (d, i) => {
-                        const x = d[0] < 0 ? this.x(labels[-d[0]-1]) : positions[d[0]-1]
+                        const x = d[0] < 0 ? this.toX(d[0]) : positions[d[0]-1]
                         const y = this.y(this.clusterData.height[i])
                         return `translate(${x-3},${y+10})rotate(90)`
                     })
@@ -188,8 +192,8 @@ export default {
             }
             // Right
             groupEnter.append('line') 
-                .attr('x1', d => d[1] < 0 ? this.x(labels[-d[1]-1]) : positions[d[1]-1])
-                .attr('x2', d => d[1] < 0 ? this.x(labels[-d[1]-1]) : positions[d[1]-1])
+                .attr('x1', d => d[1] < 0 ? this.toX(d[1]) : positions[d[1]-1])
+                .attr('x2', d => d[1] < 0 ? this.toX(d[1]) : positions[d[1]-1])
                 .attr('y1', (d, i) => this.y(this.clusterData.height[i]))
                 .attr('y2', (d, i) => {
                     if (d[1] < 0) return this.y(this.clusterData.height[i])+5
@@ -204,7 +208,7 @@ export default {
             if (this.labels) {
                 groupEnter.append('text')
                     .attr('transform', (d, i) => {
-                        const x = d[1] < 0 ? this.x(labels[-d[1]-1]) : positions[d[1]-1]
+                        const x = d[1] < 0 ? this.toX(d[1]) : positions[d[1]-1]
                         const y = this.y(this.clusterData.height[i])
                         return `translate(${x-3},${y+10})rotate(90)`
                     })
@@ -217,14 +221,10 @@ export default {
             if (this.colors) this.updateColors()
         },
         updateColors() {
-            const xCluster = d3.scaleBand()
-                .domain(this.x.domain())
-                .range(this.x.range())
-                .padding(this.x.padding())
             const yCluster = d3.scaleBand()
                 .domain(Object.keys(this.colors))
                 .range([this.height, this.height - this.colorsHeight])
-            
+
             const axis = d3.axisLeft(yCluster)
             this.g.select('#colors-axis').call(axis)
 
@@ -241,9 +241,10 @@ export default {
             rect.exit().remove()
             const rectEnter = rect.enter().append('rect')
                 .attr('fill', d => d)
-                .attr('x', (d, i) => xCluster(this.clusterData.ordered[i]))
+                .attr('stroke', d => d)
+                .attr('x', (d, i) => this.x(this.clusterData.ordered[i]))
                 .attr('y', 0)
-                .attr('width', xCluster.bandwidth() + xCluster.padding() * 2)
+                .attr('width', this.x.bandwidth() + this.x.padding() * 2)
                 .attr('height', this.colorHeight)
         }
     },
