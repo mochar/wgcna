@@ -13,16 +13,16 @@
                 v-model="searchTerm" />
             <div class="d-flex flex-column p-1">
                 <div v-for="(item, i) in paginatedList" :key="item" class="d-flex align-items-center">
-                    <div class="reformat-item w-100" @click="$emit('selected', ((page-1) * items) + i)">
-                        <span class="fa fa-trash fa-fw"
-                            :class="removedIndices.includes(((page-1) * items) + i) ? 'text-danger' : 'text-light'">
-                        </span>
+                    <div class="reformat-item w-100">
                         {{ item }}
                     </div>
-                    <!-- <select class="custom-select form-control-sm" @click.stop>
-                        <option value="categorical" selected>Categorical</option>
-                        <option value="continous">Continous</option>
-                    </select> -->
+                    <button class="btn btn-link pb-0 pt-0" @click="$emit('selected', toAbsoluteIndex(i))">
+                        <span class="fa fa-trash" :class="trashClass(i)"></span>
+                    </button>
+                    <button class="btn btn-link pb-0 pt-0 pl-0 text-primary" @click="setContinues(i)" v-if="trait">
+                        <strong v-if="isContinues(i)">C</strong>
+                        <strong v-else>N</strong>
+                    </button>
                 </div>
             </div>
             <div style="border-top: 1px solid #eee" class="w-100">
@@ -46,7 +46,7 @@ export default {
         }
     },
 
-    props: ['list', 'removedIndices', 'name'],
+    props: ['list', 'removedIndices', 'continuesIndices', 'name', 'trait'],
 
     methods: {
         prevPage() {
@@ -54,6 +54,19 @@ export default {
         },
         nextPage() {
             if (this.canNext) this.page = this.page + 1
+        },
+        toAbsoluteIndex(i) {
+            return ((this.page - 1) * this.items) + i
+        },
+        trashClass(i) {
+            const isRemoved = this.removedIndices.includes(this.toAbsoluteIndex(i))
+            return isRemoved ? 'text-danger' : 'text-secondary'
+        },
+        isContinues(i) {
+            return this.continuesIndices.includes(this.toAbsoluteIndex(i))
+        },
+        setContinues(i) {
+            this.$emit('traitSelected', this.toAbsoluteIndex(i))
         }
     },
 

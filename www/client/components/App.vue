@@ -26,8 +26,8 @@
         </div>
     </nav>
 
-    <div class="container h-100" id="app">
-        <router-view class="h-100"></router-view>
+    <div class="container" id="app">
+        <router-view></router-view>
     </div>
 
     <new-project-modal></new-project-modal>
@@ -77,11 +77,6 @@ export default {
 html {
     overflow-y: scroll;
     font-size: 14px;
-    height: 100%;
-}
-
-body {
-    height: 100%;
 }
 
 input[type=text] {
@@ -181,13 +176,20 @@ a:active, .btn-link:active {
     color: #111;
     background-color: #f8f8f8;
     border-color: #dae0e54d;
-    background: -moz-linear-gradient(hsl(0, 0, 100%), hsl(0, 0, 30%));  */
-    background: linear-gradient(hsl(0, 0%, 97%), hsl(0, 0%, 95%)); 
+    /* background: -moz-linear-gradient(hsl(0, 0, 100%), hsl(0, 0, 30%));
+    background: linear-gradient(hsl(0, 0%, 97%), hsl(0, 0%, 95%));  */
 }
 
 #navbar-main {
     border-bottom: 1px solid #eaeaea;
     border-top: 2px solid #01549b;
     background-color: #fcfcfc66;
+}
+
+.block-title {
+    color: #01549b;
+    letter-spacing: 1px;
+    font-weight: bold;
+    margin-bottom: 1rem;
 }
 </style>

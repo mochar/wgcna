@@ -200,6 +200,9 @@ def trait(project_id):
         removed_col_names = [x for x in request.form['col'].split(',') if x != '']
         if request.form['transpose'] == 'true':
             df = df.T
+        continues_indices = [int(x) for x in request.form['continues'].split(',')]
+        traits = {x: 'C' if i in continues_indices else 'N' for i, x in enumerate(df.columns)}
+        redis.hmset('traits:{}'.format(project_id), traits)
         df.drop(removed_col_names, axis=1, inplace=True)
         df.drop(removed_row_names, axis=0, inplace=True)
         df.to_csv(g.trait_path)

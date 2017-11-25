@@ -46,6 +46,7 @@
 
             :url="reformatUrl"
             :cols="reformatCols"
+            :trait="isTrait"
 
             @loaded="go = false"
             @done="next">
@@ -116,13 +117,14 @@ export default {
             steps.push('Outliers')
             return steps
         },
+        isTrait() {
+            return this.project.trait && this.step > 2
+        },
         reformatUrl() {
-            if (!this.project.trait) return 'expression'
-            return this.step < 3 ? 'expression' : 'trait'
+            return this.isTrait ? 'trait' : 'expression'
         },
         reformatCols() {
-            if (!this.project.trait) return 'Genes'
-            return this.step < 3 ? 'Genes' : 'Traits'
+            return this.isTrait ? 'Traits' : 'Genes'
         }
     },
     

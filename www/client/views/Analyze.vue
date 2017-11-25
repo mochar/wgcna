@@ -191,13 +191,6 @@ export default {
     margin-bottom: 1rem;
 }
 
-.block-title {
-    color: #01549b;
-    letter-spacing: 1px;
-    font-weight: bold;
-    margin-bottom: 1rem;
-}
-
 .block-action-div {
     border-top: 1px dashed #ccc;
     padding-top: 1rem;

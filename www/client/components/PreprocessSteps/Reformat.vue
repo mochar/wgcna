@@ -6,15 +6,16 @@
             name="Samples"
             :removedIndices="removedRowIndices"
             :list="rowNames"
-            @selected="i => selectRemovedIndex('row', i)"
-            @removed="indices => removedRowIndices = indices">
+            @selected="i => selectRemovedIndex('row', i)">
         </reformat-popover>
         <reformat-popover 
             :name="cols"
+            :trait="trait"
             :removedIndices="removedColIndices"
+            :continuesIndices="continuesIndices"
             :list="colNames"
             @selected="i => selectRemovedIndex('col', i)"
-            @removed="indices => removedColIndices = indices">
+            @traitSelected="i => selectContinuesIndex(i)">
         </reformat-popover>
         <button class="btn btn-light" @click="transpose = !transpose">
             <span class="fa fa-retweet fa-lg"></span>
@@ -35,11 +36,12 @@ export default {
             rowNames: null,
             colNames: null,
             removedRowIndices: [],
-            removedColIndices: []
+            removedColIndices: [],
+            continuesIndices: []
         }
     },
 
-    props: ['projectId', 'go', 'url', 'cols'],
+    props: ['projectId', 'go', 'url', 'cols', 'trait'],
 
     components: {
         ReformatPopover
@@ -50,6 +52,8 @@ export default {
             const formData = new FormData()
             formData.append('row', this.removedRowIndices.map(i => this.rowNames[i]))
             formData.append('col', this.removedColIndices.map(i => this.colNames[i]))
+            if (this.trait)
+                formData.append('continues', this.continuesIndices)
             formData.append('transpose', this.transpose)
             $.ajax({
                 url: `${ROOTURL}/projects/${this.projectId}/${this.url}`,
@@ -85,6 +89,11 @@ export default {
                 if (i === -1) this.removedColIndices.push(index)
                 else this.removedColIndices.splice(i, 1)
             }
+        },
+        selectContinuesIndex(index) {
+            const i = this.continuesIndices.indexOf(index)
+            if (i === -1) this.continuesIndices.push(index)
+            else this.continuesIndices.splice(i, 1)
         }
     },
 
