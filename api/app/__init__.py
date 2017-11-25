@@ -69,9 +69,9 @@ def project_from_id(project_id):
 
 
 def user_projects():
-    user_id = session.get('id')
-    if user_id is None:
+    if 'id' not in session:
         return []
+    user_id = session['id']
     project_ids = redis.smembers('projects:{}'.format(user_id))
     pipe = redis.pipeline()
     for project_id in project_ids:
@@ -96,7 +96,7 @@ def create_project(user_id, name, description, omic, expression, trait=None):
     if trait is not None:
         trait.save(os.path.join(project_folder, 'trait.csv'))
     redis.sadd('projects:{}'.format(user_id), project_id)
-    redis.hset('project:{}'.format(project_id), project)
+    redis.hmset('project:{}'.format(project_id), project)
     return project
 
 
@@ -106,6 +106,7 @@ def delete_project(user_id, project_id):
         shutil.rmtree(project_folder)
     redis.srem('projects:{}'.format(user_id), project_id)
     redis.delete('project:{}'.format(project_id))
+    redis.delete('traits:{}'.format(project_id))
 
 
 @app.before_request
@@ -122,19 +123,20 @@ def setup_request_info():
         g.eigengene_path = os.path.join(g.project_folder, 'eigengenes.csv')
         g.pvalues_path = os.path.join(g.project_folder, 'pvalues.csv')
         g.trait_path = os.path.join(g.project_folder, 'trait.csv')
-    user_id = session.get('id')
-    if user_id is not None:
-        g.user_id = user_id
+    if 'id' in session:
+        g.user_id = session.get('id')
 
 
 def project_exists(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        session_id = session.get('id')
-        if session_id is None:
+        if 'id' not in session:
             abort(404)
+            return
+        session_id = session['id']
         if not redis.sismember('projects:{}'.format(session_id), g.project_id):
             abort(404)
+            return
         return f(*args, **kwargs)
     return decorated_function
 
@@ -151,9 +153,7 @@ def projects():
         omic = request.form.get('omic')
         if expression.filename == '' or name == '':
             return jsonify(error='Required fields not supplied.'), 403
-        user_id = session.get('id')
-        if user_id is None:
-            user_id = create_user()
+        user_id = session.get('id') if 'id' in session else create_user()
         project = create_project(user_id, name, description, omic, expression,
             trait=None if trait.filename == '' else trait)
         return jsonify({'project': project})
@@ -200,7 +200,7 @@ def trait(project_id):
         removed_col_names = [x for x in request.form['col'].split(',') if x != '']
         if request.form['transpose'] == 'true':
             df = df.T
-        continues_indices = [int(x) for x in request.form['continues'].split(',')]
+        continues_indices = [int(x) for x in request.form['continues'].split(',') if x != '']
         traits = {x: 'C' if i in continues_indices else 'N' for i, x in enumerate(df.columns)}
         redis.hmset('traits:{}'.format(project_id), traits)
         df.drop(removed_col_names, axis=1, inplace=True)
@@ -220,9 +220,14 @@ def goodsamplesgenes(project_id):
 @project_exists
 def cluster_samples(project_id):
     if request.method == 'GET':
+        project = project_from_id(project_id)
         # TODO save to file and use as cache?
-        cluster_data = rscripts.hclust(g.expression_path)
-        return jsonify(cluster_data)
+        response = {'clusterData': rscripts.hclust(g.expression_path)}
+        if project['trait']:
+            colors_df = pd.read_csv(g.trait_path, index_col=0)
+            response['colors'] = colors_df.to_dict(orient='list')
+            response['types'] = redis.hgetall('traits:{}'.format(project_id))
+        return jsonify(response)
     elif request.method == 'POST':
         outlier_samples = request.form.getlist('samples[]')
         df = pd.read_csv(g.expression_path, index_col=0)
