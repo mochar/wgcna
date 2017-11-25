@@ -1,11 +1,11 @@
 <template>
 <div>
-    <treshold 
+    <threshold 
         :project="project" 
         :update="shouldUpdate"
         v-if="project.step > 0" 
-        @done="tresholdDone">
-    </treshold>
+        @done="thresholdDone">
+    </threshold>
     <cluster 
         :project="project" 
         :update="shouldUpdate || project.step == 2"
@@ -17,19 +17,19 @@
 </template>
 
 <script>
-import Treshold from 'components/Treshold'
+import Threshold from 'components/Threshold'
 import Cluster from 'components/Cluster'
 
 export default {
     props: ['project', 'shouldUpdate'],
 
     components: {
-        Treshold,
+        Threshold,
         Cluster
     },
 
     methods: {
-        tresholdDone(power) {
+        thresholdDone(power) {
             this.$store.commit('editProject', {step: 2, power})
         },
         clusterDone(minModuleSize) {
