@@ -15,6 +15,9 @@
 
 <script>
 import Dendrogram from 'charts/Dendrogram'
+import { min, max } from 'd3-array'
+import { scaleSequential, scaleOrdinal } from 'd3-scale'
+import { interpolateReds, schemeReds } from 'd3-scale-chromatic'
 
 export default {
     data() {
@@ -25,7 +28,8 @@ export default {
             cutting: false,
             clusterData: null,
             colors: null,
-            outlierSamples: []
+            outlierSamples: [],
+            twoColorPal: schemeReds[3].filter((x, i) => i !== 1)
         }
     },
 
@@ -38,8 +42,26 @@ export default {
     methods: {
         getClusterData() {
             return $.get(`${ROOTURL}/projects/${this.projectId}/clustersamples`).then(data => {
-                this.clusterData = data
-                // this.colors = {Kek: this.clusterData.ordered.map(d => Math.random() > 0.5 ? 'red' : 'white')}
+                this.clusterData = data.clusterData
+                if (data.colors) {
+                    for (let x in data.colors) {
+                        let colors = [], scale
+                        const uniqColors = [...new Set(data.colors[x])]
+                        if (data.types[x] === 'N') {
+                            let palette = schemeReds[uniqColors.length]
+                            if (uniqColors.length === 2) palette = this.twoColorPal
+                            scale = scaleOrdinal(palette).domain(uniqColors)
+                        } else {
+                            scale = scaleSequential(interpolateReds).domain([min(uniqColors), max(uniqColors)])
+                        }
+
+                        data.clusterData.order.forEach((index, i) => {
+                            colors[index] = scale(data.colors[x][i])
+                        })
+                        data.colors[x] = colors
+                    }
+                    this.colors = data.colors
+                }
             })
         },
         done() {
