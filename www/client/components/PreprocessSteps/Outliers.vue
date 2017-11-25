@@ -56,7 +56,7 @@ export default {
                         }
 
                         data.clusterData.order.forEach((index, i) => {
-                            colors[index] = scale(data.colors[x][i])
+                            colors[i] = scale(data.colors[x][index])
                         })
                         data.colors[x] = colors
                     }
