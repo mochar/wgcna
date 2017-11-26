@@ -34,30 +34,32 @@
         </div>
         <div class="col-6">
             <div class="btn-group btn-block" id="project-select">
-                <button class="btn btn-light btn-block dropdown-toggle text-left d-flex justify-content-between align-items-center" 
-                        style="margin-right: -1px" data-toggle="dropdown">
-                    <span v-if="!$store.state.projectLoading && project">
-                        {{ project.name }}
-                        <span v-show="project.description" class="text-muted">- {{ project.description }}</span>
-                    </span>
-                    <span class="fa fa-cog fa-spin" v-else></span>
-                </button>
-                <div class="dropdown-menu">
-                    <!-- <span class="m-3">Projects</span> -->
-                    <a class="dropdown-item" href="#" v-for="(project, i) in projects" :key="project.id"
-                        @click.prevent="selectProject(project, i)">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span>{{ project.name }}</span>
-                            <span class="badge badge-pill badge-light bg-main">{{ project.omic }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-secondary">{{ project.description}}</small>
-                        </div>
-                    </a>
+                <div class="w-100">
+                    <button class="btn btn-light btn-block dropdown-toggle text-left d-flex justify-content-between align-items-center" 
+                            style="margin-right: -1px" data-toggle="dropdown">
+                        <span v-if="!$store.state.projectLoading && project">
+                            {{ project.name }}
+                            <span v-show="project.description" class="text-muted">- {{ project.description }}</span>
+                        </span>
+                        <span class="fa fa-cog fa-spin" v-else></span>
+                    </button>
+                    <div class="dropdown-menu w-100">
+                        <!-- <span class="m-3">Projects</span> -->
+                        <a class="dropdown-item" href="#" v-for="(project, i) in projects" :key="project.id"
+                            @click.prevent="selectProject(project, i)">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>{{ project.name }}</span>
+                                <span class="badge badge-pill badge-light bg-main">{{ project.omic }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-secondary">{{ project.description}}</small>
+                            </div>
+                        </a>
+                    </div>
                 </div>
-                <button class="btn btn-light" style="margin-left: -1px" data-toggle="modal" data-target="#edit-modal">
+                <router-link tag="button" class="btn btn-light" style="margin-left: -1px" :to="{ name: 'project', params: { id: $route.params.id }}">
                     <span class="fa fa-edit"></span>
-                </button>
+                </router-link>
             </div>
         </div>
     </div>
@@ -71,14 +73,7 @@
             </component>
         </keep-alive>
     </div>
-    <div class="w-100 h-100 d-flex flex-column justify-content-center align-items-center" style="color: rgba(0,0,0,.3)" v-else>
-        <div>
-            <span class="fa fa-circle fa-lg"></span>
-            <span class="fa fa-circle fa-lg ml-2 mr-2"></span>
-            <span class="fa fa-circle fa-lg"></span>
-        </div>
-        <strong class="d-flex mt-2">Loading</strong>
-    </div>
+    <loading v-else></loading>
 
     <!-- <export-modal :name="name" :step="step" :modules="modules" v-if="step > 3"></export-modal> -->
 </div>
@@ -90,6 +85,7 @@ import ExportModal from 'components/ExportModal'
 import ModuleCreationTab from 'components/AnalyzeTabs/ModuleCreationTab'
 import ModuleInspectionTab from 'components/AnalyzeTabs/ModuleInspectionTab'
 import ModuleSignificanceTab from 'components/AnalyzeTabs/ModuleSignificanceTab'
+import Loading from 'components/Loading'
 
 export default {
     data() {
@@ -107,7 +103,8 @@ export default {
         ExportModal,
         ModuleCreationTab,
         ModuleInspectionTab,
-        ModuleSignificanceTab
+        ModuleSignificanceTab,
+        Loading
     },
 
     methods: {
@@ -145,13 +142,7 @@ export default {
     },
 
     beforeRouteUpdate(to, from, next) {
-        let projectIndex = null
-        for (let index = 0; index < this.projects.length; index++) {
-            const project = this.projects[index]
-            if (project.id === to.params.id) {
-                projectIndex = index
-            }
-        }
+        const projectIndex = this.$helpers.projectFromId(to.params.id, this.projects)
         this.$store.commit('setProjectIndex', projectIndex)
         const project = this.$store.getters.project
         if (projectIndex === null) {
@@ -166,14 +157,7 @@ export default {
     watch: {
         '$store.state.projectLoading'() {
             if (!this.$store.state.projectLoading) {
-                console.log(this.$route.params)
-                let projectIndex = null
-                for (let index = 0; index < this.projects.length; index++) {
-                    const project = this.projects[index]
-                    if (project.id === this.$route.params.id) {
-                        projectIndex = index
-                    }
-                }
+                const projectIndex = this.$helpers.projectFromId(this.$route.params.id, this.projects)
                 this.$store.commit('setProjectIndex', projectIndex)
                 const project = this.$store.getters.project
                 projectIndex === null && this.$router.push({ name: 'notfound' })

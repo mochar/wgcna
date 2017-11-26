@@ -5,6 +5,7 @@ import Analyze from 'views/Analyze'
 import Preprocess from 'views/Preprocess'
 import Integrate from 'views/Integrate'
 import NotFound from 'views/NotFound'
+import Project from 'views/Project'
 
 Vue.use(Router)
 
@@ -25,6 +26,11 @@ export default new Router({
             name: 'analyze',
             path: '/analyze/:id',
             component: Analyze
+        },
+        {
+            name: 'project',
+            path: '/project/:id',
+            component: Project
         },
         {
             path: '/integrate',

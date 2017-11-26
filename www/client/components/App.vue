@@ -31,7 +31,6 @@
     </div>
 
     <new-project-modal></new-project-modal>
-    <edit-project-modal v-if="$store.getters.project"></edit-project-modal>
 </div>
 </template>
 
@@ -39,7 +38,6 @@
 import 'bootstrap'
 import Vue from 'vue'
 import NewProjectModal from 'components/NewProjectModal'
-import EditProjectModal from 'components/EditProjectModal'
 
 Vue.filter('round', function(value, decimals) {
   if(!value) value = 0
@@ -51,8 +49,7 @@ $.ajaxSetup({ xhrFields: { withCredentials: true } })
 
 export default {
     components: {
-        NewProjectModal,
-        EditProjectModal
+        NewProjectModal
     },
 
     created() {
