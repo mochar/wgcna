@@ -89,7 +89,7 @@ import ModuleCreationTab from 'components/AnalyzeTabs/ModuleCreationTab'
 import ModuleInspectionTab from 'components/AnalyzeTabs/ModuleInspectionTab'
 import ModuleSignificanceTab from 'components/AnalyzeTabs/ModuleSignificanceTab'
 import Loading from 'components/Loading'
-import { mapState } from 'vuex'
+import { mapState, mapMutations, mapGetters } from 'vuex'
 
 export default {
     data() {
@@ -112,6 +112,7 @@ export default {
     },
 
     methods: {
+        ...mapMutations(['setProjectById']),
         generateReport() {
             // const url = `${ROOTURL}/report/${this.name}`
             // window.open(url)
@@ -132,6 +133,7 @@ export default {
 
     computed: {
         ...mapState(['projectIndex', 'projects']),
+        ...mapGetters(['projectIds']),
         project() {
             const project = this.$store.getters.project
             this.shouldUpdate = !this.previousProject || this.previousProject.id != project.id
@@ -144,25 +146,17 @@ export default {
     },
 
     beforeRouteUpdate(to, from, next) {
-        const projectIndex = this.$helpers.projectFromId(to.params.id, this.projects)
-        this.$store.commit('setProjectIndex', projectIndex)
-        const project = this.$store.getters.project
-        if (projectIndex === null) {
-            next({ name: 'notfound' })
-        } else if (from.name === 'analyze') {
-            next()
-        } else {
-            next({ name: 'analyze', params: { id: project.id }})
-        }
+        if (!this.projectIds.includes(to.params.id)) next({ name: 'notfound' })
+        this.setProjectById(to.params.id)
+        if (from.name === 'analyze') next()
+        else next({ name: 'analyze', params: { id: this.projectIndex }})
     },
     
     watch: {
         '$store.state.projectLoading'() {
             if (!this.$store.state.projectLoading) {
-                const projectIndex = this.$helpers.projectFromId(this.$route.params.id, this.projects)
-                this.$store.commit('setProjectIndex', projectIndex)
-                const project = this.$store.getters.project
-                projectIndex === null && this.$router.push({ name: 'notfound' })
+                if (!this.projectIds.includes(to.params.id)) next({ name: 'notfound' })
+                this.setProjectById(this.$route.params.id)
             }
         }
     }

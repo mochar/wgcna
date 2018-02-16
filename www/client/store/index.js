@@ -5,7 +5,7 @@ import router from '../router'
 Vue.use(Vuex)
 
 const state = {
-    projects: [], // when null, app not initialized yet
+    projects: [],
     projectIndex: null,
     projectLoading: true
 }
@@ -13,6 +13,9 @@ const state = {
 const getters = {
     project: state => {
         return state.projectIndex === null ? null : state.projects[state.projectIndex]
+    },
+    projectIds: state => {
+        return state.projects.map(project => project.id)
     }
 }
 
@@ -22,6 +25,15 @@ const mutations = {
     },
     setProjectIndex(state, index) {
         state.projectIndex = index
+    },
+    setProjectById(state, id) {
+        for (let index = 0; index < state.projects.length; index++) {
+            const project = state.projects[index]
+            if (project.id === id) {
+                state.projectIndex = index
+                break
+            }
+        }
     },
     editProject(state, edits) {
         Vue.set(state.projects, state.projectIndex, 

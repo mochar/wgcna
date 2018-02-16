@@ -15,16 +15,6 @@ let helpers = {
     },
     downloadSvg: function(svgEl, filename) {
         svgDownload(svgEl, filename)
-    },
-    projectFromId(projectId, projects) {
-        let projectIndex = null
-        for (let index = 0; index < projects.length; index++) {
-            const project = projects[index]
-            if (project.id === projectId) {
-                projectIndex = index
-            }
-        }
-        return projectIndex
     }
 }
 
