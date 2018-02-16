@@ -14,10 +14,10 @@
                 </button>
                 <div class="dropdown-menu dropdown-menu-right">
                     <h6 class="dropdown-header">Download plot</h6>
-                    <a class="dropdown-item" href="#" @click.prevent="downloadPlot(0)">
+                    <a class="dropdown-item" href="#" @click.prevent="downloadPlot(0, 'scale_independence')">
                         Scale independence
                     </a>
-                    <a class="dropdown-item" href="#" @click.prevent="downloadPlot(1)">
+                    <a class="dropdown-item" href="#" @click.prevent="downloadPlot(1, 'mean_connectivity')">
                         Mean connectivity
                     </a>
                 </div>
@@ -126,9 +126,9 @@ export default {
                 this.loading = false
             })
         },
-        downloadPlot(svgIndex) {
+        downloadPlot(svgIndex, filename) {
             const svgEl = $(this.$el).find('svg')[svgIndex]
-            this.$helpers.downloadSvg(svgEl, 'scale_independence.svg')
+            this.$helpers.downloadSvg(svgEl, filename)
         }
     },
 

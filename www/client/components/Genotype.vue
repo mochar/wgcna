@@ -191,7 +191,7 @@ export default {
         },
         downloadPlot() {
             const svgEl = $(this.$el).find('svg')[0]
-            this.$helpers.downloadSvg(svgEl, 'significance.svg')
+            this.$helpers.downloadSvg(svgEl, 'significance')
         }
     },
 

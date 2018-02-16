@@ -79,7 +79,7 @@ export default {
         },
         downloadPlot() {
             const svgEl = $(this.$el).find('svg')[0]
-            this.$helpers.downloadSvg(svgEl, 'sample_clusters.svg')
+            this.$helpers.downloadSvg(svgEl, 'sample_clusters')
         },
         del() {
             $.ajax({

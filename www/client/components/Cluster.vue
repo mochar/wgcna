@@ -104,7 +104,7 @@ export default {
         },
         downloadPlot() {
             const svgEl = $(this.$el).find('svg')[0]
-            this.$helpers.downloadSvg(svgEl, 'gene_clusters.svg')
+            this.$helpers.downloadSvg(svgEl, 'gene_clusters')
         }
     },
 
