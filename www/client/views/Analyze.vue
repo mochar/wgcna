@@ -89,6 +89,7 @@ import ModuleCreationTab from 'components/AnalyzeTabs/ModuleCreationTab'
 import ModuleInspectionTab from 'components/AnalyzeTabs/ModuleInspectionTab'
 import ModuleSignificanceTab from 'components/AnalyzeTabs/ModuleSignificanceTab'
 import Loading from 'components/Loading'
+import { mapState } from 'vuex'
 
 export default {
     data() {
@@ -130,9 +131,7 @@ export default {
     },
 
     computed: {
-        projects() {
-            return this.$store.state.projects
-        },
+        ...mapState(['projectIndex', 'projects']),
         project() {
             const project = this.$store.getters.project
             this.shouldUpdate = !this.previousProject || this.previousProject.id != project.id

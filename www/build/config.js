@@ -8,7 +8,7 @@ module.exports = {
   vendor: Object.keys(pkg.dependencies),
   babel: {
     babelrc: false,
-    presets: ['vue-app'],
+    presets: ['vue-app']
   },
   postcss: [
     // add prefix via postcss since it's faster
