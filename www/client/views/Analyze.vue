@@ -38,7 +38,8 @@
                     <button class="btn btn-light btn-block dropdown-toggle text-left d-flex justify-content-between align-items-center" 
                             style="margin-right: -1px" data-toggle="dropdown">
                         <span v-if="!$store.state.projectLoading && project">
-                            {{ project.name }}
+                            <span class="fa fa-circle fa-fw" :class="`text-${project.omic}`"></span>
+                            <span>{{ project.name }}</span>
                             <span v-show="project.description" class="text-muted">- {{ project.description }}</span>
                         </span>
                         <span class="fa fa-cog fa-spin" v-else></span>
@@ -49,7 +50,9 @@
                             @click.prevent="selectProject(project, i)">
                             <div class="d-flex justify-content-between align-items-center">
                                 <span>{{ project.name }}</span>
-                                <span class="badge badge-pill badge-light bg-main">{{ project.omic }}</span>
+                                <span class="badge badge-pill badge-light bg-main" :class="`bg-${project.omic}`">
+                                    {{ project.omic }}
+                                </span>
                             </div>
                             <div class="d-flex justify-content-between align-items-center">
                                 <small class="text-secondary">{{ project.description}}</small>

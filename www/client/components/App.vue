@@ -173,6 +173,26 @@ a:active, .btn-link:active {
     color: #5a5a5a !important;
 }
 
+
+.bg-lipidomics {
+    background-color: #fbc93d !important;
+}
+.text-lipidomics {
+    color: #fbc93d !important;
+}
+.bg-metabolomics {
+    background-color: #6cc0e5;
+}
+.text-metabolomics {
+    color: #6cc0e5;
+}
+.bg-transcriptomics {
+    background-color: #fb4f4f;
+}
+.text-transcriptomics {
+    color: #fb4f4f;
+}
+
 #new-project-btn {
     color: #111;
     background-color: #f8f8f8;
