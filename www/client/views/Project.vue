@@ -57,6 +57,7 @@
 <script>
 import SampleTree from 'components/SampleTree'
 import Loading from 'components/Loading'
+import { mapState, mapMutations, mapGetters } from 'vuex'
 
 export default {
     data() {
@@ -71,11 +72,11 @@ export default {
     },
 
     methods: {
+        ...mapMutations(['setProjectById']),
         loadProject() {
-            const projectIndex = this.$helpers.projectFromId(this.$route.params.id, this.$store.state.projects)
-            this.$store.commit('setProjectIndex', projectIndex)
+            if (!this.projectIds.includes(this.$route.params.id)) next({ name: 'notfound' })
+            this.setProjectById(this.$route.params.id)
             this.project = this.$store.getters.project
-            projectIndex === null && this.$router.push({ name: 'notfound' })
         },
         downloadPlot() {
             const svgEl = $(this.$el).find('svg')[0]
@@ -92,13 +93,18 @@ export default {
         }
     },
 
+    computed: {
+        ...mapState(['projectIndex', 'projects', 'projectLoading']),
+        ...mapGetters(['projectIds']),
+    },
+
     created() {
-        if (!this.$store.state.projectLoading) this.loadProject()
+        if (!this.projectLoading) this.loadProject()
     },
 
     watch: {
-        '$store.state.projectLoading'() {
-            if (!this.$store.state.projectLoading) this.loadProject()
+        'projectLoading'() {
+            if (!this.projectLoading) this.loadProject()
         }
     }
 }
