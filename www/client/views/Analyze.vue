@@ -127,7 +127,6 @@ export default {
         selectProject(project, index) {
             this.tab = 'ModuleCreationTab'
             this.$router.push({ name: 'analyze', params: { id: project.id }})
-            // this.$store.commit('setProjectIndex', index)
         }
     },
 
@@ -151,11 +150,15 @@ export default {
         if (from.name === 'analyze') next()
         else next({ name: 'analyze', params: { id: this.projectIndex }})
     },
+
+    created() {
+        this.setProjectById(this.$store.state.route.params.id)
+    },
     
     watch: {
         '$store.state.projectLoading'() {
             if (!this.$store.state.projectLoading) {
-                if (!this.projectIds.includes(to.params.id)) next({ name: 'notfound' })
+                if (!this.projectIds.includes(this.$route.params.id)) next({ name: 'notfound' })
                 this.setProjectById(this.$route.params.id)
             }
         }

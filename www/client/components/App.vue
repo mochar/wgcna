@@ -10,7 +10,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <div class="navbar-nav">
                     <router-link :to="`/analyze/${analyzeTo}`" class="nav-item nav-link" 
-                            active-class="active" tag="a" v-if="$store.getters.project">
+                            active-class="active" tag="a" v-if="$store.state.projects.length > 0">
                         Analyze
                     </router-link>
                     <span class="nav-item nav-link text-muted" v-else>Analyze</span>
@@ -53,15 +53,12 @@ export default {
     },
 
     created() {
-        this.$store.dispatch('getProjects').then(data => {
-            if (data.length > 0) this.$store.commit('setProjectIndex', 0)
-        })
+        this.$store.dispatch('getProjects')
     },
 
     computed: {
         analyzeTo() {
-            const project = this.$store.getters.project
-            return project === null ? '' : project.id
+            return this.$store.getters.projectIds[0]
         }
     }
 }
