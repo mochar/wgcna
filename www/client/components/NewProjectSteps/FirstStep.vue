@@ -13,23 +13,20 @@
         <br>
         <div class="form-check form-check-inline">
             <label class="custom-control custom-radio">
-                <input class="custom-control-input" type="radio" name="omic" value="transcriptomics" checked>
-                <span class="custom-control-indicator"></span>
-                <span class="custom-control-description">Transcriptomics</span>
+                <input id="trans-radio" class="custom-control-input" type="radio" name="omic" value="transcriptomics" checked>
+                <label class="custom-control-label" for="trans-radio">Transcriptomics</label>
             </label>
         </div>
         <div class="form-check form-check-inline">
             <label class="custom-control custom-radio">
-                <input class="custom-control-input" type="radio" name="omic" value="metabolomics">
-                <span class="custom-control-indicator"></span>
-                <span class="custom-control-description">Metabolomics</span>
+                <input id="met-radio" class="custom-control-input" type="radio" name="omic" value="metabolomics">
+                <label class="custom-control-label" for="met-radio">Metabolomics</label>
             </label>
         </div>
         <div class="form-check form-check-inline">
             <label class="custom-control custom-radio">
-                <input class="custom-control-input" type="radio" name="omic" value="lipidomics">
-                <span class="custom-control-indicator"></span>
-                <span class="custom-control-description">Lipidomics</span>
+                <input id="lip-radio" class="custom-control-input" type="radio" name="omic" value="lipidomics">
+                <label class="custom-control-label" for="lip-radio">Lipidomics</label>
             </label>
         </div>
     </div>
