@@ -8,21 +8,13 @@
     </button>
     <div class="webui-popover-content">
         <div class="popover-body">
-            <h5>{{ name }}</h5>
-            <input type="text" placeholder="Search" class="bg-light w-100 p-1"
-                v-model="searchTerm" />
+            <h5 class="text-capitalize">{{ name }}</h5>
+            <input type="text" placeholder="Search" class="bg-light w-100 p-1" v-model="searchTerm" />
             <div class="d-flex flex-column p-1">
                 <div v-for="(item, i) in paginatedList" :key="item" class="d-flex align-items-center">
                     <div class="reformat-item w-100">
                         {{ item }}
                     </div>
-                    <button class="btn btn-link pb-0 pt-0" @click="$emit('selected', toAbsoluteIndex(i))">
-                        <span class="fa fa-trash" :class="trashClass(i)"></span>
-                    </button>
-                    <button class="btn btn-link pb-0 pt-0 pl-0 text-primary" @click="setContinues(i)" v-if="trait">
-                        <strong v-if="isContinues(i)">C</strong>
-                        <strong v-else>N</strong>
-                    </button>
                 </div>
             </div>
             <div style="border-top: 1px solid #eee" class="w-100">
@@ -46,7 +38,7 @@ export default {
         }
     },
 
-    props: ['list', 'removedIndices', 'continuesIndices', 'name', 'trait'],
+    props: ['list', 'name'],
 
     methods: {
         prevPage() {
@@ -57,16 +49,6 @@ export default {
         },
         toAbsoluteIndex(i) {
             return ((this.page - 1) * this.items) + i
-        },
-        trashClass(i) {
-            const isRemoved = this.removedIndices.includes(this.toAbsoluteIndex(i))
-            return isRemoved ? 'text-danger' : 'text-secondary'
-        },
-        isContinues(i) {
-            return this.continuesIndices.includes(this.toAbsoluteIndex(i))
-        },
-        setContinues(i) {
-            this.$emit('traitSelected', this.toAbsoluteIndex(i))
         }
     },
 
@@ -102,15 +84,4 @@ export default {
 </script>
 
 <style>
-.popover-body {
-    display: inline;
-    padding: 0;
-}
-
-.reformat-item {
-    cursor: pointer;
-}
-.reformat-item:hover {
-    background-color: #eee;
-}
 </style>

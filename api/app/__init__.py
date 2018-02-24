@@ -88,14 +88,17 @@ def create_user():
 
 def create_project(user_id, name, description, omic, expression, trait=None):
     project_id = uuid.uuid4().hex
-    project = {'name': name, 'description': description, 'id': project_id, 'step': 1,
-        'omic': omic, 'trait': 0 if trait is None else 1, 'preprocessed': 0}
     project_folder = project_id_to_folder(project_id)
     os.makedirs(project_folder)
     expression.save(os.path.join(project_folder, 'expression.csv'))
     if trait is not None:
         trait.save(os.path.join(project_folder, 'trait.csv'))
     redis.sadd('projects:{}'.format(user_id), project_id)
+
+    df = pd.read_csv(os.path.join(project_folder, 'expression.csv'))
+    project = {'name': name, 'description': description, 'id': project_id, 'step': 1,
+        'omic': omic, 'trait': 0 if trait is None else 1, 'preprocessed': 0,
+        'genes': len(df.columns), 'samples': len(df.index)}
     redis.hmset('project:{}'.format(project_id), project)
     return project
 
@@ -178,12 +181,12 @@ def expression(project_id):
         response = {'colNames': df.columns.tolist(), 'rowNames': df.index.tolist()}
         return jsonify(response)
     elif request.method == 'PUT':
-        removed_row_names = [x for x in request.form['row'].split(',') if x != '']
-        removed_col_names = [x for x in request.form['col'].split(',') if x != '']
         if request.form['transpose'] == 'true':
             df = df.T
-        df.drop(removed_col_names, axis=1, inplace=True)
-        df.drop(removed_row_names, axis=0, inplace=True)
+            n_genes = redis.hget('project:{}'.format(project_id), 'genes')
+            n_samples = redis.hget('project:{}'.format(project_id), 'samples')
+            redis.hset('project:{}'.format(project_id), 'genes', n_samples)
+            redis.hset('project:{}'.format(project_id), 'samples', n_genes)
         df.to_csv(g.expression_path)
         return jsonify({}), 200
 
@@ -193,19 +196,11 @@ def expression(project_id):
 def trait(project_id):
     df = pd.read_csv(g.trait_path, index_col=0)
     if request.method == 'GET':
-        response = {'colNames': df.columns.tolist(), 'rowNames': df.index.tolist()}
-        return jsonify(response)
+        return jsonify(df.to_dict(orient='split'))
     elif request.method == 'PUT':
-        removed_row_names = [x for x in request.form['row'].split(',') if x != '']
-        removed_col_names = [x for x in request.form['col'].split(',') if x != '']
-        if request.form['transpose'] == 'true':
-            df = df.T
         continues_indices = [int(x) for x in request.form['continues'].split(',') if x != '']
         traits = {x: 'C' if i in continues_indices else 'N' for i, x in enumerate(df.columns)}
         redis.hmset('traits:{}'.format(project_id), traits)
-        df.drop(removed_col_names, axis=1, inplace=True)
-        df.drop(removed_row_names, axis=0, inplace=True)
-        df.to_csv(g.trait_path)
         return jsonify({}), 200
 
 
@@ -233,6 +228,8 @@ def cluster_samples(project_id):
         df = pd.read_csv(g.expression_path, index_col=0)
         df.drop(outlier_samples, axis=0, inplace=True)
         df.to_csv(g.expression_path)
+        n_samples = redis.hget('project:{}'.format(project_id), 'samples')
+        redis.hset('project:{}'.format(project_id), 'samples', int(n_samples) - len(outlier_samples))
         return jsonify({})
 
 
@@ -292,6 +289,13 @@ def cluster_genes(project_id):
         redis.hset('project:{}'.format(project_id), 'step', 4)
         redis.hset('project:{}'.format(project_id), 'minModuleSize', min_module_size)
         return jsonify(r)
+
+
+@app.route('/projects/<project_id>/eigengenes', methods=['GET'])
+@project_exists
+def module_eigengenes(project_id):
+    eigengenes = pd.read_csv(g.eigengene_path, index_col=0).to_dict(orient='list')
+    return jsonify(eigengenes=eigengenes)
 
 
 @app.route('/projects/<project_id>/genotype', methods=['GET', 'POST'])

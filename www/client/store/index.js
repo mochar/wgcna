@@ -49,7 +49,6 @@ const actions = {
         return $.getJSON(`${ROOTURL}/projects/`).then(data => {
             const projects = data.projects
             commit('setProjects', projects)
-            commit('setProjectLoading', false)
             return projects
         })
     }

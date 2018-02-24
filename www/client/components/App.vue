@@ -27,7 +27,7 @@
     </nav>
 
     <div class="container" id="app">
-        <router-view></router-view>
+        <router-view v-if="!$store.state.projectLoading"></router-view>
     </div>
 
     <new-project-modal></new-project-modal>
@@ -53,7 +53,9 @@ export default {
     },
 
     created() {
-        this.$store.dispatch('getProjects')
+        this.$store.dispatch('getProjects').then(() => {
+            this.$store.commit('setProjectLoading', false)
+        })
     },
 
     computed: {

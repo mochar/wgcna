@@ -38,25 +38,13 @@
             </span>
         </div>
         <component 
-            class="preprocess-component"
             v-if="project.id"
-            :go="go"
             :is="current" 
-            :projectId="project.id"
-
-            :url="reformatUrl"
-            :cols="reformatCols"
-            :trait="isTrait"
-
-            @loaded="go = false"
+            :project="project"
             @done="next">
         </component>
-        <div class="mt-2">
-            <button class="btn btn-light" :disabled="go" @click="go = true" v-if="step <= steps.length">
-                <span class="fa fa-check"></span>
-                OK
-            </button>
-            <button class="btn btn-primary" :disabled="loading" @click="done" v-else>
+        <div class="mt-2" v-if="step > steps.length">
+            <button class="btn btn-primary" :disabled="loading" @click="done">
                 <span class="fa fa-chevron-right"></span>
                 Analyze
             </button>
@@ -66,7 +54,8 @@
 </template>
 
 <script>
-import Reformat from 'components/PreprocessSteps/Reformat'
+import ReformatExpression from 'components/PreprocessSteps/ReformatExpression'
+import ReformatTrait from 'components/PreprocessSteps/ReformatTrait'
 import GoodGenes from 'components/PreprocessSteps/GoodGenes'
 import Outliers from 'components/PreprocessSteps/Outliers'
 
@@ -76,26 +65,28 @@ export default {
             step: 1,
             project: null,
             loading: false,
-            go: false,
             finished: false
         }
     },
 
     components: {
-        Reformat,
+        ReformatExpression,
+        ReformatTrait,
         GoodGenes,
         Outliers
     },
 
     methods: {
         next() {
-            // this.go = false
             this.step++
             if (this.step > this.steps.length)
                 this.finished = true
         },
         done() {
-            this.$router.push('/')
+            this.loading = true
+            this.$store.dispatch('getProjects').then(() => {
+                this.$router.push({ name: 'analyze', params: { id: this.project.id }})
+            })
         },
         setProject() {
             const projectId = this.$route.params.id
@@ -111,20 +102,11 @@ export default {
         },
         steps() {
             if (!this.project) return null
-            let steps = ['Reformat', 'GoodGenes']
+            let steps = ['ReformatExpression', 'GoodGenes']
             if (this.project.trait)
-                steps.push('Reformat')
+                steps.push('ReformatTrait')
             steps.push('Outliers')
             return steps
-        },
-        isTrait() {
-            return this.project.trait && this.step > 2
-        },
-        reformatUrl() {
-            return this.isTrait ? 'trait' : 'expression'
-        },
-        reformatCols() {
-            return this.isTrait ? 'Traits' : 'Genes'
         }
     },
     
