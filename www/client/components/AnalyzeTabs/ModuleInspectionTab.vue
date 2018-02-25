@@ -9,7 +9,7 @@
             :key="module" 
             :name="module"
             :data="data.data[i]"
-            :groups="traitData.data[nominalTraits.indexOf(trait)]"
+            :groups="traitData.data[traitData.index.indexOf(trait)]"
             :samples="data.columns">
         </module>
     </div>
