@@ -25,6 +25,10 @@
         </div>
     </div>
 
+    <p class="card-text">
+        Pick a threshold which will be used to power-transform the gene correlations in order to reduce inherent biological noise.
+    </p>
+
     <div class="row" v-if="!loading">
         <div class="col-4">
             <table class="table table-hover table-sm">

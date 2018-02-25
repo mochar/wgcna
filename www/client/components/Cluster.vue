@@ -2,7 +2,7 @@
 <div class="card card-body block">
     <div class="d-flex justify-content-between align-items-start">
         <h6 class="block-title">
-            GENE CLUSTERING
+            FEATURE CLUSTERING
             <span class="fa fa-lg fa-cog fa-spin float-right" v-if="loading"></span>
         </h6>
         <div class="text-muted d-flex align-items-center">
@@ -20,6 +20,10 @@
             </div>
         </div>
     </div>
+
+    <p class="card-text">
+        Features are hierarchically clustered and subsequently grouped based on a given minimum module size.
+    </p>
 
     <div v-if="!loading">
         <dendrogram 
