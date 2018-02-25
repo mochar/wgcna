@@ -69,6 +69,7 @@ export default {
 <style src="../../node_modules/font-awesome/css/font-awesome.min.css"></style>
 <style src="../../node_modules/bootstrap/dist/css/bootstrap.min.css"></style>
 <style src="../../node_modules/webui-popover/dist/jquery.webui-popover.min.css"></style>
+<style src="../../client/external/distrochart.css"></style>
 <style>
 html {
     overflow-y: scroll;

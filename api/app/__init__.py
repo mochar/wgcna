@@ -60,6 +60,7 @@ def is_number(string):
 def process_project(project):
     project['trait'] = bool(int(project['trait']))
     project['preprocessed'] = bool(int(project['preprocessed']))
+    project['traits'] = redis.hgetall('traits:{}'.format(project['id']))
     return project
 
 
@@ -196,12 +197,20 @@ def expression(project_id):
 def trait(project_id):
     df = pd.read_csv(g.trait_path, index_col=0)
     if request.method == 'GET':
+        if {'true': True, 'false': False}[request.args.get('transpose', 'false')]:
+            df = df.T
         return jsonify(df.to_dict(orient='split'))
     elif request.method == 'PUT':
         continues_indices = [int(x) for x in request.form['continues'].split(',') if x != '']
         traits = {x: 'C' if i in continues_indices else 'N' for i, x in enumerate(df.columns)}
         redis.hmset('traits:{}'.format(project_id), traits)
         return jsonify({}), 200
+
+
+@app.route('/projects/<project_id>/traits')
+@project_exists
+def traits(project_id):
+    return jsonify(redis.hgetall('traits:{}'.format(project_id)))
 
 
 @app.route('/projects/<project_id>/goodsamplesgenes')
@@ -294,8 +303,8 @@ def cluster_genes(project_id):
 @app.route('/projects/<project_id>/eigengenes', methods=['GET'])
 @project_exists
 def module_eigengenes(project_id):
-    eigengenes = pd.read_csv(g.eigengene_path, index_col=0).to_dict(orient='list')
-    return jsonify(eigengenes=eigengenes)
+    eigengenes = pd.read_csv(g.eigengene_path, index_col=0)
+    return jsonify(eigengenes.T.to_dict(orient='split'))
 
 
 @app.route('/projects/<project_id>/genotype', methods=['GET', 'POST'])

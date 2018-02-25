@@ -57,7 +57,7 @@
 <script>
 import SampleTree from 'components/SampleTree'
 import Loading from 'components/Loading'
-import { mapState, mapMutations, mapGetters } from 'vuex'
+import { mapState, mapActions, mapGetters } from 'vuex'
 
 export default {
     data() {
@@ -72,10 +72,10 @@ export default {
     },
 
     methods: {
-        ...mapMutations(['setProjectById']),
+        ...mapActions(['selectProjectById']),
         loadProject() {
             if (!this.projectIds.includes(this.$route.params.id)) next({ name: 'notfound' })
-            this.setProjectById(this.$route.params.id)
+            this.selectProjectById(this.$route.params.id)
             this.project = this.$store.getters.project
         },
         downloadPlot() {

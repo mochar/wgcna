@@ -89,7 +89,7 @@ import ModuleCreationTab from 'components/AnalyzeTabs/ModuleCreationTab'
 import ModuleInspectionTab from 'components/AnalyzeTabs/ModuleInspectionTab'
 import ModuleSignificanceTab from 'components/AnalyzeTabs/ModuleSignificanceTab'
 import Loading from 'components/Loading'
-import { mapState, mapMutations, mapGetters } from 'vuex'
+import { mapState, mapActions, mapGetters } from 'vuex'
 
 export default {
     data() {
@@ -112,7 +112,7 @@ export default {
     },
 
     methods: {
-        ...mapMutations(['setProjectById']),
+        ...mapActions(['selectProjectById']),
         generateReport() {
             // const url = `${ROOTURL}/report/${this.name}`
             // window.open(url)
@@ -146,20 +146,20 @@ export default {
 
     beforeRouteUpdate(to, from, next) {
         if (!this.projectIds.includes(to.params.id)) next({ name: 'notfound' })
-        this.setProjectById(to.params.id)
+        this.selectProjectById(to.params.id)
         if (from.name === 'analyze') next()
         else next({ name: 'analyze', params: { id: this.projectIndex }})
     },
 
     created() {
-        this.setProjectById(this.$store.state.route.params.id)
+        this.selectProjectById(this.$store.state.route.params.id)
     },
     
     watch: {
         '$store.state.projectLoading'() {
             if (!this.$store.state.projectLoading) {
                 if (!this.projectIds.includes(this.$route.params.id)) next({ name: 'notfound' })
-                this.setProjectById(this.$route.params.id)
+                this.selectProjectById(this.$route.params.id)
             }
         }
     }

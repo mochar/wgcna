@@ -7,12 +7,18 @@ Vue.use(Vuex)
 const state = {
     projects: [],
     projectIndex: null,
-    projectLoading: true
+    projectLoading: true,
+    traitData: null
 }
 
 const getters = {
     project: state => {
         return state.projectIndex === null ? null : state.projects[state.projectIndex]
+    },
+    nominalTraits: (state, getters) => {
+        const project = getters.project
+        if (!project && !project.traits) return null
+        return Object.keys(project.traits).filter(t => project.traits[t] === 'N')
     },
     projectIds: state => {
         return state.projects.map(project => project.id)
@@ -42,6 +48,9 @@ const mutations = {
     setProjectLoading(state, loading) {
         state.projectLoading = loading
     },
+    setTraitData(state, data) {
+        state.traitData = data
+    }
 }
 
 const actions = {
@@ -51,6 +60,16 @@ const actions = {
             commit('setProjects', projects)
             return projects
         })
+    },
+    getTraitData({ state, getters, commit }) {
+        if (state.traitData) return Promise.resolve()
+        return $.getJSON(`${ROOTURL}/projects/${getters.project.id}/trait?transpose=true`).then(data => {
+            commit('setTraitData', data)
+        })
+    },
+    selectProjectById({ commit }, id) {
+        commit('setTraitData', null)
+        commit('setProjectById', id)
     }
 }
 
