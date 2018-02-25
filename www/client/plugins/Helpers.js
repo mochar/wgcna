@@ -13,6 +13,9 @@ let helpers = {
         const _step = step || 1
         return Array((_end - _start) / _step).fill(0).map((v, i) => _start + (i * _step))
     },
+    unique: function(array) {
+        return [...new Set(array)]
+    },
     downloadSvg: function(svgEl, filename) {
         svgDownload(svgEl, filename)
     }
