@@ -49,7 +49,8 @@ export default {
             }
         },
         variables_() {
-            this.$emit('ordinal', this.variables_)
+            if (this.isOrdinal) 
+                this.$emit('ordinal', this.variables_)
         }
     },
     

@@ -6,8 +6,14 @@
         @done="genotypeDone"
         v-if="project.step > 3">
     </genotype> -->
+    
+    <correlation-view 
+        :project="project" 
+        @back="showCorrs = false"
+        v-if="showCorrs">
+    </correlation-view>
 
-    <div id="significance-container" class="d-flex align-items-start">
+    <div id="significance-container" class="d-flex align-items-start" v-else>
         <div class="card card-body block mr-1" style="flex: 1">
             <div class="d-flex justify-content-between align-items-start">
                 <h6 class="block-title text-uppercase">
@@ -31,7 +37,12 @@
             </div>
         </div>
 
-        <correlation-setup class="ml-1" style="flex: 1"></correlation-setup>
+        <correlation-setup 
+            :project="project" 
+            @corr="showCorrs = true"
+            class="ml-1" 
+            style="flex: 1">
+        </correlation-setup>
     </div>
 </div>
 </template>
@@ -39,12 +50,14 @@
 <script>
 import Genotype from 'components/Genotype'
 import CorrelationSetup from 'components/SignificanceTesting/CorrelationSetup'
+import CorrelationView from 'components/SignificanceTesting/CorrelationView'
 import { mapGetters } from 'vuex'
 
 export default {
     data() {
         return {
             trait: null,
+            showCorrs: false
         }
     },
 
@@ -52,7 +65,8 @@ export default {
 
     components: {
         Genotype,
-        CorrelationSetup
+        CorrelationSetup,
+        CorrelationView
     },
     
     methods: {

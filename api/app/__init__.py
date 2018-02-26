@@ -328,6 +328,21 @@ def genotype(project_id):
     return jsonify(response)
 
 
+@app.route('/projects/<project_id>/correlate', methods=['GET', 'POST'])
+@project_exists
+def correlate(project_id):
+    project_folder = project_id_to_folder(project_id)
+    if request.method == 'POST':
+        ordinals = request.get_json(force=True)
+        trait_types = redis.hgetall('traits:{}'.format(project_id))
+        corrs = rscripts.correlate_traits(g.eigengene_path, g.trait_path, trait_types, ordinals)
+        corrs.to_csv(os.path.join(project_folder, 'corrs.csv'))
+        return jsonify()
+    elif request.method == 'GET':
+        corrs = pd.read_csv(os.path.join(project_folder, 'corrs.csv'), index_col=0)
+        return jsonify(corrs.to_dict(orient='split'))
+
+
 @app.route('/export/<name>')
 def export(name):
     format_ = request.args.get('format')
@@ -371,6 +386,7 @@ def report(name):
     return send_file(path, as_attachment=True)
 
 
+"""
 @app.route('/correlate')
 def correlate():
     names = request.args.getlist('names[]')
@@ -406,3 +422,4 @@ def correlate():
                 links.append(link)
 
     return jsonify({'nodes': nodes, 'links': links})
+"""

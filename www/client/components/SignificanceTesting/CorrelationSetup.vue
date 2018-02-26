@@ -33,8 +33,9 @@
         </div>
     </div>
     <div class="mt-3">
-        <button class="btn btn-light">
-            <span class="fa fa-check"></span>
+        <button class="btn btn-light" @click="go" :disabled="loading">
+            <span class="fa fa-refresh fa-spin fa-fw" v-if="loading"></span>
+            <span class="fa fa-check fa-fw" v-else></span>
             Go
         </button>
         <button class="btn btn-light" disabled>
@@ -52,16 +53,34 @@ export default {
     data() {
         return {
             method: 'pearson',
-            ordinals: {}
+            ordinals: {},
+            loading: false
         }
     },
+
+    props: ['project'],
 
     components: {
         OrdinalTrait
     },
 
     methods: {
-        ...mapActions(['getTraitData'])
+        ...mapActions(['getTraitData']),
+        go() {
+            this.loading = true
+            const data = JSON.stringify(this.ordinals)
+            $.post({
+                url: `${ROOTURL}/projects/${this.project.id}/correlate`,
+                data: data,
+                dataType: 'json',
+                async: true
+            }).then(() => {
+                this.loading = false
+                this.$emit('corr')
+            }, () => {
+                this.loading = false
+            })
+        }
     },
 
     computed: {
