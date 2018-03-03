@@ -26,12 +26,11 @@
     </p>
 
     <div v-if="!loading">
-        <dendrogram 
+        <dendro
             :cluster-data="clusterData" 
             :ratio="0.35" 
-            :colors="colors" 
-            v-if="!loading">
-        </dendrogram>
+            :colors="colors">
+        </dendro>
         <div class="block-action-div">
             <form class="form-inline" enctype="multipart/form-data" @submit.prevent="cut">
                 <label class="mr-2">Minimum module size</label>
@@ -56,20 +55,20 @@
 </template>
 
 <script>
-import Dendrogram from 'charts/Dendrogram'
+import Dendro from 'charts/Dendro'
 
 export default {
     data() {
         return {
             loading: true,
             cutting: false,
-            clusterData: null,
-            colors: null
+            // clusterData: null,
+            // colors: null
         }
     },
 
     components: {
-        Dendrogram
+        Dendro
     },
 
     props: ['project', 'update'],
