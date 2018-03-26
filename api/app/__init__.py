@@ -17,6 +17,10 @@ from redis import StrictRedis
 import pandas as pd
 
 import app.rscripts as rscripts
+try:
+    from scripts.set_analysis import Set_analysis
+except:
+    print('Annotation script not found, starting without annotation support.')
 
 
 app = Flask(__name__)
@@ -127,6 +131,7 @@ def setup_request_info():
         g.eigengene_path = os.path.join(g.project_folder, 'eigengenes.csv')
         g.pvalues_path = os.path.join(g.project_folder, 'pvalues.csv')
         g.trait_path = os.path.join(g.project_folder, 'trait.csv')
+        g.annotation_path = os.path.join(g.project_folder, 'annotations.json')
     if 'id' in session:
         g.user_id = session.get('id')
 
@@ -341,6 +346,26 @@ def correlate(project_id):
     elif request.method == 'GET':
         corrs = pd.read_csv(os.path.join(project_folder, 'corrs.csv'), index_col=0)
         return jsonify(corrs.to_dict(orient='split'))
+
+
+@app.route('/projects/<project_id>/annotate', methods=['GET'])
+@project_exists
+def annotate(project_id):
+    print(request.args.get('id_type'))
+    print(request.args.get('annotation_type'))
+
+    print(request.args.get('recalculate'))
+
+    if request.args.get('recalculate') == 'true':
+        project_folder = project_id_to_folder(project_id)
+        set_analysis = Set_analysis()
+        annotations = set_analysis.annotate(project_folder)
+        return jsonify(annotations)
+    else:
+        try:
+            return jsonify(json.load(open(g.annotation_path, 'r')))
+        except:
+            return jsonify({})
 
 
 @app.route('/export/<name>')

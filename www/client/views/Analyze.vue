@@ -30,6 +30,15 @@
                         Module significance
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a
+                        class="nav-link"
+                        :class="{ disabled: !hasModules, active: tab == 'ModuleAnnotationTab' }"
+                        href="#"
+                        @click.prevent="tab = 'ModuleAnnotationTab'">
+                        Module annotation
+                    </a>
+                </li>
             </ul>
         </div>
         <div class="col-6">
@@ -88,6 +97,7 @@ import ExportModal from 'components/ExportModal'
 import ModuleCreationTab from 'components/AnalyzeTabs/ModuleCreationTab'
 import ModuleInspectionTab from 'components/AnalyzeTabs/ModuleInspectionTab'
 import ModuleSignificanceTab from 'components/AnalyzeTabs/ModuleSignificanceTab'
+import ModuleAnnotationTab from 'components/AnalyzeTabs/ModuleAnnotationTab'
 import Loading from 'components/Loading'
 import { mapState, mapActions, mapGetters } from 'vuex'
 
@@ -108,6 +118,7 @@ export default {
         ModuleCreationTab,
         ModuleInspectionTab,
         ModuleSignificanceTab,
+        ModuleAnnotationTab,
         Loading
     },
 
