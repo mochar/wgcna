@@ -17,6 +17,9 @@
                     <router-link to="/integrate" class="nav-item nav-link" active-class="active" tag="a">
                         Integrate
                     </router-link>
+                    <router-link to="/semanticintegrate" class="nav-item nav-link" active-class="active" tag="a" v-if=false>
+                        Semantic Integrate
+                    </router-link>
                 </div>
             </div>
             <button class="btn btn-light float-right" id="new-project-btn" data-toggle="modal" data-target="#new-modal">

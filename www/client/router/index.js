@@ -4,6 +4,7 @@ import Home from 'views/Home'
 import Analyze from 'views/Analyze'
 import Preprocess from 'views/Preprocess'
 import Integrate from 'views/Integrate'
+import SemanticIntegrate from 'views/SemanticIntegrate'
 import NotFound from 'views/NotFound'
 import Project from 'views/Project'
 
@@ -35,6 +36,10 @@ export default new Router({
         {
             path: '/integrate',
             component: Integrate
+        },
+        {
+            path: '/semanticintegrate',
+            component: SemanticIntegrate
         },
         {
             name: 'notfound',
