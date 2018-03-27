@@ -12,7 +12,7 @@
             <select class="custom-select" v-model="annotation_type">
                 <option v-for="annotation_type in annotation_types" :key="annotation_type" :value="annotation_type">{{ annotation_type }}</option>
             </select>
-            <button class="btn btn-light" :disabled="loading" v-on:click="annotate"><span class="fa fa-check"> </span>Annotate</button>
+            <button class="btn btn-light" :disabled="loading" v-on:click="annotate(true)"><span class="fa fa-check"> </span>Annotate</button>
         </div>
 
         <h6><span class="fa fa-cog fa-spin" v-if="loading"></span></h6>
@@ -57,13 +57,12 @@ export default {
     props: ['project', 'shouldUpdate'],
 
     methods: {
-        annotate() {
+        annotate(recalculate) {
             this.loading = true
             this.annotations = {}
-            $.getJSON(`${ROOTURL}/projects/${this.project.id}/annotate`,{"id_type" :  this.id_type, "annotation_type" : this.annotation_type, "recalculate" : true}).then(data => {
+            $.getJSON(`${ROOTURL}/projects/${this.project.id}/annotate`,{"id_type" :  this.id_type, "annotation_type" : this.annotation_type, "recalculate" : recalculate}).then(data => {
                 this.annotations = data
                 this.loading = false
-                //this.$forceUpdate()
             })
         }
     },
@@ -71,13 +70,7 @@ export default {
     created() {
         this.id_type = this.id_types[0]
         this.annotation_type = this.annotation_types[0]
-        this.loading = true
-        $.getJSON(`${ROOTURL}/projects/${this.project.id}/annotate`,{"id_type" :  this.id_type, "annotation_type" : this.annotation_type, "recalculate" : false}).then(data => {
-            this.annotations = data
-            console.log(this.annotations)
-            this.loading = false
-            //this.$forceUpdate()
-        })
+        this.annotate(false)
     }
 }
 </script>
