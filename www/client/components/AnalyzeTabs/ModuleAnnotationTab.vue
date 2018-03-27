@@ -8,7 +8,7 @@
             <select class="custom-select" v-model="id_type">
                 <option v-for="id_type in id_types" :key="id_type" :value="id_type">{{ id_type }}</option>
             </select>
-            Annotation soure:
+            Annotation source:
             <select class="custom-select" v-model="annotation_type">
                 <option v-for="annotation_type in annotation_types" :key="annotation_type" :value="annotation_type">{{ annotation_type }}</option>
             </select>
@@ -48,7 +48,7 @@ export default {
             loading: true,
             id_types: ['Euretos synonym'],
             id_type: "",
-            annotation_types: ['Molecular Function'],
+            annotation_types: ['Pathway', 'Molecular Function'],
             annotation_type: "",
             annotations: {}
         }
