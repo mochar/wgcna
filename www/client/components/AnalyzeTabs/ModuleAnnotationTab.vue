@@ -56,6 +56,12 @@ export default {
 
     props: ['project', 'shouldUpdate'],
 
+    watch: {
+        project: function() {
+            this.annotate(false)
+        }
+    },
+
     methods: {
         annotate(recalculate) {
             this.loading = true
