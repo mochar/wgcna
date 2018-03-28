@@ -1,10 +1,10 @@
 <template>
     <div class="row">
         <div class="col-6">
-            <SemanticProjectSelect title="omic 1" v-on:projectId="projectId1 = $event" v-on:id_type="id_type1 = $event"></SemanticProjectSelect>
+            <SemanticProjectSelect title="omic 1" :loading="loading" v-on:projectId="projectId1 = $event" v-on:id_type="id_type1 = $event"></SemanticProjectSelect>
         </div>
         <div class="col-6">
-            <SemanticProjectSelect title="omic 2" v-on:projectId="projectId2 = $event" v-on:id_type="id_type2 = $event"></SemanticProjectSelect>
+            <SemanticProjectSelect title="omic 2" :loading="loading" v-on:projectId="projectId2 = $event" v-on:id_type="id_type2 = $event"></SemanticProjectSelect>
         </div>
         <div class="col-12">
             <div class="card card-body block">
@@ -12,7 +12,7 @@
                     Semantic integration
                 </h6>
                 Annotation source:
-                <select class="custom-select" v-model="annotation_type">
+                <select class="custom-select" v-model="annotation_type" :disabled="loading">
                     <option v-for="annotation_type in annotation_types" :key="annotation_type" :value="annotation_type">{{ annotation_type }}</option>
                 </select>
                 Minimum number of concepts connected to set:
@@ -23,7 +23,13 @@
             </div>
         </div>
         <div class="col-12">
-            <div class="card card-body block">
+        <h6><span class="fa fa-cog fa-spin" v-if="loading"></span></h6>
+        </div>
+        <div v-if=true>
+            {{ status }}
+        </div>
+        <div class="col-12">
+            <div class="card card-body block" v-if="overlap_list">
                 <h6 class="block-title">
                     Overlap
                 </h6>
@@ -96,6 +102,7 @@ export default {
             id_type1: null,
             id_type2: null,
             overlap_list: null,
+            status: null
         }
     },
 
@@ -105,14 +112,21 @@ export default {
 
     methods: {
         integrate() {
+            var ref = this
+            this.status = null
             this.loading = true
             this.overlap_list = null
             $.getJSON(`${ROOTURL}/integrate`,{"projectId1": this.projectId1,
                 "projectId2": this.projectId2, "id_type1": this.id_type1,
                 "id_type2": this.id_type2,
-                "annotation_type": this.annotation_type}).then(data => {
+                "annotation_type": this.annotation_type})
+            .then(data => {
                 this.overlap_list = data
                 this.loading = false
+            })
+            .fail(function(request, status, error) {
+                ref.loading = false
+                ref.status = status
             })
         }
     },

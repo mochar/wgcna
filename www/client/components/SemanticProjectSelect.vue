@@ -4,11 +4,11 @@
             {{ title }}
         </h6>
         Project:
-        <select class="custom-select" v-model="projectId">
+        <select class="custom-select" v-model="projectId" :disabled="loading">
             <option v-for="projectId in projectIds" :key="projectId" :value="projectId">{{ getNameFromId(projectId) }}</option>
         </select>
         Id type:
-        <select class="custom-select" v-model="id_type">
+        <select class="custom-select" v-model="id_type" :disabled="loading">
             <option v-for="id_type in id_types" :key="id_type" :value="id_type">{{ id_type }}</option>
         </select>
     </div>
@@ -26,7 +26,7 @@ export default {
         }
     },
 
-    props: ['title'],
+    props: ["title", "loading"],
 
     computed: {
         ...mapState(['projectIndex', 'projects']),
