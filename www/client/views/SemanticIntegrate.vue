@@ -1,15 +1,15 @@
 <template>
     <div class="row">
         <div class="col-6">
-            <SemanticProjectSelect title="omic 1" :loading="loading" v-on:projectId="projectId1 = $event" v-on:id_type="id_type1 = $event"></SemanticProjectSelect>
+            <SemanticProjectSelect title="Data set 1" :loading="loading" v-on:projectId="projectId1 = $event" v-on:id_type="id_type1 = $event"></SemanticProjectSelect>
         </div>
         <div class="col-6">
-            <SemanticProjectSelect title="omic 2" :loading="loading" v-on:projectId="projectId2 = $event" v-on:id_type="id_type2 = $event"></SemanticProjectSelect>
+            <SemanticProjectSelect title="Data set 2" :loading="loading" v-on:projectId="projectId2 = $event" v-on:id_type="id_type2 = $event"></SemanticProjectSelect>
         </div>
         <div class="col-12">
             <div class="card card-body block">
                 <h6 class="block-title">
-                    Semantic integration
+                    Options
                 </h6>
                 Annotation source:
                 <select class="custom-select" v-model="annotation_type" :disabled="loading">
@@ -19,6 +19,8 @@
                 <input v-model.number="min_connected" type="number" :disabled=true>
                 P-Value threshold for sets:
                 <input v-model.number="pvalue_treshold" type="number" :disabled=true>
+                Top n of annotations:
+                <input v-model.number="annotation_count" type="number" :disabled=true>
                 <button class="btn btn-light" :disabled="loading" v-on:click="integrate"><span class="fa fa-check"> </span>Integrate</button>
             </div>
         </div>
@@ -92,10 +94,11 @@ import SemanticProjectSelect from 'components/SemanticProjectSelect'
 export default {
     data() {
         return {
-            annotation_types: ['Pathway', 'Molecular Function'],
+            annotation_types: ["Pathway", "Molecular Function", "Cell Function", "Organ or Tissue Function", "Biologic Function"],
             annotation_type: "",
             min_connected: 3,
             pvalue_treshold: 1,
+            annotation_count: 20,
             loading: false,
             projectId1: null,
             projectId2: null,

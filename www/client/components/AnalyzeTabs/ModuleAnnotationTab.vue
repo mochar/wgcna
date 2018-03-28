@@ -52,7 +52,7 @@ export default {
             loading: true,
             id_types: ["Entrez", "ENSG", "ChEBI", "Euretos synonym"],
             id_type: "",
-            annotation_types: ['Pathway', 'Molecular Function'],
+            annotation_types: ["Pathway", "Molecular Function", "Cell Function", "Organ or Tissue Function", "Biologic Function"],
             annotation_type: "",
             annotations: {},
             status: null
