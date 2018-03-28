@@ -358,14 +358,38 @@ def annotate(project_id):
 
     if request.args.get('recalculate') == 'true':
         project_folder = project_id_to_folder(project_id)
-        set_analysis = Set_analysis()
+        set_analysis = Set_analysis(request.args.get('annotation_type'))
         annotations = set_analysis.annotate(project_folder)
+
+        arguments = {'annotation_type':request.args.get('annotation_type'),
+                    'id_type':request.args.get('id_type')}
+        # Store in project data??
+        #return jsonify({'annotations' : annotations, 'arguments' : arguments})
         return jsonify(annotations)
     else:
         try:
             return jsonify(json.load(open(g.annotation_path, 'r')))
         except:
             return jsonify({})
+
+@app.route('/integrate', methods=['GET'])
+def integrate():
+    print(request.args.get('projectId1'))
+    print(request.args.get('projectId2'))
+    print(request.args.get('id_type1'))
+    print(request.args.get('id_type2'))
+    print(request.args.get('annotation_type'))
+
+    project_folder1 = project_id_to_folder(request.args.get('projectId1'))
+    project_folder2 = project_id_to_folder(request.args.get('projectId2'))
+
+    print(project_folder1)
+    print(project_folder2)
+
+    set_analysis = Set_analysis(request.args.get('annotation_type'))
+    overlap_list = set_analysis.make_real_matrix(project_folder1, project_folder2)
+
+    return jsonify(overlap_list)
 
 
 @app.route('/export/<name>')
