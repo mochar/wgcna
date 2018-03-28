@@ -20,7 +20,7 @@ import { mapState, mapActions, mapGetters } from 'vuex'
 export default {
     data() {
         return {
-            id_types: ["Euretos synonym"],
+            id_types: ["Entrez", "ENSG", "ChEBI", "Euretos synonym"],
             id_type: null,
             projectId: null
         }

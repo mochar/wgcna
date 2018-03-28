@@ -351,18 +351,16 @@ def correlate(project_id):
 @app.route('/projects/<project_id>/annotate', methods=['GET'])
 @project_exists
 def annotate(project_id):
-    print(request.args.get('id_type'))
-    print(request.args.get('annotation_type'))
+    id_type = request.args.get('id_type')
+    annotation_type = request.args.get('annotation_type')
+    recalculate = request.args.get('recalculate')
 
-    print(request.args.get('recalculate'))
-
-    if request.args.get('recalculate') == 'true':
+    if recalculate == "true":
         project_folder = project_id_to_folder(project_id)
-        set_analysis = Set_analysis(request.args.get('annotation_type'))
-        annotations = set_analysis.annotate(project_folder)
+        set_analysis = Set_analysis(annotation_type)
+        annotations = set_analysis.annotate(project_folder, id_type)
 
-        arguments = {'annotation_type':request.args.get('annotation_type'),
-                    'id_type':request.args.get('id_type')}
+        arguments = {'annotation_type':annotation_type, 'id_type':id_type}
         # Store in project data??
         #return jsonify({'annotations' : annotations, 'arguments' : arguments})
         return jsonify(annotations)
@@ -380,6 +378,9 @@ def integrate():
     print(request.args.get('id_type2'))
     print(request.args.get('annotation_type'))
 
+    id_type1 = request.args.get('id_type1')
+    id_type2 = request.args.get('id_type2')
+
     project_folder1 = project_id_to_folder(request.args.get('projectId1'))
     project_folder2 = project_id_to_folder(request.args.get('projectId2'))
 
@@ -387,7 +388,7 @@ def integrate():
     print(project_folder2)
 
     set_analysis = Set_analysis(request.args.get('annotation_type'))
-    overlap_list = set_analysis.make_real_matrix(project_folder1, project_folder2)
+    overlap_list = set_analysis.make_real_matrix(project_folder1, project_folder2, id_type1, id_type2)
 
     return jsonify(overlap_list)
 

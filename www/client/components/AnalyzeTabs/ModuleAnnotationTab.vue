@@ -50,7 +50,7 @@ export default {
     data() {
         return {
             loading: true,
-            id_types: ['Euretos synonym'],
+            id_types: ["Entrez", "ENSG", "ChEBI", "Euretos synonym"],
             id_type: "",
             annotation_types: ['Pathway', 'Molecular Function'],
             annotation_type: "",
