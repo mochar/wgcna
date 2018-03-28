@@ -4,70 +4,78 @@
             <SemanticProjectSelect title="omic 1" v-on:projectId="projectId1 = $event" v-on:id_type="id_type1 = $event"></SemanticProjectSelect>
         </div>
         <div class="col-6">
-                        <SemanticProjectSelect title="omic 2" v-on:projectId="projectId2 = $event" v-on:id_type="id_type2 = $event"></SemanticProjectSelect>
+            <SemanticProjectSelect title="omic 2" v-on:projectId="projectId2 = $event" v-on:id_type="id_type2 = $event"></SemanticProjectSelect>
         </div>
-        <div class="card card-body block">
-            <h6 class="block-title">
-                Semantic integration
-            </h6>
-            Annotation source:
-            <select class="custom-select" v-model="annotation_type">
-                <option v-for="annotation_type in annotation_types" :key="annotation_type" :value="annotation_type">{{ annotation_type }}</option>
-            </select>
-            <button class="btn btn-light" :disabled="loading" v-on:click="integrate"><span class="fa fa-check"> </span>Integrate</button>
+        <div class="col-12">
+            <div class="card card-body block">
+                <h6 class="block-title">
+                    Semantic integration
+                </h6>
+                Annotation source:
+                <select class="custom-select" v-model="annotation_type">
+                    <option v-for="annotation_type in annotation_types" :key="annotation_type" :value="annotation_type">{{ annotation_type }}</option>
+                </select>
+                Minimum number of concepts connected to set:
+                <input v-model.number="min_connected" type="number" :disabled=true>
+                P-Value threshold for sets:
+                <input v-model.number="pvalue_treshold" type="number" :disabled=true>
+                <button class="btn btn-light" :disabled="loading" v-on:click="integrate"><span class="fa fa-check"> </span>Integrate</button>
+            </div>
         </div>
-        <div class="card card-body block">
-            <h6 class="block-title">
-                Overlap
-            </h6>
-            <table style="width:100%" border="0px">
-                <tr>
-                    <th>omic 1</th>
-                    <th>omic 2</th>
-                    <th>Overlap</th>
-                </tr>
-                <tr v-for="overlap in overlap_list">
-                    <td>
-                        <div class="dropdown ml-2">
-                            <button class="btn btn-link text-muted pr-1 pt-0 pb-0" data-toggle="dropdown">
-                                {{ overlap[0] }}
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-right">
-                                <h6 class="dropdown-header">Annotations</h6>
-                                <a class="dropdown-item" v-for="annotation in overlap[3]">
-                                    {{ annotation }}
-                                </a>
+        <div class="col-12">
+            <div class="card card-body block">
+                <h6 class="block-title">
+                    Overlap
+                </h6>
+                <table style="width:100%" border="0px">
+                    <tr>
+                        <th>omic 1</th>
+                        <th>omic 2</th>
+                        <th>overlap</th>
+                    </tr>
+                    <tr v-for="overlap in overlap_list">
+                        <td>
+                            <div class="dropdown ml-2">
+                                <button class="btn btn-link text-muted pr-1 pt-0 pb-0" data-toggle="dropdown">
+                                    {{ overlap[0] }}
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <h6 class="dropdown-header">Annotations</h6>
+                                    <a class="dropdown-item" v-for="annotation in overlap[3]">
+                                        {{ annotation }}
+                                    </a>
+                                </div>
                             </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="dropdown ml-2">
-                            <button class="btn btn-link text-muted pr-1 pt-0 pb-0" data-toggle="dropdown">
-                                {{ overlap[1] }}
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-right">
-                                <h6 class="dropdown-header">Annotations</h6>
-                                <a class="dropdown-item" v-for="annotation in overlap[4]">
-                                    {{ annotation }}
-                                </a>
+                        </td>
+                        <td>
+                            <div class="dropdown ml-2">
+                                <button class="btn btn-link text-muted pr-1 pt-0 pb-0" data-toggle="dropdown">
+                                    {{ overlap[1] }}
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <h6 class="dropdown-header">Annotations</h6>
+                                    <a class="dropdown-item" v-for="annotation in overlap[4]">
+                                        {{ annotation }}
+                                    </a>
+                                </div>
                             </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="dropdown ml-2">
-                            <button class="btn btn-link text-muted pr-1 pt-0 pb-0" data-toggle="dropdown">
-                                {{ overlap[2] }}
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-right">
-                                <h6 class="dropdown-header">Annotations</h6>
-                                <a class="dropdown-item" v-for="annotation in overlap[5]">
-                                    {{ annotation }}
-                                </a>
+                        </td>
+                        <td>
+                            <div class="dropdown ml-2">
+                                <button class="btn btn-link text-muted pr-1 pt-0 pb-0" data-toggle="dropdown">
+                                    {{ overlap[2] }} / {{ overlap[3].length + overlap[4].length - overlap[5].length}}
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <h6 class="dropdown-header">Annotations</h6>
+                                    <a class="dropdown-item" v-for="annotation in overlap[5]">
+                                        {{ annotation }}
+                                    </a>
+                                </div>
                             </div>
-                        </div>
-                    </td>
-                </tr>
-            </table>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
     </div>
 </template>
@@ -80,12 +88,14 @@ export default {
         return {
             annotation_types: ['Pathway', 'Molecular Function'],
             annotation_type: "",
+            min_connected: 3,
+            pvalue_treshold: 1,
             loading: false,
             projectId1: null,
             projectId2: null,
             id_type1: null,
             id_type2: null,
-            overlap_list: null
+            overlap_list: null,
         }
     },
 
