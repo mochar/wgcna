@@ -28,6 +28,7 @@
     <div v-if="!loading">
         <dendro
             :cluster-data="clusterData" 
+            :cuttable="false"
             :ratio="0.35" 
             :colors="colors">
         </dendro>

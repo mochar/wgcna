@@ -1,17 +1,29 @@
 <template>
-<dendrogram 
-    v-if="colors" 
-    :ratio="0.3"
-    :labels="true"
-    :cluster-data="clusterData"
-    :cuttable="cuttable"
-    :colors="colors"
-    @cutted="d => $emit('cutted', d)">
-</dendrogram>
+<div>
+    <dendrogram 
+        v-if="colors" 
+        :ratio="0.3"
+        :labels="true"
+        :cluster-data="clusterData"
+        :cuttable="cuttable"
+        :colors="colors"
+        @cutted="d => $emit('cutted', d)">
+    </dendrogram>
+    <dendro
+        v-if="colors" 
+        :ratio="0.3"
+        :labels="true"
+        :cluster-data="clusterData"
+        :cuttable="cuttable"
+        :colors="colors"
+        @cutted="d => $emit('cutted', d)">
+    </dendro>
+</div>
 </template>
 
 <script>
 import Dendrogram from 'charts/Dendrogram'
+import Dendro from 'charts/Dendro'
 import { min, max } from 'd3-array'
 import { scaleSequential, scaleOrdinal } from 'd3-scale'
 import { interpolateReds, schemeReds } from 'd3-scale-chromatic'
@@ -28,7 +40,8 @@ export default {
     props: ['projectId', 'cuttable'],
 
     components: {
-        Dendrogram
+        Dendrogram,
+        Dendro
     },
 
     created() {

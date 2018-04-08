@@ -1,5 +1,8 @@
 <template>
-<canvas></canvas>
+<div class="dendro">
+    <canvas class="main"></canvas>
+    <canvas class="cut"></canvas>
+</div>
 </template>
 
 <script>
@@ -11,13 +14,18 @@ export default {
         return {
             cutline: null,
             cutlineset:null,
-            cutHeight: null,
             clusters: null,
             largestCluster: null
         }
     },
 
-    props: ['clusterData', 'cuttable', 'labels', 'ratio', 'colors'],
+    props: {
+        clusterData: Object,
+        cuttable: Boolean,
+        labels: Boolean,
+        ratio: Number,
+        colors: Object
+    },
 
     methods: {
         buildPositions() {
@@ -30,22 +38,31 @@ export default {
             }, [])
         },
         resize() {
-            let width = Math.round($(this.$el).parent().width())
-            this.width = width - this.margin.left - this.margin.right
+            this.width_ = Math.round($(this.$el).parent().width())
+            this.width = this.width_ - this.margin.left - this.margin.right
             if (this.colors)
                 this.colorsHeight = Object.keys(this.colors).length * this.colorHeight
-            let height = Math.round(this.ratio * width)
-            height += this.colorsHeight  + this.colorsMargin
-            this.height = height - this.margin.top - this.margin.bottom
+            this.height_ = Math.round(this.ratio * this.width_)
+            this.height_ += this.colorsHeight  + this.colorsMargin
+            this.height = this.height_ - this.margin.top - this.margin.bottom
+        },
+        setupCanvas() {
+            // After resize, canvas is clear. Therefore setup again every resize
+            this.canvas.width = this.width_
+            this.canvas.height = this.height_
+            this.context.translate(this.margin.left + .5, this.margin.top + .5)
+            this.context.font = 'normal 12px sans-serif'
 
-            this.canvas.width = this.width + this.margin.left + this.margin.right
-            this.canvas.height = this.height + this.margin.top + this.margin.bottom
-            this.context.translate(this.margin.left, this.margin.top)
+            this.cutCanvas.width = this.width_
+            this.cutCanvas.height = this.y.range()[0]
+            this.cutContext.translate(this.margin.left + .5, this.margin.top + .5)
+            this.cutContext.lineWidth = 2
+            this.cutContext.strokeStyle = 'red'
         },
         toX(d) {
             return this.x(this.clusterData.labels[-d - 1]) + (this.x.bandwidth() / 2)
         },
-        updatePlot() {
+        updateScales() {
             this.x
                 .domain(this.clusterData.ordered)
                 .range([0, this.width-25])
@@ -56,13 +73,16 @@ export default {
                 .domain([Math.max(heightMin - 0.1 * (heightMax - heightMin), 0), heightMax])
                 // .domain([0, d3.max(this.clusterData.height)])
                 .range([this.height - this.colorsHeight - this.colorsMargin, 0])
-            
-            const labels = this.clusterData.labels
+            this.yReverse
+                .domain(this.y.range())
+                .range(this.y.domain())
+        },
+        updatePlot() {
             const positions = this.buildPositions()
 
             // draw
-            this.context.translate(.5, .5)
             drawAxis(this.y, this.context, true, 'Height')
+
             this.context.beginPath()
             for (let i = 0; i < this.clusterData.merge.length; i++) {
                 // Element:
@@ -98,9 +118,11 @@ export default {
             }
             this.context.stroke()
 
+            if (this.labels) this.updateLabels()
             if (this.colors) this.updateColors()
+        },
+        updateLabels() {
 
-            this.context.translate(-0.5, -0.5)
         },
         updateColors() {
             const yCluster = d3.scaleBand()
@@ -126,21 +148,48 @@ export default {
     },
 
     mounted() {
-        this.canvas = d3.select(this.$el).node()
+        this.canvas = d3.select(this.$el).select('canvas.main').node()
         this.context = this.canvas.getContext('2d')
-        this.context.font = 'normal 12px sans-serif'
+
+        this.cutCanvas = d3.select(this.$el).select('canvas.cut').node()
+        this.cutContext = this.cutCanvas.getContext('2d')
 
         this.height = 100
         this.width = 100
         this.colorHeight = 20
         this.colorsHeight = 0
         this.colorsMargin = 50
+        this.cutHeight = null
         this.margin = {top: 10, right: 5, bottom: 5, left: 100}
 
         this.x = d3.scaleBand().paddingOuter(.5)
         this.y = d3.scaleLinear().interpolate(d3.interpolateRound)
+        this.yReverse = d3.scaleLinear().interpolate(d3.interpolateRound)
+
+        if (this.cuttable) {
+            d3.select(this.cutCanvas).on('mousemove', () => {
+                const newHeight = d3.event.offsetY - this.margin.top
+                this.cutContext.clearRect(-.5, -.5 - this.margin.top, 
+                    this.cutCanvas.width, this.cutCanvas.height + this.margin.top)
+                this.cutContext.beginPath()
+                this.cutContext.moveTo(0, newHeight)
+                this.cutContext.lineTo(this.cutCanvas.width, newHeight)
+                if (this.cutHeight) {
+                    this.cutContext.moveTo(0, this.cutHeight)
+                    this.cutContext.lineTo(this.cutCanvas.width, this.cutHeight)
+                }
+                this.cutContext.stroke()
+            }).on('click', () => {
+                this.cutHeight = d3.event.offsetY - this.margin.top
+                console.log(this.yReverse(this.cutHeight))
+                this.cutContext.moveTo(0, this.cutHeight)
+                this.cutContext.lineTo(this.cutCanvas.width, this.cutHeight)
+            })
+        }
 
         this.resize()
+        this.updateScales()
+        this.setupCanvas()
         this.updatePlot()
     },
 
@@ -158,3 +207,21 @@ export default {
     }
 }
 </script>
+
+<style>
+.dendro {
+    position: relative;
+}
+
+.dendro canvas {
+}
+
+.dendro canvas.main {
+    z-index: 1;
+}
+.dendro canvas.cut {
+    position: absolute;
+    z-index: 2;
+    left: 0;
+}
+</style>
