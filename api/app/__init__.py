@@ -116,7 +116,6 @@ def delete_project(user_id, project_id):
 @app.before_request
 def setup_request_info():
     g.project_id = request.view_args is not None and request.view_args.get('project_id') 
-    app.logger.debug(g.project_id)
     if g.project_id is not None:
         g.project_folder = project_id_to_folder(g.project_id)
         g.expression_path = os.path.join(g.project_folder, 'expression.csv')
@@ -405,9 +404,12 @@ def crosscorrelate():
     matching_samples = set(MEs_list[0].index.tolist())
     for MEs in MEs_list[1:]:
         matching_samples.intersection_update(MEs.index.tolist())
-    app.logger.debug(len(matching_samples))
+
+    # Terminate when no matching samples
+    if len(matching_samples) == 0:
+        return jsonify(nodes=[], links=[])
+
     for MEs in MEs_list:
-        app.logger.debug(MEs.shape)
         MEs.drop(MEs.index[~MEs.index.isin(matching_samples)], inplace=True)
     
     # Calculate correlations
