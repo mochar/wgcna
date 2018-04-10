@@ -116,6 +116,7 @@ def delete_project(user_id, project_id):
 @app.before_request
 def setup_request_info():
     g.project_id = request.view_args is not None and request.view_args.get('project_id') 
+    app.logger.debug(g.project_id)
     if g.project_id is not None:
         g.project_folder = project_id_to_folder(g.project_id)
         g.expression_path = os.path.join(g.project_folder, 'expression.csv')
@@ -386,17 +387,18 @@ def report(name):
     return send_file(path, as_attachment=True)
 
 
-"""
-@app.route('/correlate')
-def correlate():
-    names = request.args.getlist('names[]')
-    app.logger.debug(names)
+@app.route('/crosscorrelate')
+def crosscorrelate():
+    project_ids = request.args.getlist('projects[]')
+    project_folders = [project_id_to_folder(id) for id in project_ids]
+    project_names = [project_from_id(id)['name'] for id in project_ids]
 
     # Read MEs 
-    MEs_list = [pd.read_csv('data/{}/MEs.csv'.format(n), index_col=0) for n in names]
+    MEs_list = [pd.read_csv(os.path.join(pf, 'eigengenes.csv'), index_col=0) 
+                for pf in project_folders]
     nodes = []
     for i, MEs in enumerate(MEs_list):
-        nodes.extend([{'name': c, 'group': names[i]} for c in MEs.columns])
+        nodes.extend([{'name': c, 'group': project_names[i]} for c in MEs.columns])
         nodes.append({'name': 'dummy{}'.format(i), 'group': 'dummies'})
 
     # Reduce MEs to matching samples
@@ -410,16 +412,15 @@ def correlate():
     
     # Calculate correlations
     links = []
-    for i, j in itertools.combinations(range(len(names)), 2):
+    for i, j in itertools.combinations(range(len(project_ids)), 2):
         columns_i = MEs_list[i].columns.tolist()
         columns_j = MEs_list[j].columns.tolist()
         for module_a, module_b in itertools.product(columns_i, columns_j):
             corr, p = pearsonr(MEs_list[i][module_a], MEs_list[j][module_b])
-            if p < 0.05 and (corr >= 0.5 or corr <= -0.05):
-                link = {'source': {'name': module_a, 'group': names[i]},
-                        'target': {'name': module_b, 'group': names[j]},
-                        'value': corr}
-                links.append(link)
+            # if p < 0.05 and (corr >= 0.5 or corr <= -0.5):
+            link = {'source': {'name': module_a, 'group': project_names[i]},
+                    'target': {'name': module_b, 'group': project_names[j]},
+                    'value': corr}
+            links.append(link)
 
     return jsonify({'nodes': nodes, 'links': links})
-"""

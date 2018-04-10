@@ -28,8 +28,8 @@ export default {
     methods: {
         resize() {
             this.width = $(this.$el).parent().width()
-            this.height = this.width 
-            this.radius = this.width / 2
+            this.height = this.width * .7
+            this.radius = this.height / 2
             this.arc.outerRadius(this.radius - 5).innerRadius(this.radius - 55)
         },
         arcsToDefPaths(arcs) {

@@ -1,81 +1,91 @@
 <template>
-<div class="row">
-    <div class="col-3">
-        <div class="card card-body block">
-            <h5 class="card-title">Data</h5>
-
-            <div class="btn-group">
-                <select v-model="plotName" class="btn btn-secondary w-100">
-                    <option v-for="name in names">{{ name }}</option>
-                </select>
-                <button class="btn btn-primary" @click="addName">
-                    +
-                </button>
+<div>
+    <div class="card card-body block">
+        <div class="d-flex justify-content-between align-items-start">
+            <h6 class="block-title text-uppercase">
+                Cross-correlate
+            </h6>
+        </div>
+        <p class="card-text">
+            Correlate module eigengenes of paired sets.
+        </p>
+        <div class="row">
+            <div class="col-5">
+                <add-project-block 
+                    :deletable="false"
+                    :showAdd="false"
+                    :projects="filteredProjects"
+                    @selected="p => $set(selected, 0, p)">
+                </add-project-block>
+                <add-project-block 
+                    :deletable="false"
+                    :showAdd="true"
+                    :projects="filteredProjects"
+                    :init="1"
+                    @selected="p => $set(selected, 1, p)">
+                </add-project-block>
             </div>
-
-            <div>
-                <span v-for="name in plotNames">
-                    {{ name }}
-                </span>
-            </div>
-
-            <button class="btn btn-primary" @click="plot">Plot</button>
+        </div>
+        <div>
+            <button class="btn btn-light" @click="plot" :disabled="loading">
+                <span class="fa fa-refresh fa-spin fa-fw" v-if="loading"></span>
+                <span class="fa fa-check fa-fw" v-else></span>
+                Plot
+            </button>
         </div>
     </div>
 
-    <div class="col-9">
-        <div class="card card-body block">
-            <correlation :data="plotData" :names="plotNames"></correlation>
-        </div>
+    <div class="card card-body block mt-2">
+        <correlation :data="plotData" :names="[]"></correlation>
     </div>
 </div>
 </template>
 
 <script>
 import Correlation from 'charts/Correlation'
+import AddProjectBlock from 'components/Integrate/AddProjectBlock'
+import { mapState, mapActions, mapGetters } from 'vuex'
 
 export default {
     data() {
         return {
-            plotName: null,
-            // plotNames: [],
-            plotNames: ['AUC Lipidomics', 'AUC Metabolomics'],
-            plotData: null
+            plotData: null,
+            selected: [],
+            loading: false
         }
     },
 
     components: {
-        Correlation
+        Correlation,
+        AddProjectBlock
     },
 
     methods: {
-        addName() {
-            const index = this.plotNames.indexOf(this.plotName)
-            if (index > -1) this.plotNames.splice(index, 1)
-            else this.plotNames.push(this.plotName)
-        },
         plot() {
-            const names = this.plotNames
-            $.getJSON(`${ROOTURL}/correlate`, {names}).then(data => {
+            this.loading = true
+            const selectedIds = this.selected.map(d => d.id)
+            console.log(selectedIds)
+            $.getJSON(`${ROOTURL}/crosscorrelate`, {projects: selectedIds}).then(data => {
                 this.plotData = data
+                this.loading = false
             })
         }
     },
 
     computed: {
+        ...mapState(['projects']),
         names() {
             return this.$store.state.names
-        }
-    },
-
-    watch: {
-        names() {
-            this.plotName = this.names[0]
+        },
+        filteredProjects() {
+            console.log('kek')
+            const chosen = this.selected.filter(d => d).map(d => d.id)
+            return this.projects.filter(d => !chosen.includes(d.id))
         }
     },
 
     created() {
-        this.plotName = this.names[0]
+        this.project = this.projects[0]
     }
 }
 </script>
