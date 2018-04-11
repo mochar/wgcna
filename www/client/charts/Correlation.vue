@@ -19,7 +19,7 @@ export default {
 
             radius: null,
             arc: d3.arc().cornerRadius(20),
-            symbol: d3.symbol().size(500)
+            symbol: d3.symbol().size(400)
         }
     },
 
@@ -60,8 +60,10 @@ export default {
             // Line
             const arcsMap = d3.map(arcs, d => `${d.data.name}_${d.data.group}`)
             const ribbon = d3.ribbon().radius(this.radius - 50)
-            const widthScale = d3.scaleLinear().domain([0.5, 1]).range([2, 3]) // 3,5
-            const opScale = d3.scaleLinear().domain([0.5, 1]).range([.5, .9])
+            // const widthScale = d3.scaleLinear().domain([0.5, 1]).range([2, 3]) // 3,5
+            // const opScale = d3.scaleLinear().domain([0.5, 1]).range([.5, .9])
+            const widthScale = d3.scaleLinear().domain([0, 1]).range([2, 3]) // 3,5
+            const opScale = d3.scaleLinear().domain([0, 1]).range([.5, .9])
             const line = this.svg.selectAll('.line').data(this.data.links)
             line.enter().append('path')
                 .classed('line', true)

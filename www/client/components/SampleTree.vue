@@ -9,7 +9,7 @@
         :colors="colors"
         @cutted="d => $emit('cutted', d)">
     </dendrogram>
-    <dendro
+    <!-- <dendro
         v-if="colors" 
         :ratio="0.3"
         :labels="true"
@@ -17,12 +17,12 @@
         :cuttable="cuttable"
         :colors="colors"
         @cutted="d => $emit('cutted', d)">
-    </dendro>
+    </dendro> -->
 </div>
 </template>
 
 <script>
-import Dendrogram from 'charts/Dendrogram'
+import Dendrogram from 'charts/Dendrogram.vue'
 import Dendro from 'charts/Dendro'
 import { min, max } from 'd3-array'
 import { scaleSequential, scaleOrdinal } from 'd3-scale'
@@ -41,7 +41,7 @@ export default {
 
     components: {
         Dendrogram,
-        Dendro
+        // Dendro
     },
 
     created() {
