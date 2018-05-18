@@ -18,7 +18,7 @@ function dendrogram(settings) {
     chart.data = chart.settings.data
 
     function toX(d, i) {
-        // return chart.x(chart.data.labels[-d - 1]) + (chart.x.bandwidth() / 2)
+        return chart.x[i](chart.data[i].labels[-d - 1]) + (chart.x[i].bandwidth() / 2)
         return chart.x[i](chart.data[i].labels[-d - 1])
     }
 
@@ -45,7 +45,7 @@ function dendrogram(settings) {
         chart.outerRadius = 400
 
         chart.x = chart.data.map(d => d3.scaleBand().paddingOuter(.5))
-        chart.y = d3.scaleLinear().interpolate(d3.interpolateRound)
+        chart.y = chart.data.map(d => d3.scaleLinear().interpolate(d3.interpolateRound))
 
         resize()
         updateScales()
@@ -71,18 +71,20 @@ function dendrogram(settings) {
     }
 
     function updateScales() {
+        // const heights = Array.prototype.concat(...chart.data.map(d => d.height))
+        // const heightMin = d3.min(heights)
+        // const heightMax = d3.max(heights)
+
         for (let i = 0; i < chart.data.length; i++) {
             chart.x[i]
                 .domain(chart.data[i].ordered)
-                .range([0, chart.width-25])
+                .range([0, chart.width])
+            let heightMin = d3.min(chart.data[i].height)
+            let heightMax = d3.max(chart.data[i].height)
+            chart.y[i]
+                .domain([Math.max(heightMin - .1 * (heightMax - heightMin), 0), heightMax])
+                .range([chart.height, 0])
         }
-
-        const heights = Array.prototype.concat(...chart.data.map(d => d.height))
-        const heightMin = d3.min(heights)
-        const heightMax = d3.max(heights)
-        chart.y
-            .domain([Math.max(heightMin - 0.1 * (heightMax - heightMin), 0), heightMax])
-            .range([chart.height, 0])
     }
 
     function divide() {
@@ -93,9 +95,8 @@ function dendrogram(settings) {
 
     chart.update = function() {
         let x = d3.scaleLinear()
-            .domain([0, chart.width-25])
+            .domain([0, chart.width])
         let y = d3.scaleLinear()
-            .domain(chart.y.range())
             .range([chart.innerRadius, chart.outerRadius])
         let line = d3.lineRadial()
             .angle(d => x(d[0]) + Math.PI * .5)
@@ -105,6 +106,7 @@ function dendrogram(settings) {
         const arcs = divide()
         for (let z = 0; z < arcs.length; z++) {
             x.range([arcs[z].startAngle, arcs[z].endAngle])
+            y.domain(chart.y[z].range())
 
             let positions = buildPositions(z)
             let locations = chart.data[z].merge.map((d, i) => {
@@ -114,16 +116,16 @@ function dendrogram(settings) {
                 //      bottomleft  |            | 
                 //                               | bottomright
                 let left = d[0] < 0 ? toX(d[0], z) : positions[d[0]-1],
-                    top = chart.y(chart.data[z].height[i]),
+                    top = chart.y[z](chart.data[z].height[i]),
                     right = d[1] < 0 ? toX(d[1], z) : positions[d[1]-1],
                     // bottomLeft = d[0] < 0 ? chart.y(chart.data.height[i])+5 :
                     //                     chart.y(chart.data.height[d[0]-1]),
                     // bottomRight = d[1] < 0 ? chart.y(chart.data.height[i])+5 :
                     //                     chart.y(chart.data.height[d[1]-1])
-                    bottomLeft = d[0] < 0 ? chart.y.range()[0] :
-                                        chart.y(chart.data[z].height[d[0]-1]),
-                    bottomRight = d[1] < 0 ? chart.y.range()[0] :
-                                        chart.y(chart.data[z].height[d[1]-1])
+                    bottomLeft = d[0] < 0 ? chart.y[z].range()[0] :
+                                        chart.y[z](chart.data[z].height[d[0]-1]),
+                    bottomRight = d[1] < 0 ? chart.y[z].range()[0] :
+                                        chart.y[z](chart.data[z].height[d[1]-1])
 
                 return {left, top, right, bottomLeft, bottomRight}
             })
