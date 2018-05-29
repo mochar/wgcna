@@ -436,6 +436,7 @@ def report(name):
     return send_file(path, as_attachment=True)
 
 
+"""
 @app.route('/crosscorrelate')
 def crosscorrelate():
     project_ids = request.args.getlist('projects[]')
@@ -476,3 +477,23 @@ def crosscorrelate():
             links.append(link)
 
     return jsonify({'nodes': nodes, 'links': links})
+    return jsonify(img=base64_encode_image('/home/mochar/work/duchenne/kristina/circle_compressed.png'))
+"""
+
+
+@app.route('/crosscorrelate')
+def crosscorrelate():
+    project_ids = request.args.getlist('projects[]')
+    projects = [project_from_id(id) for id in project_ids]
+    project_folders = [project_id_to_folder(id) for id in project_ids]
+
+    data = []
+    matching_samples = set()
+    for project, folder in zip(projects, project_folders):
+        eigengenes_df = pd.read_csv(os.path.join(folder, 'eigengenes.csv'), index_col=0).T
+        cluster_data = rscripts.hclust(eigengenes_df)
+        data.append({'project': project, 'clusterData': cluster_data, 
+            'samples': eigengenes_df.columns.tolist()})
+        matching_samples.update(set(data[-1]['samples']))
+
+    return jsonify(matching=list(matching_samples), data=data)
