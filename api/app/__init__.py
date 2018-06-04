@@ -351,6 +351,7 @@ def correlate(project_id):
 @app.route('/projects/<project_id>/annotate', methods=['GET'])
 @project_exists
 def annotate(project_id):
+    from scripts.set_analysis import Set_analysis
     id_type = request.args.get('id_type')
     annotation_type = request.args.get('annotation_type')
     recalculate = request.args.get('recalculate')
@@ -372,6 +373,7 @@ def annotate(project_id):
 
 @app.route('/integrate', methods=['GET'])
 def integrate():
+    from scripts.set_analysis import Set_analysis
     print(request.args.get('projectId1'))
     print(request.args.get('projectId2'))
     print(request.args.get('id_type1'))

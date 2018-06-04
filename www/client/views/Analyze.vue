@@ -30,7 +30,7 @@
                         Module significance
                     </a>
                 </li>
-                <li class="nav-item" v-if=false>
+                <li class="nav-item" v-if=true>
                     <a
                         class="nav-link"
                         :class="{ disabled: !hasModules, active: tab == 'ModuleAnnotationTab' }"

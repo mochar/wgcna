@@ -17,7 +17,7 @@
                     <router-link to="/integrate" class="nav-item nav-link" active-class="active" tag="a">
                         Integrate
                     </router-link>
-                    <router-link to="/semanticintegrate" class="nav-item nav-link" active-class="active" tag="a" v-if=false>
+                    <router-link to="/semanticintegrate" class="nav-item nav-link" active-class="active" tag="a" v-if=true>
                         Semantic Integrate
                     </router-link>
                 </div>
