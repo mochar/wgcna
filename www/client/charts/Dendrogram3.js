@@ -78,20 +78,23 @@ function dendrogram(settings) {
                 const radius = Math.sqrt(pos[0]**2 + pos[1]**2)
                 const module = chart.xRev(angle)
 
-                // const x = radius * Math.cos(chart.x(module) - Math.PI * .5)
-                // const y = radius * Math.sin(chart.x(module) - Math.PI * .5)
-                // chart.g.select('circle.meme').attr('cx', x).attr('cy', y)
-
                 // const project = module.split('_')[0]
                 // const trees = d3.selectAll('g.tree')
                 // trees.transition().attr('stroke', 'black')
                 // trees.filter(`.tree_${project}`).transition().attr('stroke', 'grey')
 
                 chart.g.selectAll('.module').interrupt().transition().attr('r', 2)
-                chart.g.select(`#module_${module}`)
-                    .transition()
-                    .duration(100)
-                    .attr('r', 6)
+                if (radius <= chart.innerRadius && module.split('_')[1] !== 'dummy') {
+                    chart.g.select(`#module_${module}`)
+                        .transition()
+                        .duration(100)
+                        .attr('r', 6)
+                    chart.g.select('text#selected-module')
+                        .text(module.split('_')[1])
+                } else {
+                    chart.g.select('text#selected-module')
+                        .text('')
+                }
             })
         chart.g = chart.svg.append('g')
 
@@ -128,6 +131,14 @@ function dendrogram(settings) {
         // Axis
         chart.axis = chart.g.append('g')
             .attr('text-anchor', 'end')
+        
+        // Selected module
+        chart.g.append('text')
+            .attr('id', 'selected-module')
+            .attr('x', 0)
+            .attr('y', 0)
+            .style('text-anchor', 'middle')
+            .style('font-size', '1.1rem')
   
         resize()
         updateScales()
