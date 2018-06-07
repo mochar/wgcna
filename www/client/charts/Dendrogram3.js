@@ -68,8 +68,33 @@ function dendrogram(settings) {
         chart.innerRadius = 275
         chart.outerRadius = 400
 
+        
         chart.svg = d3.select(chart.settings.selector)
             .attr('transform', `translate(${chart.margin.left}, ${chart.margin.top})`)
+            .on('mousemove', d => {
+                const pier = d3.scaleLinear()
+                    .domain([Math.PI, -Math.PI])
+                    .range([0, 2 * Math.PI])
+                const pos = d3.mouse(chart.g.node())
+                const angle = pier(Math.atan2(pos[0], pos[1]))
+                const radius = Math.sqrt(pos[0]**2 + pos[1]**2)
+                const module = chart.xRev(angle)
+
+                // const x = radius * Math.cos(chart.x(module) - Math.PI * .5)
+                // const y = radius * Math.sin(chart.x(module) - Math.PI * .5)
+                // chart.g.select('circle.meme').attr('cx', x).attr('cy', y)
+
+                // const project = module.split('_')[0]
+                // const trees = d3.selectAll('g.tree')
+                // trees.transition().attr('stroke', 'black')
+                // trees.filter(`.tree_${project}`).transition().attr('stroke', 'grey')
+
+                chart.g.selectAll('.module').interrupt().transition().attr('r', 2)
+                chart.g.select(`#module_${module}`)
+                    .transition()
+                    .duration(100)
+                    .attr('r', 6)
+            })
         chart.g = chart.svg.append('g')
 
         // x: projectid_modulename -> node position
@@ -83,6 +108,10 @@ function dendrogram(settings) {
             .domain(chart.allModules)
             .range([0, 2 * Math.PI])
             .padding(.5)
+
+        chart.xRev = d3.scaleQuantize()
+            .domain([0, 2 * Math.PI])
+            .range(chart.allModules)
 
         // y: dendrogram height -> radius
         const heights = flatten(chart.data.map(d => d.height))
@@ -125,11 +154,16 @@ function dendrogram(settings) {
         const arc = d3.arc()
 
         // Trees
-        const locations = flatten(chart.data.map((d, z) => buildPositions(z)))
-        const group = chart.g.append('g').selectAll('.group').data(locations)
+        const tree = chart.g.append('g').selectAll('g.tree')
+            .data(chart.data.map((d, z) => buildPositions(z)))
+        tree.exit().remove()
+        const treeEnter = tree.enter().append('g')
+            .attr('class', (d, i) => `tree tree_${chart.ids[i]}`)
+            .attr('stroke', 'black')
+
+        const group = treeEnter.selectAll('.group').data(d => d)
         group.exit().remove()
         const groupEnter = group.enter().append('g')
-            .attr('stroke', 'black')
             .attr('stroke-width', '1.5')
         groupEnter.append('path')
             .attr('d', d => line([[d.left, d.top], [d.left, d.bottomLeft]]))
@@ -144,6 +178,7 @@ function dendrogram(settings) {
         circle.exit().remove()
         circle.enter().append('circle')
             .filter(d => d.split('_')[1] !== 'dummy')
+            .attr('id', d => `module_${d}`)
             .classed('module', true)
             .attr('transform', d => {
                 const radius = chart.innerRadius - 15
@@ -155,7 +190,7 @@ function dendrogram(settings) {
             .attr('r', 2)
         
         // Links
-        const ribbon = d3.ribbon().radius(chart.innerRadius - 20)
+        const ribbon = d3.ribbon().radius(chart.innerRadius - 25)
         const link = chart.g.append('g').selectAll('d').data(chart.corrs)
         link.exit().remove()
         link.enter().append('path')
