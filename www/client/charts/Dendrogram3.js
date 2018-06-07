@@ -55,8 +55,6 @@ function dendrogram(settings) {
                                     chart.y(data.height[d[0]-1]),
                 bottomRight = d[1] < 0 ? chart.y.range()[0] :
                                     chart.y(data.height[d[1]-1])
-
-            // console.log({left, top, right, bottomLeft, bottomRight})
             return {left, top, right, bottomLeft, bottomRight}
         })
     }
@@ -243,6 +241,28 @@ function dendrogram(settings) {
             .attr('stroke', 'grey')
             .attr('stroke-width', 1)
             .attr('d', line([[0, chart.y.range()[0]], [0, chart.y.range()[1]]]))
+        
+        // Labels
+        arc.innerRadius(chart.outerRadius+23).outerRadius(chart.outerRadius+23)
+        const textPath = treeEnter.append('path')
+            .attr('id', (d, i) => `path_${chart.ids[i]}`) 
+            .attr('d', (d, i) => { 
+                const id = chart.ids[i]
+                const modules = chart.data[i].ordered
+                const start = chart.x(`${id}_${modules[0]}`)
+                const end = chart.x(`${id}_${modules[modules.length - 1]}`)
+                return arc({startAngle: start, endAngle: end})
+            })
+            .attr('stroke-width', 0)
+        
+        treeEnter.append('text').append('textPath') 
+            .attr('xlink:href', (d, i) => `#path_${chart.ids[i]}`)
+            .style('text-anchor','middle') 
+            .attr('startOffset', (d, i) => {
+                const length = textPath._groups[0][i].getTotalLength()
+                return length / 4
+            })
+            .text((d, i) => chart.names[i])
 
         return chart
     }
