@@ -1,6 +1,10 @@
 import * as d3 from 'd3'
 import { drawAxis, scaleRadial } from 'charts/Functions'
 
+function flatten(array) {
+    return Array.prototype.concat(...array)
+}
+
 function dendrogram(settings) {
 
     let chart = {}
@@ -8,6 +12,7 @@ function dendrogram(settings) {
     chart.settings = {
         data: null,
         names: null,
+        ids: null,
         ratio: null,
         selector: null
     }
@@ -16,19 +21,42 @@ function dendrogram(settings) {
     }
 
     chart.data = chart.settings.data
+    chart.names = chart.settings.names
+    chart.ids = chart.settings.ids
 
     function toX(d, i) {
-        // return chart.x[i](chart.data[i].labels[-d - 1]) + (chart.x[i].bandwidth() / 2)
-        return chart.x[i](chart.data[i].ordered[-d - 1])
+        const moduleName = chart.data[i].ordered[-d - 1]
+        const projectId = chart.ids[i]
+        return chart.x(`${projectId}_${moduleName}`)
     }
 
     function buildPositions(z) {
-        return chart.data[z].merge.reduce((prev, cur, i) => {
+        const data = chart.data[z]
+
+        const positions = data.merge.reduce((prev, cur, i) => {
             const x1 = cur[0] < 0 ? toX(cur[0], z) : prev[cur[0]-1]
             const x2 = cur[1] < 0 ? toX(cur[1], z) : prev[cur[1]-1]
             prev.push(x1 + ((x2 - x1) / 2))
             return prev
         }, [])
+
+        return data.merge.map((d, i) => {
+            // Element:
+            //                    top
+            //      left        -------------- right
+            //      bottomleft  |            | 
+            //                               | bottomright
+            let left = d[0] < 0 ? toX(d[0], z) : positions[d[0]-1],
+                top = chart.y(data.height[i]),
+                right = d[1] < 0 ? toX(d[1], z) : positions[d[1]-1],
+                bottomLeft = d[0] < 0 ? chart.y.range()[0] :
+                                    chart.y(data.height[d[0]-1]),
+                bottomRight = d[1] < 0 ? chart.y.range()[0] :
+                                    chart.y(data.height[d[1]-1])
+
+            // console.log({left, top, right, bottomLeft, bottomRight})
+            return {left, top, right, bottomLeft, bottomRight}
+        })
     }
 
     !function init() {
@@ -42,9 +70,25 @@ function dendrogram(settings) {
             .attr('transform', `translate(${chart.margin.left}, ${chart.margin.top})`)
         chart.g = chart.svg.append('g')
 
-        // chart.x = chart.data.map(d => d3.scaleBand().paddingOuter(.6))
-        chart.x = chart.data.map(d => d3.scalePoint().padding(.8))
-        chart.y = chart.data.map(d => d3.scaleLinear().interpolate(d3.interpolateRound))
+        // x: projectid_modulename -> node position
+        chart.allModules = flatten(chart.data.map((d, i) => {
+            const projectId = chart.ids[i]
+            return d.ordered
+                .map(d2 => `${projectId}_${d2}`)
+                .concat(`${projectId}_dummy`)
+        }))
+        chart.x = d3.scalePoint()
+            .domain(chart.allModules)
+            .range([0, 2 * Math.PI])
+            .padding(.5)
+
+        // y: dendrogram height -> radius
+        const heights = flatten(chart.data.map(d => d.height))
+        const heightMin = d3.min(heights)
+        const heightMax = d3.max(heights)
+        chart.y = d3.scaleLinear()
+            .domain([Math.max(heightMin - .1 * (heightMax - heightMin), 0), heightMax])
+            .range([chart.innerRadius, chart.outerRadius])
 
         resize()
         updateScales()
@@ -62,89 +106,41 @@ function dendrogram(settings) {
     }
 
     function updateScales() {
-        // const heights = Array.prototype.concat(...chart.data.map(d => d.height))
-        // const heightMin = d3.min(heights)
-        // const heightMax = d3.max(heights)
-
-        for (let i = 0; i < chart.data.length; i++) {
-            chart.x[i]
-                .domain(chart.data[i].ordered)
-                .range([0, chart.width])
-            let heightMin = d3.min(chart.data[i].height)
-            let heightMax = d3.max(chart.data[i].height)
-            chart.y[i]
-                .domain([Math.max(heightMin - .1 * (heightMax - heightMin), 0), heightMax])
-                .range([chart.height, 0])
-        }
-    }
-
-    function divide() {
-        const data = chart.data.map(d => d.labels.length)
-        const arcs = d3.pie().padAngle(0)(data)
-        return arcs
     }
 
     chart.update = function() {
-        let x = d3.scaleLinear()
-            .domain([0, chart.width])
-        let y = d3.scaleLinear()
-            .range([chart.innerRadius, chart.outerRadius])
-        let line = d3.lineRadial()
-            .angle(d => x(d[0]))
-            .radius(d => y(d[1]))
-        let arc = d3.arc()
+        const line = d3.lineRadial()
+        const arc = d3.arc()
 
-        const arcs = divide()
-        for (let z = 0; z < arcs.length; z++) {
-            x.range([arcs[z].startAngle, arcs[z].endAngle])
-            y.domain(chart.y[z].range())
+        // Trees
+        const locations = flatten(chart.data.map((d, z) => buildPositions(z)))
+        const group = chart.g.append('g').selectAll('.group').data(locations)
+        group.exit().remove()
+        const groupEnter = group.enter().append('g')
+            .attr('stroke', 'black')
+            .attr('stroke-width', '1.5')
+        groupEnter.append('path')
+            .attr('d', d => line([[d.left, d.top], [d.left, d.bottomLeft]]))
+        groupEnter.append('path')
+            .attr('d', d => line([[d.right, d.top], [d.right, d.bottomRight]]))
+        groupEnter.append('path')
+            .attr('d', d => arc({innerRadius: d.top, outerRadius: d.top, startAngle: d.left, endAngle: d.right}))
 
-            let positions = buildPositions(z)
-            let locations = chart.data[z].merge.map((d, i) => {
-                // Element:
-                //                    top
-                //      left        -------------- right
-                //      bottomleft  |            | 
-                //                               | bottomright
-                let left = d[0] < 0 ? toX(d[0], z) : positions[d[0]-1],
-                    top = chart.y[z](chart.data[z].height[i]),
-                    right = d[1] < 0 ? toX(d[1], z) : positions[d[1]-1],
-                    bottomLeft = d[0] < 0 ? chart.y[z].range()[0] :
-                                        chart.y[z](chart.data[z].height[d[0]-1]),
-                    bottomRight = d[1] < 0 ? chart.y[z].range()[0] :
-                                        chart.y[z](chart.data[z].height[d[1]-1])
-
-                return {left, top, right, bottomLeft, bottomRight}
+        // Nodes
+        const circle = chart.g.append('g').selectAll('circle.module')
+            .data(chart.allModules, d => d)
+        circle.exit().remove()
+        circle.enter().append('circle')
+            .filter(d => d.split('_')[1] !== 'dummy')
+            .classed('module', true)
+            .attr('transform', d => {
+                const radius = chart.innerRadius - 15
+                const angle = chart.x(d)
+                const x_ = radius * Math.cos(angle - Math.PI * .5) + 1
+                const y_ = radius * Math.sin(angle - Math.PI * .5) + 1
+                return `translate(${x_}, ${y_})`
             })
-
-            // draw
-            const project = chart.g.append('g').classed('project', true)
-
-            const group = project.selectAll('.group').data(locations)
-            group.exit().remove()
-            const groupEnter = group.enter().append('g')
-                .attr('stroke', 'black')
-                .attr('stroke-width', '1.5')
-            groupEnter.append('path')
-                .attr('d', d => line([[d.left, d.top], [d.left, d.bottomLeft]]))
-            groupEnter.append('path')
-                .attr('d', d => line([[d.right, d.top], [d.right, d.bottomRight]]))
-            groupEnter.append('path')
-                .attr('d', d => arc({innerRadius: y(d.top), outerRadius: y(d.top), startAngle: x(d.left), endAngle: x(d.right)}))
-
-            const circle = project.selectAll('circle.module').data(chart.data[z].ordered)
-            circle.exit().remove()
-            circle.enter().append('circle')
-                .classed('module', true)
-                .attr('transform', d => {
-                    const radius = chart.innerRadius - 15
-                    const angle = x(chart.x[z](d))
-                    const x_ = radius * Math.cos(angle - Math.PI * .5) + 1
-                    const y_ = radius * Math.sin(angle - Math.PI * .5) + 1
-                    return `translate(${x_}, ${y_})`
-                })
-                .attr('r', 2)
-        }
+            .attr('r', 2)
 
         return chart
     }
