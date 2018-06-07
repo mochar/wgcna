@@ -11,6 +11,7 @@ function dendrogram(settings) {
 
     chart.settings = {
         data: null,
+        corrs: null,
         names: null,
         ids: null,
         ratio: null,
@@ -21,6 +22,7 @@ function dendrogram(settings) {
     }
 
     chart.data = chart.settings.data
+    chart.corrs = chart.settings.corrs
     chart.names = chart.settings.names
     chart.ids = chart.settings.ids
 
@@ -87,8 +89,14 @@ function dendrogram(settings) {
         const heightMin = d3.min(heights)
         const heightMax = d3.max(heights)
         chart.y = d3.scaleLinear()
-            .domain([Math.max(heightMin - .1 * (heightMax - heightMin), 0), heightMax])
+            // .domain([Math.max(heightMin - .1 * (heightMax - heightMin), 0), heightMax])
+            .domain([heightMin, heightMax])
             .range([chart.innerRadius, chart.outerRadius])
+        
+        // 
+        chart.color = d3.scaleLinear()
+            .domain([-1, 0, 1])
+            .range(['#C51D1D', 'white', 'steelblue'])
 
         resize()
         updateScales()
@@ -141,6 +149,22 @@ function dendrogram(settings) {
                 return `translate(${x_}, ${y_})`
             })
             .attr('r', 2)
+        
+        // Links
+        const ribbon = d3.ribbon().radius(chart.innerRadius - 20)
+        const link = chart.g.append('g').selectAll('d').data(chart.corrs)
+        link.exit().remove()
+        link.enter().append('path')
+            .attr('stroke', d => chart.color(d.value))
+            .attr('opacity', d => Math.log(Math.abs(d.value)) + 1)
+            .attr('d', d => {
+                const sourceAngle = chart.x(d.source)
+                const targetAngle = chart.x(d.target)
+                return ribbon({
+                    source: { startAngle: sourceAngle, endAngle: sourceAngle },
+                    target: { startAngle: targetAngle, endAngle: targetAngle }
+                })
+            })
 
         return chart
     }

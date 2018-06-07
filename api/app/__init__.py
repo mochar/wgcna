@@ -436,51 +436,6 @@ def report(name):
     return send_file(path, as_attachment=True)
 
 
-"""
-@app.route('/crosscorrelate')
-def crosscorrelate():
-    project_ids = request.args.getlist('projects[]')
-    project_folders = [project_id_to_folder(id) for id in project_ids]
-    project_names = [project_from_id(id)['name'] for id in project_ids]
-
-    # Read MEs 
-    MEs_list = [pd.read_csv(os.path.join(pf, 'eigengenes.csv'), index_col=0) 
-                for pf in project_folders]
-    nodes = []
-    for i, MEs in enumerate(MEs_list):
-        nodes.extend([{'name': c, 'group': project_names[i]} for c in MEs.columns])
-        nodes.append({'name': 'dummy{}'.format(i), 'group': 'dummies'})
-
-    # Reduce MEs to matching samples
-    matching_samples = set(MEs_list[0].index.tolist())
-    for MEs in MEs_list[1:]:
-        matching_samples.intersection_update(MEs.index.tolist())
-
-    # Terminate when no matching samples
-    if len(matching_samples) == 0:
-        return jsonify(nodes=[], links=[])
-
-    for MEs in MEs_list:
-        MEs.drop(MEs.index[~MEs.index.isin(matching_samples)], inplace=True)
-    
-    # Calculate correlations
-    links = []
-    for i, j in itertools.combinations(range(len(project_ids)), 2):
-        columns_i = MEs_list[i].columns.tolist()
-        columns_j = MEs_list[j].columns.tolist()
-        for module_a, module_b in itertools.product(columns_i, columns_j):
-            corr, p = pearsonr(MEs_list[i][module_a], MEs_list[j][module_b])
-            # if p < 0.05 and (corr >= 0.5 or corr <= -0.5):
-            link = {'source': {'name': module_a, 'group': project_names[i]},
-                    'target': {'name': module_b, 'group': project_names[j]},
-                    'value': corr}
-            links.append(link)
-
-    return jsonify({'nodes': nodes, 'links': links})
-    return jsonify(img=base64_encode_image('/home/mochar/work/duchenne/kristina/circle_compressed.png'))
-"""
-
-
 @app.route('/crosscorrelate')
 def crosscorrelate():
     project_ids = request.args.getlist('projects[]')
@@ -488,12 +443,35 @@ def crosscorrelate():
     project_folders = [project_id_to_folder(id) for id in project_ids]
 
     data = []
-    matching_samples = set()
+    eigengenes_dfs = []
     for project, folder in zip(projects, project_folders):
-        eigengenes_df = pd.read_csv(os.path.join(folder, 'eigengenes.csv'), index_col=0).T
-        cluster_data = rscripts.hclust(eigengenes_df)
+        eigengenes_df = pd.read_csv(os.path.join(folder, 'eigengenes.csv'), index_col=0)
+        eigengenes_dfs.append(eigengenes_df)
+        cluster_data = rscripts.hclust(eigengenes_df.T)
         data.append({'project': project, 'clusterData': cluster_data, 
-            'samples': eigengenes_df.columns.tolist()})
-        matching_samples.update(set(data[-1]['samples']))
+            'samples': eigengenes_df.index.tolist()})
+    
+    # Terminate when no matching samples
+    matching_samples = set.intersection(*[set(d['samples']) for d in data])
+    if len(matching_samples) == 0:
+        return jsonify(error='No matching samples'), 400
+    
+    # Filter down to matching samples
+    for eigengenes_df in eigengenes_dfs:
+        drop = ~eigengenes_df.index.isin(matching_samples)
+        eigengenes_df.drop(eigengenes_df.index[drop], inplace=True)
+    
+    # Calculate correlations
+    crosscorrs = []
+    for i, j in itertools.combinations(range(len(projects)), 2):
+        cross_correlations = pd.concat([eigengenes_dfs[z] for z in (i, j)], 
+                                       axis=1, keys=['df1', 'df2']).corr().loc['df1', 'df2']
+        for index in cross_correlations.index:
+            for column in cross_correlations.columns:
+                crosscorr = {}
+                crosscorr['source'] = '{}_{}'.format(project_ids[i], index)
+                crosscorr['target'] = '{}_{}'.format(project_ids[j], column)
+                crosscorr['value'] = cross_correlations.loc[index, column]
+                crosscorrs.append(crosscorr)
 
-    return jsonify(matching=list(matching_samples), data=data)
+    return jsonify(matching=list(matching_samples), data=data, crosscorrs=crosscorrs)
