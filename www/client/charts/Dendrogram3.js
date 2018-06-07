@@ -98,6 +98,10 @@ function dendrogram(settings) {
             .domain([-1, 0, 1])
             .range(['#C51D1D', 'white', 'steelblue'])
 
+        // Axis
+        chart.axis = chart.g.append('g')
+            .attr('text-anchor', 'end')
+  
         resize()
         updateScales()
     }()
@@ -165,6 +169,45 @@ function dendrogram(settings) {
                     target: { startAngle: targetAngle, endAngle: targetAngle }
                 })
             })
+        
+        // Axis
+        const yTick = chart.axis
+            .selectAll('g')
+            // .data(chart.y.ticks(5).slice(1))
+            .data(chart.y.ticks(5))
+            .enter().append('g')
+    
+        yTick.append('circle')
+            .attr('fill', 'none')
+            .attr('stroke', '#000')
+            .attr('stroke-opacity', 0.175)
+            .attr('r', chart.y)
+
+        yTick.append('text')
+            .attr('x', -6)
+            .attr('y', d => -chart.y(d))
+            .attr('dy', '0.35em')
+            .attr('fill', 'none')
+            .attr('stroke', '#fff')
+            .attr('stroke-width', 5)
+            .text(chart.y.tickFormat(10, 's'));
+      
+        yTick.append('text')
+            .attr('x', -6)
+            .attr('y', d => -chart.y(d))
+            .attr('dy', '0.35em')
+            .text(chart.y.tickFormat(10, 's'));
+      
+        chart.axis.append('text')
+            .attr('x', -6)
+            .attr('y', d => -chart.y(chart.y.ticks(10).pop()))
+            .attr('dy', '-1em')
+            .text('Height')
+        
+        chart.axis.append('path')
+            .attr('stroke', 'grey')
+            .attr('stroke-width', 1)
+            .attr('d', line([[0, chart.y.range()[0]], [0, chart.y.range()[1]]]))
 
         return chart
     }
