@@ -89,7 +89,8 @@
                 :sigOnly="sigOnly"
                 :columnOnly="columnOnly">
             </significance>
-            <button @click.prevent="showPvalues = false" class="btn btn-light" v-if="showPvalues">
+            <!-- <button @click.prevent="showPvalues = false" class="btn btn-light" v-if="showPvalues"> -->
+            <button @click.prevent="$emit('back')" class="btn btn-light" v-if="showPvalues">
                 <span class="fa fa-angle-double-left"></span>
                 Return
             </button>
@@ -206,9 +207,9 @@ export default {
     watch: {
         project() {
             if (this.update) {
-                this.loading = true
-                this.showPvalues = false
-                this.setUp()
+                // this.loading = true
+                // this.showPvalues = false
+                // this.setUp()
             }
         }
     },

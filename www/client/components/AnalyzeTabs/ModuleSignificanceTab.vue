@@ -1,11 +1,12 @@
 <template>
 <div>
-    <!-- <genotype
+    <genotype
         :project="project" 
         :update="shouldUpdate || project.step == 4"
         @done="genotypeDone"
-        v-if="project.step > 3">
-    </genotype> -->
+        @back="showSig = false"
+        v-if="showSig">
+    </genotype>
     
     <correlation-view 
         :project="project" 
@@ -13,7 +14,7 @@
         v-if="showCorrs">
     </correlation-view>
 
-    <div id="significance-container" class="d-flex align-items-start" v-else>
+    <div id="significance-container" class="d-flex align-items-start" v-if="!showCorrs && !showSig">
         <div class="card card-body block mr-1" style="flex: 1">
             <div class="d-flex justify-content-between align-items-start">
                 <h6 class="block-title text-uppercase">
@@ -27,7 +28,7 @@
                 <option v-for="trait in nominalTraits" :key="trait" :value="trait">{{ trait }}</option>
             </select>
             <div class="mt-3">
-                <button class="btn btn-light">
+                <button class="btn btn-light" @click="showSig = true">
                     <span class="fa fa-check"></span>
                     Go
                 </button>
@@ -57,7 +58,8 @@ export default {
     data() {
         return {
             trait: null,
-            showCorrs: false
+            showCorrs: false,
+            showSig: false
         }
     },
 
