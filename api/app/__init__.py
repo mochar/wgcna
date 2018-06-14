@@ -317,20 +317,24 @@ def module_eigengenes(project_id):
 def genotype(project_id):
     project_folder = project_id_to_folder(project_id)
     if request.method == 'POST':
-        groups = request.form.get('groups')
+        trait = request.get_json(force=True)['trait']
+        groups = pd.read_csv(project_folder + '/trait.csv', index_col=0).loc[:, trait]
+        groups = ','.join(groups.tolist())
         if groups is None:
             return {'error': 'Please specify the groups.'}, 403
         cmd = ['Rscript', '--no-init-file', 'scripts/genotype.R', project_folder, groups]
         subprocess.check_output(cmd, universal_newlines=True)
         redis.hset('project:{}'.format(project_id), 'groups', groups)
         redis.hset('project:{}'.format(project_id), 'step', 5)
-    df = pd.read_csv(g.pvalues_path, index_col=0, keep_default_na=False, na_values=[''])
-    response = {}
-    response['pvalues'] = df.to_dict(orient='list')
-    response['modules'] = df.index.tolist()
-    response['eigengenes'] = pd.read_csv(g.eigengene_path, index_col=0).to_dict(orient='list')
-    response['groups'] = redis.hget('project:{}'.format(project_id), 'groups').split(',')
-    return jsonify(response)
+        return jsonify()
+    else:
+        df = pd.read_csv(g.pvalues_path, index_col=0, keep_default_na=False, na_values=[''])
+        response = {}
+        response['pvalues'] = df.to_dict(orient='list')
+        response['modules'] = df.index.tolist()
+        response['eigengenes'] = pd.read_csv(g.eigengene_path, index_col=0).to_dict(orient='list')
+        response['groups'] = redis.hget('project:{}'.format(project_id), 'groups').split(',')
+        return jsonify(response)
 
 
 @app.route('/projects/<project_id>/correlate', methods=['GET', 'POST'])

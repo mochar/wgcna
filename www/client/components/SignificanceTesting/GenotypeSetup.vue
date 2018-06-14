@@ -1,0 +1,61 @@
+<template>
+<div class="card card-body block">
+    <div class="d-flex justify-content-between align-items-start">
+        <h6 class="block-title text-uppercase">
+            Differential expression
+        </h6>
+    </div>
+    <p class="card-text">
+        Use the module eigengene to find a statistically significant difference between sample groups.
+    </p>
+    <select class="custom-select" v-model="trait">
+        <option v-for="trait in nominalTraits" :key="trait" :value="trait">{{ trait }}</option>
+    </select>
+    <div class="mt-3">
+        <button class="btn btn-light" @click="go" :disabled="loading">
+            <span class="fa fa-check" v-if="!loading"></span>
+            <span class="fa fa-refresh fa-spin" v-else></span>
+            Go
+        </button>
+        <button class="btn btn-light" disabled>
+            View previous result
+        </button>
+    </div>
+</div>
+</template>
+
+<script>
+export default {
+    data() {
+        return {
+            trait: null,
+            loading: false
+        }
+    },
+    
+    props: ['nominalTraits', 'project'],
+
+    methods: {
+        go() {
+            this.loading = true
+            const data = JSON.stringify({ trait: this.trait })
+            $.post({
+                url: `${ROOTURL}/projects/${this.project.id}/genotype`,
+                data: data,
+                dataType: 'json',
+                async: true
+            }).then(() => {
+                this.loading = false
+                this.$store.commit('editProject', {step: 5})
+                this.$emit('go')
+            }, () => {
+                this.loading = false
+            })
+        }
+    },
+
+    created() {
+        this.trait = this.nominalTraits[0]
+    }
+}
+</script>
