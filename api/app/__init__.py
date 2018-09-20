@@ -15,6 +15,7 @@ from flask_cors import CORS
 from scipy.stats.stats import pearsonr
 from redis import StrictRedis
 import pandas as pd
+import numpy as np
 
 import app.rscripts as rscripts
 try:
@@ -76,7 +77,7 @@ def project_from_id(project_id):
 def user_projects():
     if 'id' not in session:
         return []
-    user_id = session['id']
+    user_id = session.get('id')
     project_ids = redis.smembers('projects:{}'.format(user_id))
     pipe = redis.pipeline()
     for project_id in project_ids:
@@ -142,7 +143,7 @@ def project_exists(f):
         if 'id' not in session:
             abort(404)
             return
-        session_id = session['id']
+        session_id = session.get('id')
         if not redis.sismember('projects:{}'.format(session_id), g.project_id):
             abort(404)
             return
@@ -150,7 +151,8 @@ def project_exists(f):
     return decorated_function
 
 
-@app.route('/projects/', methods=['GET', 'POST', 'OPTIONS'])
+# @app.route('/projects/', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/projects/', methods=['GET', 'POST'])
 def projects():
     if request.method == 'GET':
         return jsonify({'projects': user_projects()})
@@ -168,7 +170,7 @@ def projects():
         return jsonify({'project': project})
 
 
-@app.route('/projects/<project_id>', methods=['GET', 'DELETE'])
+@app.route('/projects/<project_id>', methods=['GET', 'DELETE', 'PUT'])
 @project_exists
 def project(project_id):
     if request.method == 'GET':
@@ -176,7 +178,12 @@ def project(project_id):
         return jsonify({'project': project})
     elif request.method == 'DELETE':
         delete_project(g.user_id, project_id)
-    return jsonify({})
+        return jsonify({}), 200
+    elif request.method == 'PUT':
+        redis.hset('project:{}'.format(project_id), 'name', request.form['name'])
+        redis.hset('project:{}'.format(project_id), 'description', request.form['description'])
+        redis.hset('project:{}'.format(project_id), 'omic', request.form['omic'])
+        return jsonify({}), 200
 
 
 @app.route('/projects/<project_id>/expression', methods=['GET', 'POST', 'PUT'])
@@ -204,7 +211,7 @@ def trait(project_id):
     if request.method == 'GET':
         if {'true': True, 'false': False}[request.args.get('transpose', 'false')]:
             df = df.T
-        return jsonify(df.to_dict(orient='split'))
+        return jsonify(df.to_json(orient='split')), 200
     elif request.method == 'PUT':
         continues_indices = [int(x) for x in request.form['continues'].split(',') if x != '']
         traits = {x: 'C' if i in continues_indices else 'N' for i, x in enumerate(df.columns)}
@@ -234,7 +241,7 @@ def cluster_samples(project_id):
         response = {'clusterData': rscripts.hclust(g.expression_path)}
         if project['trait']:
             colors_df = pd.read_csv(g.trait_path, index_col=0)
-            response['colors'] = colors_df.to_dict(orient='list')
+            response['colors'] = colors_df.replace(np.nan, 'null').to_dict(orient='list')
             response['types'] = redis.hgetall('traits:{}'.format(project_id))
         return jsonify(response)
     elif request.method == 'POST':
@@ -319,7 +326,7 @@ def genotype(project_id):
     if request.method == 'POST':
         trait = request.get_json(force=True)['trait']
         groups = pd.read_csv(project_folder + '/trait.csv', index_col=0).loc[:, trait]
-        groups = ','.join(groups.tolist())
+        groups = ','.join(groups.apply(str).tolist())
         if groups is None:
             return {'error': 'Please specify the groups.'}, 403
         cmd = ['Rscript', '--no-init-file', 'scripts/genotype.R', project_folder, groups]
@@ -469,7 +476,7 @@ def crosscorrelate():
     crosscorrs = []
     for i, j in itertools.combinations(range(len(projects)), 2):
         cross_correlations = pd.concat([eigengenes_dfs[z] for z in (i, j)], 
-                                       axis=1, keys=['df1', 'df2']).corr().loc['df1', 'df2']
+                                       axis=1, keys=['df1', 'df2']).corr('spearman').loc['df1', 'df2']
         for index in cross_correlations.index:
             for column in cross_correlations.columns:
                 crosscorr = {}
