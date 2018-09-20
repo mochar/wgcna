@@ -89,21 +89,14 @@ def project_from_id(project_id):
 
 
 def user_projects():
-    if 'id' not in session:
+    if session is None:
         return []
-    user_id = session.get('id')
-    project_ids = redis.smembers('projects:{}'.format(user_id))
+    project_ids = redis.smembers('projects:{}'.format(session.sid))
     pipe = redis.pipeline()
     for project_id in project_ids:
         pipe.hgetall('project:{}'.format(project_id))
     projects = pipe.execute()
     return [process_project(p) for p in projects]
-
-
-def create_user():
-    user_id = uuid.uuid4().hex
-    session['id'] = user_id
-    return user_id
 
 
 def create_project(user_id, name, description, omic, expression, trait=None):
@@ -147,18 +140,15 @@ def setup_request_info():
         g.pvalues_path = os.path.join(g.project_folder, 'pvalues.csv')
         g.trait_path = os.path.join(g.project_folder, 'trait.csv')
         g.annotation_path = os.path.join(g.project_folder, 'annotations.json')
-    if 'id' in session:
-        g.user_id = session.get('id')
 
 
 def project_exists(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'id' not in session:
+        if session is None:
             abort(404)
             return
-        session_id = session.get('id')
-        if not redis.sismember('projects:{}'.format(session_id), g.project_id):
+        if not redis.sismember('projects:{}'.format(session.sid), g.project_id):
             abort(404)
             return
         return f(*args, **kwargs)
@@ -178,8 +168,7 @@ def projects():
         omic = request.form.get('omic')
         if expression.filename == '' or name == '':
             return jsonify(error='Required fields not supplied.'), 403
-        user_id = session.get('id') if 'id' in session else create_user()
-        project = create_project(user_id, name, description, omic, expression,
+        project = create_project(session.sid, name, description, omic, expression,
             trait=None if trait.filename == '' else trait)
         return jsonify({'project': project})
 
@@ -191,7 +180,7 @@ def project(project_id):
         project = project_from_id(project_id)
         return jsonify({'project': project})
     elif request.method == 'DELETE':
-        delete_project(g.user_id, project_id)
+        delete_project(session.sid, project_id)
         return jsonify({}), 200
     elif request.method == 'PUT':
         redis.hset('project:{}'.format(project_id), 'name', request.form['name'])
