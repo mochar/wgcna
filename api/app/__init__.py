@@ -11,6 +11,7 @@ from functools import wraps
 
 from flask import Flask, request, jsonify, send_file, make_response, session, g, abort
 from flask_session import Session
+from flask_session.sessions import RedisSessionInterface
 from flask_cors import CORS
 from scipy.stats.stats import pearsonr
 from redis import StrictRedis
@@ -31,6 +32,19 @@ redis = StrictRedis(db=app.config['REDIS_DB_DATA'], decode_responses=True,
 app.config['SESSION_REDIS'] =  StrictRedis(db=app.config['REDIS_DB_SESSION'])
 Session(app)
 CORS(app, supports_credentials=True, expose_headers=['Location'])
+
+
+# Not simple CORS requests send a preflight OPTIONS request, which do not
+# contain cookies. Flask-session therefore creates a new session, even
+# though one might already exist. Here I "fix" this by ignoring OPTIONS
+# requests in the session interface.
+class CorsRedisSessionInterface(RedisSessionInterface):
+    def open_session(self, app, request):
+        if request.method == 'OPTIONS':
+            return None
+        return super(CorsRedisSessionInterface, self).open_session(app, request)
+app.session_interface = CorsRedisSessionInterface(app.config['SESSION_REDIS'], 
+    'session:', app.config['SESSION_USE_SIGNER'], True)
 
 
 def base64_encode_image(image):
