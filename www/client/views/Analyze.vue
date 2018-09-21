@@ -9,7 +9,7 @@
                         :class="{ active: tab == 'ModuleCreationTab' }" 
                         href="#" 
                         @click.prevent="tab = 'ModuleCreationTab'">
-                        Module creation
+                        Generate
                     </a>
                 </li>
                 <li class="nav-item">
@@ -18,7 +18,7 @@
                         :class="{ disabled: !hasModules, active: tab == 'ModuleSignificanceTab' }" 
                         href="#" 
                         @click.prevent="tab = 'ModuleSignificanceTab'">
-                        Module significance
+                        Significance
                     </a>
                 </li>
                 <li class="nav-item">
@@ -27,7 +27,7 @@
                         :class="{ disabled: !hasModules, active: tab == 'ModuleInspectionTab' }" 
                         href="#" 
                         @click.prevent="tab = 'ModuleInspectionTab'">
-                        Module inspection
+                        Inspection
                     </a>
                 </li>
                 <li class="nav-item" v-if=true>
@@ -36,7 +36,7 @@
                         :class="{ disabled: !hasModules, active: tab == 'ModuleAnnotationTab' }"
                         href="#"
                         @click.prevent="tab = 'ModuleAnnotationTab'">
-                        Module annotation
+                        Annotation
                     </a>
                 </li>
             </ul>
