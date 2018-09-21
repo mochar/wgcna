@@ -42,7 +42,7 @@ export default {
         return {
             loading: true, // setting up
             busy: false, // doing the thing
-            types: [],
+            types: []
         }
     },
 
@@ -79,17 +79,32 @@ export default {
         }
     },
 
-    computed: {
-    },
-
     created() {
         $.get(`${ROOTURL}/projects/${this.project.id}/trait`).then(data => {
-            this.types = this.$helpers.range(data.columns.length).map(() => 'N')
-            this.data = data
+            console.log(data)
+            this.data = JSON.parse(data)
+            this.types = this.$helpers.range(this.data.columns.length).map(() => 'N')
             this.loading = false
         }, () => {
+            console.log('nani')
             this.loading = false
         })
+        // $.ajax({
+        //     url: `${ROOTURL}/projects/${this.project.id}/trait`,
+        //     type: 'GET',
+        //     async: true,
+        //     cache: false,
+        //     contentType: false,
+        //     processData: false
+        // }).then(data => {
+        //     console.log('suc')
+        //     this.types = this.$helpers.range(data.columns.length).map(() => 'N')
+        //     this.data = data
+        //     this.loading = false
+        // }, () => {
+        //     console.log('fug')
+        //     this.loading = false
+        // })
     }
 }
 </script>

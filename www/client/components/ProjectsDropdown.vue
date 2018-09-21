@@ -3,7 +3,7 @@
     <button class="btn btn-light btn-block dropdown-toggle text-left d-flex justify-content-between align-items-center" 
             style="margin-right: -1px" data-toggle="dropdown">
         <span v-if="project">
-            <span class="fa fa-circle fa-fw" :class="`text-${project.omic}`"></span>
+            <span v-if="circle" class="fa fa-circle fa-fw" :class="`text-${project.omic}`"></span>
             <span>{{ project.name }}</span>
             <span v-show="project.description" class="text-muted">- {{ project.description }}</span>
         </span>
@@ -36,7 +36,11 @@ export default {
 
     props: {
         projects: Array,
-        init: Number
+        init: Number,
+        circle: {
+            type: Boolean,
+            default: true
+        }
     },
 
     methods: {

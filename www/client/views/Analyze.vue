@@ -15,19 +15,19 @@
                 <li class="nav-item">
                     <a 
                         class="nav-link" 
-                        :class="{ disabled: !hasModules, active: tab == 'ModuleInspectionTab' }" 
+                        :class="{ disabled: !hasModules, active: tab == 'ModuleSignificanceTab' }" 
                         href="#" 
-                        @click.prevent="tab = 'ModuleInspectionTab'">
-                        Module inspection
+                        @click.prevent="tab = 'ModuleSignificanceTab'">
+                        Module significance
                     </a>
                 </li>
                 <li class="nav-item">
                     <a 
                         class="nav-link" 
-                        :class="{ disabled: !hasModules, active: tab == 'ModuleSignificanceTab' }" 
+                        :class="{ disabled: !hasModules, active: tab == 'ModuleInspectionTab' }" 
                         href="#" 
-                        @click.prevent="tab = 'ModuleSignificanceTab'">
-                        Module significance
+                        @click.prevent="tab = 'ModuleInspectionTab'">
+                        Module inspection
                     </a>
                 </li>
                 <li class="nav-item" v-if=false>

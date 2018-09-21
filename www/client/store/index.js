@@ -50,6 +50,13 @@ const mutations = {
     },
     setTraitData(state, data) {
         state.traitData = data
+    },
+    removeProject(state, index) {
+        let projects = [...state.projects]
+        projects.splice(index, 1)
+        state.projects = projects
+        state.projectIndex = state.projects.length >= 1 ? 0 : null
+        state.traitData = null
     }
 }
 
@@ -64,7 +71,7 @@ const actions = {
     getTraitData({ state, getters, commit }) {
         if (state.traitData) return Promise.resolve()
         return $.getJSON(`${ROOTURL}/projects/${getters.project.id}/trait?transpose=true`).then(data => {
-            commit('setTraitData', data)
+            commit('setTraitData', JSON.parse(data))
         })
     },
     selectProjectById({ commit }, id) {

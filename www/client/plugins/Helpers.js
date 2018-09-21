@@ -16,6 +16,9 @@ let helpers = {
     unique: function(array) {
         return [...new Set(array)]
     },
+    flatten: function(arr) {
+        return Array.prototype.concat(...arr)
+    },
     downloadSvg: function(svgEl, filename) {
         svgDownload(svgEl, filename)
     }

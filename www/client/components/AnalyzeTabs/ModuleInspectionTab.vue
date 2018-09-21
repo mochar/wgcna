@@ -1,6 +1,6 @@
 <template>
 <div>
-    <select class="custom-select" v-model="trait">
+    <select class="custom-select mb-2" v-model="trait">
         <option v-for="trait in nominalTraits" :key="trait" :value="trait">{{ trait }}</option>
     </select>
     <div v-if="traitData && data && trait">

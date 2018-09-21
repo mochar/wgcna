@@ -58,6 +58,15 @@ export default {
     
     computed: {
         ...mapGetters(['nominalTraits'])
+    },
+
+    watch: {
+        project() {
+            if (this.shouldUpdate) {
+                this.showCorrs = false
+                this.showSig = false
+            }
+        }
     }
 }
 </script>

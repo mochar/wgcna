@@ -20,7 +20,11 @@
         </div>
     </div>
 
-    <div v-if="!loading" class="mt-5">
+    <p class="card-text">
+        The trait is statistically tested for a significant difference in values between groups.
+    </p>
+
+    <div v-if="!loading" class="mt-2">
         <!-- <dl class="row" style="margin: 1rem">
             <dt class="col-2">Comparison</dt>
             <dd class="col-10">

@@ -66,7 +66,10 @@ export default {
                 }
                 this.colors = data.colors
             }
+            console.log('loaded')
             this.$emit('loaded')
+        }, () => {
+            console.log('nani?1')
         })
     }
 }

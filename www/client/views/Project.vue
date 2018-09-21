@@ -29,17 +29,29 @@
     </div>
 
     <div class="mb-3 ml-3 mr-3" v-if="project">
-        <div>
-            <strong class="text-main">Info</strong>
-            <div class="d-flex flex-column p-3 pt-0">
-                <span>{{ project.name }}</span>
-                <span>{{ project.description }}</span>
-                <span>{{ project.omic }}</span>
+        <form class="mb-5 mt-4" id="update-form" enctype="multipart/form-data" @submit.prevent="submit">
+            <div class="form-row">
+                <div class="col-5">
+                    <input type="text" :value="project.name" name="name" class="form-control" placeholder="name">
+                </div>
+                <div class="col-7">
+                    <input type="text" :value="project.description" name="description" class="form-control" placeholder="description">
+                </div>
             </div>
-        </div>
+            <div class="form-row pl-2 mt-3">
+                <div class="form-check form-check-inline" v-for="omic in ['transcriptomics', 'lipidomics', 'metabolomics']" :key="omic">
+                    <input class="form-check-input" type="radio" name="omic" :id="omic" :value="omic" :checked="omic == project.omic">
+                    <label class="form-check-label" :for="omic">{{ omic }}</label>
+                </div>
+            </div>
+            <button class="btn btn-primary mt-3" type="submit" :disabled="updating">
+                Update
+            </button>
+        </form>
         <div class="mt-4">
             <strong class="text-main">Samples and traits</strong>
-            <sample-tree :projectId="project.id" :cuttable="false">
+            <span v-if="loading" class="d-block">loading...</span>
+            <sample-tree :projectId="project.id" :cuttable="false" @loaded="loading = false" v-show="!loading">
             </sample-tree>
         </div>
     </div>
@@ -62,7 +74,9 @@ import { mapState, mapActions, mapGetters } from 'vuex'
 export default {
     data() {
         return {
-            project: null
+            project: null,
+            loading: true,
+            updating: false
         }
     },
 
@@ -87,8 +101,29 @@ export default {
                 type: 'DELETE',
                 url: `${ROOTURL}/projects/${this.project.id}`
             }).then(() => {
-                this.$router.push({ name: 'home' })
+                this.$store.commit('removeProject', this.projectIndex)
+                if (this.projectIndex == null)
+                    this.$router.push({ name: 'home' })
+                else
+                    this.$router.push({ name: 'analyze' })
             }, () => {
+            })
+        },
+        submit(event) {
+            this.updating = true
+            const formData = new FormData(event.target)
+            $.ajax({
+                url: `${ROOTURL}/projects/${this.project.id}`,
+                type: 'PUT',
+                data: formData,
+                async: true,
+                cache: false,
+                contentType: false,
+                processData: false
+            }).then(data => {
+                this.updating = false
+            }, () => {
+                this.updating = false
             })
         }
     },
@@ -109,3 +144,8 @@ export default {
     }
 }
 </script>
+
+<style>
+#project-name {
+}
+</style>

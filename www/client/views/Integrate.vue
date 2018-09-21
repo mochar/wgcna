@@ -30,7 +30,6 @@
                 :deletable="true"
                 :showAdd="n_projects == i + 1"
                 :projects="filteredProjects"
-                :init="i"
                 @selected="p => $set(selected, i, p)"
                 @add="n_projects++">
             </add-project-block>
@@ -38,7 +37,7 @@
                 <label class="mr-2">Minimum correlation</label>
                 <div class="form-group mr-2">
                     <input type="number" class="form-control" id="min-correlation" 
-                           placeholder="0.4" step=".1" min="0" max="1">
+                           placeholder="0.5" step=".1" min="0" max="1">
                 </div>
             </div>
         </div>
@@ -87,7 +86,7 @@ export default {
                 this.matching = data.matching
                 this.data = data
                 this.show = true
-                const minCorrelation = $('#min-correlation').val() || 0.4
+                const minCorrelation = $('#min-correlation').val() || 0.5
                 $('#cross-plot').empty()
                 const chart = dendrogram({
                     selector: '#cross-plot',

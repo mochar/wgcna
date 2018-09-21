@@ -12,9 +12,8 @@
     </p>
     <div>
         <select class="custom-select" v-model="method">
-            <option value="pearson">Pearson</option>
             <option value="spearman">Spearman</option>
-            <option value="mixed">Mixed</option>
+            <option value="pearson">Pearson</option>
         </select>
     </div>
     <div class="mt-3" v-if="method !== 'pearson'">
@@ -52,7 +51,7 @@ import { mapActions, mapState, mapGetters } from 'vuex'
 export default {
     data() {
         return {
-            method: 'pearson',
+            method: 'spearman',
             ordinals: {},
             loading: false
         }
@@ -76,7 +75,7 @@ export default {
                 async: true
             }).then(() => {
                 this.loading = false
-                this.$emit('corr')
+                this.$emit('go')
             }, () => {
                 this.loading = false
             })
