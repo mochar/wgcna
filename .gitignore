@@ -3,3 +3,5 @@ __pycache__/
 data-bak/
 dist/
 settings.json
+package-lock.json
+dump.rdb
