@@ -1,36 +1,28 @@
 <template>
 <div class="h-100">
-    <nav class="navbar navbar-expand-lg navbar-light" id="navbar-main">
-        <div class="container">
-            <router-link to="/" class="navbar-brand text-main font-weight-bold">WGCNA</router-link>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <div class="navbar-nav">
-                    <router-link :to="`/analyze/${analyzeTo}`" class="nav-item nav-link" 
-                            active-class="active" tag="a" v-if="$store.state.projects.length > 0">
-                        Analyze
-                    </router-link>
-                    <span class="nav-item nav-link text-muted" v-else>Analyze</span>
-                    <router-link to="/integrate" class="nav-item nav-link" active-class="active" tag="a">
-                        Integrate
-                    </router-link>
-                    <router-link to="/semanticintegrate" class="nav-item nav-link" active-class="active" tag="a" v-if=false>
-                        Semantic Integrate
-                    </router-link>
-                </div>
-            </div>
+    <div class="container" id="app">
+        <div id="navigation" class="d-flex justify-content-between mb-4 p-2">
+            <router-link to="/" class="navbar-brand text-main font-weight-bold pl-1">WGCNA</router-link>
+            <ul class="nav nav-pills nav-fill">
+                <router-link :to="`/analyze/${analyzeTo}`" class="nav-item nav-link pl-3 pr-3" 
+                        active-class="active text-main" tag="a" >
+                        <!-- v-if="$store.state.projects.length > 0"> -->
+                    Analyze
+                </router-link>
+                <!-- <span class="nav-item nav-link text-muted" v-else>Analyze</span> -->
+                <router-link to="/integrate" class="nav-item nav-link pl-3 pr-3" active-class="active" tag="a">
+                    Integrate
+                </router-link>
+            </ul>
             <button class="btn btn-light float-right" id="new-project-btn" data-toggle="modal" data-target="#new-modal">
                 <span class="fa fa-plus"></span>
                 New Project
             </button>
         </div>
-    </nav>
 
-    <div class="container" id="app">
+        <keep-alive>
         <router-view v-if="!$store.state.projectLoading"></router-view>
+        </keep-alive>
     </div>
 
     <new-project-modal></new-project-modal>
@@ -63,7 +55,8 @@ export default {
 
     computed: {
         analyzeTo() {
-            return this.$store.getters.projectIds[0]
+            const project = this.$store.getters.project
+            return project && project.id
         }
     }
 }
@@ -215,5 +208,16 @@ a:active, .btn-link:active {
     letter-spacing: 1px;
     font-weight: bold;
     margin-bottom: 1rem;
+}
+
+#navigation {
+    background-color: #fcfcfc66;
+    border: 1px solid #eaeaea;
+    /* font-weight: bold; */
+}
+#navigation .nav-link.active {
+    background-color: transparent;
+    color: #01549b !important;
+    border-bottom: 2px solid;
 }
 </style>
