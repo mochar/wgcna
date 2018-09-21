@@ -13,6 +13,8 @@
             <span class="fa fa-upload"></span>
             Upload / retrieve
         </button>
+
+        <span class="text-danger" style="font-weight: bold">{{ error }}</span>
     </form>
 
     <div class="d-flex align-items-center mt-4" v-if="types">
@@ -55,7 +57,8 @@ export default {
         return {
             uploading: false,
             loading: false,
-            types: null
+            types: null,
+            error: ''
         }
     },
 
@@ -78,8 +81,10 @@ export default {
             }).then(data => {
                 this.data = JSON.parse(data)
                 this.types = this.$helpers.range(this.data.columns.length).map(() => 'N')
+                this.error = ''
                 this.uploading = false
-            }, () => {
+            }, data => {
+                this.error = data.responseJSON.error
                 this.uploading = false
             })
         },

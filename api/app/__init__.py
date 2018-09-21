@@ -76,6 +76,12 @@ def is_number(string):
         return False
 
 
+def read_first_column(path):
+    with open(path, 'r') as f:
+        reader = csv.reader(f, delimiter=',')
+        return [i[0] for i in reader][1:]
+
+
 def process_project(project):
     project['trait'] = bool(int(project['trait']))
     project['processed'] = bool(int(project['processed']))
@@ -215,11 +221,19 @@ def expression(project_id):
 def trait(project_id):
     if request.method == 'POST':
         trait = request.files.get('trait')
-        if trait.name == '':
+        if trait is None or trait.name == '':
             return jsonify(error='Required fields not supplied.'), 403
         trait.save(g.trait_path)
-        redis.hset('project:{}'.format(project_id), 'trait', 1)
+        # Align samples with expression file
+        samples = read_first_column(g.expression_path)
         df = pd.read_csv(g.trait_path, index_col=0)
+        df = df[df.index.isin(samples)]
+        if df.shape[0] != len(samples):
+            os.remove(g.trait_path)
+            return jsonify(error='Trait data should contain all samples.'), 403
+        df.reindex(samples)
+        df.to_csv(g.trait_path)
+        redis.hset('project:{}'.format(project_id), 'trait', 1)
         return jsonify(df.to_json(orient='split')), 200
     elif request.method == 'GET':
         df = pd.read_csv(g.trait_path, index_col=0)
@@ -261,9 +275,11 @@ def cluster_samples(project_id):
         return jsonify(response)
     elif request.method == 'POST':
         outlier_samples = request.form.getlist('samples[]')
-        df = pd.read_csv(g.expression_path, index_col=0)
-        df.drop(outlier_samples, axis=0, inplace=True)
-        df.to_csv(g.expression_path)
+        # Drop in both expression and trait files
+        for path in [g.expression_path, g.trait_path]:
+            df = pd.read_csv(path, index_col=0)
+            df.drop(outlier_samples, axis=0, inplace=True)
+            df.to_csv(path)
         n_samples = redis.hget('project:{}'.format(project_id), 'samples')
         redis.hset('project:{}'.format(project_id), 'samples', int(n_samples) - len(outlier_samples))
         return jsonify({})
