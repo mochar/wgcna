@@ -51,6 +51,7 @@
     "d3-scale-chromatic": "latest",
     "d3-geo": "latest",
     "webui-popover": "latest",
-    "vuedraggable": "^2.16.0"
+    "vuedraggable": "^2.16.0",
+    "d3-radial-axis": "^1.5.1"
   }
 }

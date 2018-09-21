@@ -1,3 +1,5 @@
+import { scaleLinear} from 'd3'
+
 function drawAxis(scale, context, linear = true, label = '', tickCount = 10, tickSize = 6) {
     let tickPadding = 3,
         ticks = linear ? scale.ticks(tickCount) : scale.domain(),
@@ -37,4 +39,30 @@ function drawAxis(scale, context, linear = true, label = '', tickCount = 10, tic
     context.restore()
 }
 
-export { drawAxis }
+function scaleRadial() {
+    var linear = scaleLinear()
+
+    function scale(x) {
+        return Math.sqrt(linear(x))
+    }
+
+    scale.domain = function(_) {
+        return arguments.length ? (linear.domain(_), scale) : linear.domain()
+    }
+
+    scale.nice = function(count) {
+        return (linear.nice(count), scale);
+    }
+
+    scale.range = function(_) {
+        return arguments.length ? (linear.range(_.map(x => x * x)), scale) : 
+                                   linear.range().map(Math.sqrt)
+    }
+
+    scale.ticks = linear.ticks
+    scale.tickFormat = linear.tickFormat
+
+    return scale
+}
+
+export { drawAxis, scaleRadial }
