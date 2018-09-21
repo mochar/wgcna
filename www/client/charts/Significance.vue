@@ -3,9 +3,12 @@
     <g :transform="`translate(${margin.left}, ${margin.top})`">
         <g id="axis-top" class="axis axis--x"></g>
         <g id="axis-bottom" class="axis axis--x" :transform="`translate(0, ${height})`"></g>
-        <text :transform="`translate(${width * .9}, -15)`" text-anchor="middle" style="font-size: 1rem">
+        <text :transform="`translate(${width * .8}, -15)`" text-anchor="middle" style="font-size: 1rem">
             {{ column ? 'Wilcoxon' : 'Kruskal-Wallis' }}
         </text>
+        <!-- <text :transform="`translate(${width * .9}, -15)`" text-anchor="middle" style="font-size: 1rem">
+            Module
+        </text> -->
     </g>
 </svg>
 </template>
@@ -37,6 +40,7 @@ export default {
         resize(length) {
             this.width_ = $(this.$el).parent().width()
             this.width = this.width_ - this.margin.left - this.margin.right
+            // this.width *= .8
             this.height = length * this.size
             this.height_ = this.height + this.margin.top + this.margin.bottom
         },
@@ -73,7 +77,7 @@ export default {
                 .range([(this.size / 2) * -1, this.size / 2])
             const x = d3.scaleBand() // Eigengene region
                 .domain(this.groupShow)
-                .rangeRound([0, this.width * .8])
+                .rangeRound([0, this.width * .7])
                 .paddingInner(0.1)
             const r = d3.scaleLinear() // P-value circle size
                 .domain([0, 3])
@@ -126,20 +130,32 @@ export default {
                 })
             
             // p-val circles
+            /*
             const circle = groupAll.selectAll('circle').data(d => [d], d => `${d.module}_${this.column}`)
             circle.enter().append('circle')
                 .attr('cx', this.width * .85)
                 .attr('cy', 0)
               .merge(circle).transition()
                 .attr('r', d => d.p ? r(-Math.log10(d.p)) : 0)
+            */
             const text = groupAll.selectAll('text').data(d => [d], d => `${d.module}_${this.column}`)
             text.enter().append('text')
-                .attr('x', this.width * .9)
+                .attr('x', this.width * .8)
                 .attr('y', 5)
+                .attr('text-anchor', 'middle')
               .merge(text)
                 .attr('fill', d => d.p && d.p < 0.05 ? '#333' : 'grey' )
                 .style('font-size', '1rem')
                 .text(d => d.p ? parseFloat(d.p).toFixed(4) : 'NA')
+
+            const text2 = groupAll.selectAll('text.mod').data(d => [d], d => `${d.module}_${this.column}`)
+            text2.enter().append('text')
+                .classed('mod', true)
+                .attr('x', this.width * .9)
+                .attr('y', 5)
+              .merge(text2)
+                .style('font-size', '1rem')
+                .text(d => d.module)
             
             /// Axes and labels
             const axis = d3.axisBottom(x).tickSizeInner(-this.height)
