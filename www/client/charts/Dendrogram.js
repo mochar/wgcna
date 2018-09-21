@@ -25,7 +25,6 @@ function dendrogram(settings) {
     }
 
     function buildPositions() {
-        const labels = chart.data.labels
         return chart.data.merge.reduce((prev, cur, i) => {
             const x1 = cur[0] < 0 ? toX(cur[0]) : prev[cur[0]-1]
             const x2 = cur[1] < 0 ? toX(cur[1]) : prev[cur[1]-1]

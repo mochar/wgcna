@@ -59,6 +59,74 @@ function dendrogram(settings) {
         })
     }
 
+    function nodeSelected() {
+        const pier = d3.scaleLinear()
+            .domain([Math.PI, -Math.PI])
+            .range([0, 2 * Math.PI])
+        const pos = d3.mouse(chart.g.node())
+        const angle = pier(Math.atan2(pos[0], pos[1]))
+        const radius = Math.sqrt(pos[0]**2 + pos[1]**2)
+        const module = chart.xRev(angle)
+        const [project, name] = module.split('_')
+        const trees = d3.selectAll('g.tree')
+
+        // Find modules correlated to the selected module
+        /*
+        const links = chart.corrs
+            .filter(d => d.source === module || d.target == module)
+            .map(d => {
+                let o = {name: d.source === module ? d.target : d.source, value: d.value}
+                o.angle = chart.x(o.name)
+                return o
+            })
+        const text = chart.g.selectAll('text.name').data(links, d => d.name)
+        text.exit().remove()
+        text.enter().append('text')
+            .text(d => d.value.toFixed(2))
+            .attr('fill', d => d.value > 0 ? chart.color.range()[2] : chart.color.range()[0])
+            .attr('alignment-baseline', 'central')
+            .style('dominant-baseline', 'central')
+            .each(function(d) {
+                const radius = chart.innerRadius + 10
+                const x_ = radius * Math.cos(d.angle - Math.PI * .5) + 2
+                const y_ = radius * Math.sin(d.angle - Math.PI * .5) + 2
+
+                let degree = angle * 180 / Math.PI - 90
+                if (degree >= 180 && degree < 270) degree = -360 + degree
+
+                if (degree <= 90 && degree >= -90) {
+                    d3.select(this)
+                        .attr('text-anchor', 'begin')
+                        .attr('transform', `translate(${x_}, ${y_})rotate(${degree})`)
+                } else {
+                    degree = (degree > 0 ? -1 : 1) * (180 - Math.abs(degree))
+                    d3.select(this)
+                        .attr('text-anchor', 'end')
+                        .attr('transform', `translate(${x_}, ${y_})rotate(${degree})`)
+                }
+            })
+        */
+
+        // Reset
+        chart.g.selectAll('.module').interrupt().transition().attr('r', 2)
+        // trees.interrupt().transition().attr('opacity', 1)
+
+        //
+        if (radius <= chart.innerRadius && name !== 'dummy') {
+            chart.g.select(`#module_${module}`)
+                .transition()
+                .duration(100)
+                .attr('r', 6)
+            chart.g.select('text#selected-module')
+                .text(name)
+
+            // trees.filter(`:not(.tree_${project})`).transition().attr('opacity', 0.1)
+        } else {
+            chart.g.select('text#selected-module')
+                .text('')
+        }
+    }
+
     !function init() {
         chart.height = 100
         chart.width = 100
@@ -69,33 +137,7 @@ function dendrogram(settings) {
         
         chart.svg = d3.select(chart.settings.selector)
             .attr('transform', `translate(${chart.margin.left}, ${chart.margin.top})`)
-            .on('mousemove', d => {
-                const pier = d3.scaleLinear()
-                    .domain([Math.PI, -Math.PI])
-                    .range([0, 2 * Math.PI])
-                const pos = d3.mouse(chart.g.node())
-                const angle = pier(Math.atan2(pos[0], pos[1]))
-                const radius = Math.sqrt(pos[0]**2 + pos[1]**2)
-                const module = chart.xRev(angle)
-
-                // const project = module.split('_')[0]
-                // const trees = d3.selectAll('g.tree')
-                // trees.transition().attr('stroke', 'black')
-                // trees.filter(`.tree_${project}`).transition().attr('stroke', 'grey')
-
-                chart.g.selectAll('.module').interrupt().transition().attr('r', 2)
-                if (radius <= chart.innerRadius && module.split('_')[1] !== 'dummy') {
-                    chart.g.select(`#module_${module}`)
-                        .transition()
-                        .duration(100)
-                        .attr('r', 6)
-                    chart.g.select('text#selected-module')
-                        .text(module.split('_')[1])
-                } else {
-                    chart.g.select('text#selected-module')
-                        .text('')
-                }
-            })
+            .on('mousemove', nodeSelected)
         chart.g = chart.svg.append('g')
 
         // x: projectid_modulename -> node position
@@ -149,7 +191,8 @@ function dendrogram(settings) {
         chart.width = chart.width_ - chart.margin.left - chart.margin.right
         chart.height_ = Math.round(chart.settings.ratio * chart.width_)
         chart.height = chart.height_ - chart.margin.top - chart.margin.bottom
-        chart.outerRadius = Math.min(chart.width, chart.height) * .45
+        chart.outerRadius = Math.min(chart.width, chart.height) * .5 * .9
+        chart.innerRadius = chart.outerRadius / 1.4
 
         chart.svg.attr('width', chart.width_).attr('height', chart.height_)
         chart.g.attr('transform', `translate(${chart.width / 2}, ${chart.height / 2})`)
@@ -204,7 +247,9 @@ function dendrogram(settings) {
         link.exit().remove()
         link.enter().append('path')
             .attr('stroke', d => chart.color(d.value))
-            .attr('opacity', d => Math.log(Math.abs(d.value)) + 1)
+            .attr('stroke-width', 2)
+            // .attr('opacity', d => Math.log(Math.abs(d.value)) + 1)
+            // .attr('opacity', .8)
             .attr('d', d => {
                 const sourceAngle = chart.x(d.source)
                 const targetAngle = chart.x(d.target)
