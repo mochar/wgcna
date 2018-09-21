@@ -3,7 +3,7 @@
     <div class="container" id="app">
         <div id="navigation" class="d-flex justify-content-between mb-4 p-2">
             <router-link to="/" class="navbar-brand text-main font-weight-bold pl-1">WGCNA</router-link>
-            <ul class="nav nav-pills nav-fill">
+            <ul class="nav nav-pills nav-fill" v-if="!isNewPage">
                 <router-link :to="`/analyze/${analyzeTo}`" class="nav-item nav-link pl-3 pr-3" 
                         active-class="active text-main" tag="a" >
                         <!-- v-if="$store.state.projects.length > 0"> -->
@@ -17,25 +17,25 @@
                     Semantic Integrate
                 </router-link>
             </ul>
-            <button class="btn btn-light float-right" id="new-project-btn" data-toggle="modal" data-target="#new-modal">
+            <router-link to="/new" class="btn btn-light float-right" id="new-project-btn" tag="button" v-if="!isNewPage">
                 <span class="fa fa-plus"></span>
                 New Project
+            </router-link>
+            <button class="btn btn-light float-right" id="new-project-btn" v-else>
+                Cancel
             </button>
         </div>
 
-        <keep-alive>
-        <router-view v-if="!$store.state.projectLoading"></router-view>
+        <keep-alive exclude="new,project">
+            <router-view v-if="!$store.state.projectLoading"></router-view>
         </keep-alive>
     </div>
-
-    <new-project-modal></new-project-modal>
 </div>
 </template>
 
 <script>
 import 'bootstrap'
 import Vue from 'vue'
-import NewProjectModal from 'components/NewProjectModal'
 
 Vue.filter('round', function(value, decimals) {
   if(!value) value = 0
@@ -46,10 +46,6 @@ Vue.filter('round', function(value, decimals) {
 $.ajaxSetup({ xhrFields: { withCredentials: true } })
 
 export default {
-    components: {
-        NewProjectModal
-    },
-
     created() {
         this.$store.dispatch('getProjects').then(() => {
             this.$store.commit('setProjectLoading', false)
@@ -59,7 +55,10 @@ export default {
     computed: {
         analyzeTo() {
             const project = this.$store.getters.project
-            return project && project.id
+            return project ? project.id : this.$store.getters.projectIds[0]
+        },
+        isNewPage() {
+            return this.$route.name === 'new'
         }
     }
 }

@@ -2,11 +2,11 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from 'views/Home'
 import Analyze from 'views/Analyze'
-import Preprocess from 'views/Preprocess'
 import Integrate from 'views/Integrate'
 import SemanticIntegrate from 'views/SemanticIntegrate'
 import NotFound from 'views/NotFound'
 import Project from 'views/Project'
+import New from 'views/New'
 
 Vue.use(Router)
 
@@ -19,9 +19,9 @@ export default new Router({
             component: Home
         },
         {
-            name: 'preprocess',
-            path: '/preprocess/:id',
-            component: Preprocess
+            name: 'new',
+            path: '/new',
+            component: New
         },
         {
             name: 'analyze',

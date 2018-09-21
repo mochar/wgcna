@@ -78,7 +78,7 @@ def is_number(string):
 
 def process_project(project):
     project['trait'] = bool(int(project['trait']))
-    project['preprocessed'] = bool(int(project['preprocessed']))
+    project['processed'] = bool(int(project['processed']))
     project['traits'] = redis.hgetall('traits:{}'.format(project['id']))
     return project
 
@@ -96,22 +96,17 @@ def user_projects():
     for project_id in project_ids:
         pipe.hgetall('project:{}'.format(project_id))
     projects = pipe.execute()
-    return [process_project(p) for p in projects]
+    projects = [process_project(p) for p in projects]
+    return [project for project in projects if project['processed']]
 
 
-def create_project(user_id, name, description, omic, expression, trait=None):
+def create_project(user_id, name, description, omic):
     project_id = uuid.uuid4().hex
     project_folder = project_id_to_folder(project_id)
     os.makedirs(project_folder)
-    expression.save(os.path.join(project_folder, 'expression.csv'))
-    if trait is not None:
-        trait.save(os.path.join(project_folder, 'trait.csv'))
     redis.sadd('projects:{}'.format(user_id), project_id)
-
-    df = pd.read_csv(os.path.join(project_folder, 'expression.csv'))
     project = {'name': name, 'description': description, 'id': project_id, 'step': 1,
-        'omic': omic, 'trait': 0 if trait is None else 1, 'preprocessed': 0,
-        'genes': len(df.columns), 'samples': len(df.index)}
+        'omic': omic, 'trait': 0, 'processed': 0}
     redis.hmset('project:{}'.format(project_id), project)
     return project
 
@@ -161,15 +156,12 @@ def projects():
     if request.method == 'GET':
         return jsonify({'projects': user_projects()})
     elif request.method == 'POST':
-        expression = request.files.get('expression')
-        trait = request.files.get('trait')
         name = request.form.get('name', '')
         description = request.form.get('description', '')
         omic = request.form.get('omic')
-        if expression.filename == '' or name == '':
+        if name == '':
             return jsonify(error='Required fields not supplied.'), 403
-        project = create_project(session.sid, name, description, omic, expression,
-            trait=None if trait.filename == '' else trait)
+        project = create_project(session.sid, name, description, omic)
         return jsonify({'project': project})
 
 
@@ -192,11 +184,22 @@ def project(project_id):
 @app.route('/projects/<project_id>/expression', methods=['GET', 'POST', 'PUT'])
 @project_exists
 def expression(project_id):
-    df = pd.read_csv(g.expression_path, index_col=0)
-    if request.method == 'GET':
+    if request.method == 'POST':
+        expression = request.files.get('expression')
+        if expression.filename == '':
+            return jsonify(error='Required fields not supplied.'), 403
+        expression.save(g.expression_path)
+        df = pd.read_csv(g.expression_path, index_col=0)
+        redis.hset('project:{}'.format(project_id), 'genes', len(df.columns))
+        redis.hset('project:{}'.format(project_id), 'samples', len(df.index))
+        redis.hset('project:{}'.format(project_id), 'processed', 1)
+        return jsonify(features=len(df.columns), samples=len(df.index))
+    elif request.method == 'GET':
+        df = pd.read_csv(g.expression_path, index_col=0)
         response = {'colNames': df.columns.tolist(), 'rowNames': df.index.tolist()}
         return jsonify(response)
     elif request.method == 'PUT':
+        df = pd.read_csv(g.expression_path, index_col=0)
         if request.form['transpose'] == 'true':
             df = df.T
             n_genes = redis.hget('project:{}'.format(project_id), 'genes')
@@ -210,12 +213,21 @@ def expression(project_id):
 @app.route('/projects/<project_id>/trait', methods=['GET', 'POST', 'PUT'])
 @project_exists
 def trait(project_id):
-    df = pd.read_csv(g.trait_path, index_col=0)
-    if request.method == 'GET':
+    if request.method == 'POST':
+        trait = request.files.get('trait')
+        if trait.name == '':
+            return jsonify(error='Required fields not supplied.'), 403
+        trait.save(g.trait_path)
+        redis.hset('project:{}'.format(project_id), 'trait', 1)
+        df = pd.read_csv(g.trait_path, index_col=0)
+        return jsonify(df.to_json(orient='split')), 200
+    elif request.method == 'GET':
+        df = pd.read_csv(g.trait_path, index_col=0)
         if {'true': True, 'false': False}[request.args.get('transpose', 'false')]:
             df = df.T
         return jsonify(df.to_json(orient='split')), 200
     elif request.method == 'PUT':
+        df = pd.read_csv(g.trait_path, index_col=0)
         continues_indices = [int(x) for x in request.form['continues'].split(',') if x != '']
         traits = {x: 'C' if i in continues_indices else 'N' for i, x in enumerate(df.columns)}
         redis.hmset('traits:{}'.format(project_id), traits)

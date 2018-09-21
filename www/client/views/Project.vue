@@ -72,6 +72,8 @@ import Loading from 'components/Loading'
 import { mapState, mapActions, mapGetters } from 'vuex'
 
 export default {
+    name: 'project', 
+
     data() {
         return {
             project: null,
@@ -105,7 +107,7 @@ export default {
                 if (this.projectIndex == null)
                     this.$router.push({ name: 'home' })
                 else
-                    this.$router.push({ name: 'analyze' })
+                    this.$router.push({ name: 'analyze' , params: { id: this.$store.getters.project.id }})
             }, () => {
             })
         },
