@@ -36,8 +36,16 @@ def tree_to_dict(df, tree, index=True, with_order=True):
         'ordered': ordered, 'order': order.tolist()}
 
 
-def hclust(expression_path):
-    df = pd.read_csv(expression_path, index_col=0)
+def hclust(expression_path, transpose=False):
+    """
+    expression_path may also be a data frame 
+    """
+    if isinstance(expression_path, str):
+        df = pd.read_csv(expression_path, index_col=0)
+    else:
+        df = expression_path
+    if transpose:
+        df = df.T
     tree = robjects.r.hclust(robjects.r.dist(df), method = 'average')
     return tree_to_dict(df, tree)
 
