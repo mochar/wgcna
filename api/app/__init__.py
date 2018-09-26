@@ -195,7 +195,7 @@ def expression(project_id):
         if expression.filename == '':
             return jsonify(error='Required fields not supplied.'), 403
         expression.save(g.expression_path)
-        sep = request.form.get('delim', ',')
+        sep = request.form.get('delim', ',') or ','
         df = pd.read_csv(g.expression_path, index_col=0, sep=sep)
         redis.hset('project:{}'.format(project_id), 'genes', len(df.columns))
         redis.hset('project:{}'.format(project_id), 'samples', len(df.index))
@@ -225,7 +225,7 @@ def trait(project_id):
         if trait is None or trait.name == '':
             return jsonify(error='Required fields not supplied.'), 403
         trait.save(g.trait_path)
-        sep = request.form.get('delim', ',')
+        sep = request.form.get('delim', ',') or ','
         # Align samples with expression file
         samples = read_first_column(g.expression_path)
         df = pd.read_csv(g.trait_path, index_col=0, sep=sep)
