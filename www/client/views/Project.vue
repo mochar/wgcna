@@ -99,10 +99,8 @@ export default {
             this.$helpers.downloadSvg(svgEl, 'sample_clusters')
         },
         del() {
-            $.ajax({
-                type: 'DELETE',
-                url: `${ROOTURL}/projects/${this.project.id}`
-            }).then(() => {
+            this.$helpers.delete(this.project.id)
+            .then(() => {
                 this.$store.commit('removeProject', this.projectIndex)
                 if (this.projectIndex == null)
                     this.$router.push({ name: 'home' })
@@ -114,15 +112,8 @@ export default {
         submit(event) {
             this.updating = true
             const formData = new FormData(event.target)
-            $.ajax({
-                url: `${ROOTURL}/projects/${this.project.id}`,
-                type: 'PUT',
-                data: formData,
-                async: true,
-                cache: false,
-                contentType: false,
-                processData: false
-            }).then(data => {
+            this.$helpers.put(formData, this.project.id)
+            .then(data => {
                 this.updating = false
             }, () => {
                 this.updating = false

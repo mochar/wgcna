@@ -100,14 +100,8 @@ export default {
             this.dims = null
             this.transpose = false
             const formData = new FormData(event.target)
-            $.post({
-                url: `${ROOTURL}/projects/${this.project}/expression`,
-                data: formData,
-                async: true,
-                cache: false,
-                contentType: false,
-                processData: false
-            }).then(data => {
+            this.$helpers.post(formData, this.project, 'expression')
+            .then(data => {
                 this.dims = { samples: data.samples, features: data.features }
                 this.uploading = false
                 this.evaluating = true
@@ -135,15 +129,8 @@ export default {
             this.loading = true
             const formData = new FormData()
             formData.append('transpose', this.transpose)
-            $.ajax({
-                url: `${ROOTURL}/projects/${this.project}/expression`,
-                type: 'PUT',
-                data: formData,
-                async: true,
-                cache: false,
-                contentType: false,
-                processData: false
-            }).then(() => {
+            this.$helpers.put(formData, this.project, 'expression')
+            .then(() => {
                 this.loading = false
                 this.$emit('done')
             }, () => {

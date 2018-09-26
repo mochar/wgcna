@@ -91,14 +91,8 @@ export default {
             this.$emit('cutting')
             const formData = new FormData(event.target)
             const minModuleSize = parseInt(formData.get('minModuleSize'))
-            $.post({
-                url: `${ROOTURL}/projects/${this.project.id}/clustergenes`,
-                data: formData,
-                async: true,
-                cache: false,
-                contentType: false,
-                processData: false
-            }).then(data => {
+            this.$helpers.post(formData, this.project.id, 'clustergenes')
+            .then(data => {
                 this.colors = data
                 this.cutting = false
                 this.$emit('done', minModuleSize)

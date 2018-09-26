@@ -47,14 +47,8 @@ export default {
         submit(event) {
             this.submitting = true
             const formData = new FormData(event.target)
-            $.post({
-                url: `${ROOTURL}/projects/`,
-                data: formData,
-                async: true,
-                cache: false,
-                contentType: false,
-                processData: false
-            }).then(data => {
+            this.$helpers.post(formData)
+            .then(data => {
                 this.submitting = false
                 this.$emit('done', data.project)
             }, () => {

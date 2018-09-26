@@ -68,12 +68,8 @@ export default {
         go() {
             this.loading = true
             const data = JSON.stringify(this.ordinals)
-            $.post({
-                url: `${ROOTURL}/projects/${this.project.id}/correlate`,
-                data: data,
-                dataType: 'json',
-                async: true
-            }).then(() => {
+            this.$helpers.post(data, this.project.id, 'correlate')
+            .then(() => {
                 this.loading = false
                 this.$emit('go')
             }, () => {

@@ -54,14 +54,8 @@ export default {
             this.loading = true
             const formData = new FormData()
             this.outlierSamples.forEach(sample => formData.append('samples[]', sample))
-            $.post({
-                url: `${ROOTURL}/projects/${this.project}/clustersamples`,
-                data: formData,
-                async: true,
-                cache: false,
-                contentType: false,
-                processData: false
-            }).then(data => {
+            this.$helpers.post(formData, this.project, 'clustersamples')
+            .then(data => {
                 this.$emit('done')
             }, () => {
                 this.loading = false

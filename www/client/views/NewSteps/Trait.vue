@@ -78,14 +78,8 @@ export default {
         upload(event) {
             this.uploading = true
             const formData = new FormData(event.target)
-            $.post({
-                url: `${ROOTURL}/projects/${this.project}/trait`,
-                data: formData,
-                async: true,
-                cache: false,
-                contentType: false,
-                processData: false
-            }).then(data => {
+            this.$helpers.post(formData, this.project, 'trait')
+            .then(data => {
                 this.data = JSON.parse(data)
                 this.types = this.$helpers.range(this.data.columns.length).map(() => 'N')
                 this.error = ''
@@ -108,15 +102,8 @@ export default {
                     continuesIndices.push(index)
             }
             formData.append('continues', continuesIndices)
-            $.ajax({
-                url: `${ROOTURL}/projects/${this.project}/trait`,
-                type: 'PUT',
-                data: formData,
-                async: true,
-                cache: false,
-                contentType: false,
-                processData: false
-            }).then(() => {
+            this.$helpers.put(formData, this.project, 'trait')
+            .then(() => {
                 this.$emit('done')
                 this.loading = false
             }, () => {

@@ -39,12 +39,8 @@ export default {
         go() {
             this.loading = true
             const data = JSON.stringify({ trait: this.trait })
-            $.post({
-                url: `${ROOTURL}/projects/${this.project.id}/genotype`,
-                data: data,
-                dataType: 'json',
-                async: true
-            }).then(() => {
+            this.$helpers.post(data, this.project.id, 'genotype')
+            .then(() => {
                 this.loading = false
                 this.$store.commit('editProject', {step: 5})
                 this.$emit('go')

@@ -108,15 +108,8 @@ export default {
         pick() {
             const formData = new FormData()
             formData.append('power', this.selected)
-            $.ajax({
-                type: 'POST',
-                url: `${ROOTURL}/projects/${this.project.id}/tresholds`,
-                data: formData,
-                async: true,
-                cache: false,
-                contentType: false,
-                processData: false
-            }).then(() => {
+            this.$helpers.post(formData, this.project.id, 'tresholds')
+            .then(() => {
                 this.$emit('done', this.selected)
             }, () => {
                 console.log('error')

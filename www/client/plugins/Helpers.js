@@ -21,6 +21,31 @@ let helpers = {
     },
     downloadSvg: function(svgEl, filename) {
         svgDownload(svgEl, filename)
+    },
+
+    // AJAX things
+    ajax: function(method, data, projectId, endpoint) {
+        endpoint = endpoint && `/${endpoint}`
+        const url = `${ROOTURL}/projects/${projectId}${endpoint}`
+        let params = {
+            url: url,
+            method: method,
+            dataType: 'json', // Default is to guess based on MIME type
+            cache: false,
+            contentType: false,
+            processData: false
+        }
+        if (data) params['data'] = data
+        return $.ajax(params)
+    },
+    post: function(data, projectId = '', endpoint = '') {
+        return this.ajax('POST', data, projectId, endpoint)
+    },
+    put: function(data, projectId = '', endpoint = '') {
+        return this.ajax('PUT', data, projectId, endpoint)
+    },
+    delete: function(projectId = '', endpoint = '') {
+        return this.ajax('DELETE', null, projectId, endpoint)
     }
 }
 
