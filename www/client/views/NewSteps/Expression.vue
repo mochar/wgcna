@@ -24,7 +24,7 @@
         <div class="form-group row mt-3">
             <label for="delim" class="col-sm-1 col-form-label">Delimiter</label>
             <div class="col-sm-1">
-                <input type="text" class="form-control" id="delim" name="delim" value="," />
+                <input type="text" class="form-control" id="delim" name="delim" placeholder="," />
             </div>
         </div>
 

@@ -9,6 +9,13 @@
     <form class="mt-2" enctype="multipart/form-data" @submit.prevent="upload">
         <input type="file" class="form-control-file" name="trait">
 
+        <div class="form-group row mt-3">
+            <label for="delim" class="col-sm-1 col-form-label">Delimiter</label>
+            <div class="col-sm-1">
+                <input type="text" class="form-control" id="delim" name="delim" placeholder="," />
+            </div>
+        </div>
+
         <button class="btn btn-light mt-2" type="submit" :disabled="uploading" v-if="!disabled">
             <span class="fa fa-upload"></span>
             Upload / retrieve
