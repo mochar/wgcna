@@ -4,13 +4,14 @@
         <div id="navigation" class="d-flex justify-content-between mb-4 p-2">
             <router-link to="/" class="navbar-brand text-main font-weight-bold pl-1">WGCNA</router-link>
             <ul class="nav nav-pills nav-fill" v-if="!isNewPage">
-                <router-link :to="`/analyze/${analyzeTo}`" class="nav-item nav-link pl-3 pr-3" 
-                        active-class="active text-main" tag="a" >
+                <router-link :to="`/analyze/${analyzeTo}`" class="nav-item nav-link pl-3 pr-3 btn btn-link" 
+                        active-class="active text-main" tag="button" >
                         <!-- v-if="$store.state.projects.length > 0"> -->
                     Analyze
                 </router-link>
                 <!-- <span class="nav-item nav-link text-muted" v-else>Analyze</span> -->
-                <router-link to="/integrate" class="nav-item nav-link pl-3 pr-3" active-class="active" tag="a">
+                <router-link to="/integrate" class="nav-item nav-link pl-3 pr-3 btn btn-link" active-class="active" tag="button" 
+                                :disabled="$store.state.projects.length < 2">
                     Integrate
                 </router-link>
                 <router-link to="/semanticintegrate" class="nav-item nav-link" active-class="active" tag="a" v-if="false">
@@ -21,13 +22,13 @@
                 <span class="fa fa-plus"></span>
                 New Project
             </router-link>
-            <button class="btn btn-light float-right" id="new-project-btn" v-else>
+            <button class="btn btn-light float-right" id="new-project-btn" @click="$router.go(-1)" v-else>
                 Cancel
             </button>
         </div>
 
         <keep-alive exclude="new,project">
-            <router-view v-if="!$store.state.projectLoading"></router-view>
+            <router-view></router-view>
         </keep-alive>
     </div>
 </div>

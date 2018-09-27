@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import store from '../store'
 import Home from 'views/Home'
 import Analyze from 'views/Analyze'
 import Integrate from 'views/Integrate'
@@ -26,7 +27,11 @@ export default new Router({
         {
             name: 'analyze',
             path: '/analyze/:id',
-            component: Analyze
+            component: Analyze,
+            beforeEnter: (to, from, next) => {
+                if (to.params.id == 'undefined' || to.params.id == 'null') next({ name: 'new' })
+                else next()
+            }
         },
         {
             name: 'project',
@@ -35,7 +40,16 @@ export default new Router({
         },
         {
             path: '/integrate',
-            component: Integrate
+            component: Integrate,
+            beforeEnter: (to, from, next) => {
+                if (from.name === null) {
+                    next({ name: 'analyze' })
+                } else if (store.state.projects.length < 2) {
+                    next(false)
+                } else {
+                    next()
+                }
+            }
         },
         {
             path: '/semanticintegrate',

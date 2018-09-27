@@ -1,5 +1,5 @@
 <template>
-<div>
+<page>
     <div class="card card-body block">
         <div class="d-flex justify-content-between align-items-start">
             <h6 class="block-title text-uppercase">
@@ -55,11 +55,12 @@
     <div class="card card-body block mt-2 mb-5" v-show="true">
         <svg id="cross-plot"></svg>
     </div>
-</div>
+</page>
 </template>
 
 <script>
 import AddProjectBlock from 'components/Integrate/AddProjectBlock'
+import Page from './Page'
 import dendrogram from 'charts/Dendrogram3.js'
 import { mapState, mapActions, mapGetters } from 'vuex'
 
@@ -75,7 +76,8 @@ export default {
     },
 
     components: {
-        AddProjectBlock
+        AddProjectBlock,
+        Page
     },
 
     methods: {

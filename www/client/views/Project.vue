@@ -1,5 +1,5 @@
 <template>
-<div class="card card-body mb-5">
+<page :requirement="Boolean($store.getters.project)" class="card card-body mb-5">
     <div class="d-flex justify-content-between align-items-start">
         <h6 class="block-title">
             PROJECT
@@ -28,7 +28,7 @@
         </div>
     </div>
 
-    <div class="mb-3 ml-3 mr-3" v-if="project">
+    <div class="mb-3 ml-3 mr-3">
         <form class="mb-5 mt-4" id="update-form" enctype="multipart/form-data" @submit.prevent="submit">
             <div class="form-row">
                 <div class="col-5">
@@ -55,7 +55,6 @@
             </sample-tree>
         </div>
     </div>
-    <loading v-else></loading>
 
     <div>
         <button @click.prevent="$router.go(-1)" class="btn btn-light">
@@ -63,12 +62,12 @@
             Return
         </button>
     </div>
-</div>
+</page>
 </template>
 
 <script>
 import SampleTree from 'components/SampleTree'
-import Loading from 'components/Loading'
+import Page from './Page'
 import { mapState, mapActions, mapGetters } from 'vuex'
 
 export default {
@@ -84,7 +83,7 @@ export default {
 
     components: {
         SampleTree,
-        Loading
+        Page
     },
 
     methods: {
@@ -102,8 +101,8 @@ export default {
             this.$helpers.delete(this.project.id)
             .then(() => {
                 this.$store.commit('removeProject', this.projectIndex)
-                if (this.projectIndex == null)
-                    this.$router.push({ name: 'home' })
+                if (this.projectIndex === null)
+                    this.$router.push({ name: 'new' })
                 else
                     this.$router.push({ name: 'analyze' , params: { id: this.$store.getters.project.id }})
             }, () => {

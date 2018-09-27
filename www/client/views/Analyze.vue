@@ -1,5 +1,5 @@
 <template>
-<div>
+<page :requirement="Boolean($store.getters.project)">
     <div class="row">
         <div class="col-6">
             <ul class="nav nav-tabs top position-relative">
@@ -76,19 +76,16 @@
         </div>
     </div>
 
-    <div v-if="project">
-        <keep-alive>
-            <component
-                :is="tab"
-                :project="project" 
-                :should-update="shouldUpdate || project.step == 4">
-            </component>
-        </keep-alive>
-    </div>
-    <loading v-else></loading>
+    <keep-alive>
+        <component
+            :is="tab"
+            :project="project" 
+            :should-update="shouldUpdate || project.step == 4">
+        </component>
+    </keep-alive>
 
     <!-- <export-modal :name="name" :step="step" :modules="modules" v-if="step > 3"></export-modal> -->
-</div>
+</page>
 </template>
 
 <script>
@@ -98,7 +95,7 @@ import ModuleCreationTab from 'components/AnalyzeTabs/ModuleCreationTab'
 import ModuleInspectionTab from 'components/AnalyzeTabs/ModuleInspectionTab'
 import ModuleSignificanceTab from 'components/AnalyzeTabs/ModuleSignificanceTab'
 import ModuleAnnotationTab from 'components/AnalyzeTabs/ModuleAnnotationTab'
-import Loading from 'components/Loading'
+import Page from './Page'
 import { mapState, mapActions, mapGetters } from 'vuex'
 
 export default {
@@ -119,7 +116,7 @@ export default {
         ModuleInspectionTab,
         ModuleSignificanceTab,
         ModuleAnnotationTab,
-        Loading
+        Page
     },
 
     methods: {
