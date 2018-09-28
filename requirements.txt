@@ -1,0 +1,9 @@
+Flask==1.0.2
+Flask-Cors==3.0.6
+Flask-Session==0.3.1
+numpy==1.15.2
+pandas==0.23.4
+redis==2.10.6
+rpy2==2.9.4
+scipy==1.1.0
+tzlocal==1.5.1
