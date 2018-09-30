@@ -2,6 +2,11 @@ import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-SECRET_KEY = '\x13\xae6\xc7\xc4\xb1\xbf\x164\xe7H\xf5\x7fw9\xd7X\xe0\xb5\x90\xc5\x9c\xce\x01'
+SECRET_KEY = '\x1c\x83u\x15\x04\x8bgq\xde\xa4\x87S\xcf\xb2\xb4\xe7#\xda\x13[^\xe2\x8aV'
 DEBUG = True
 HOST = '0.0.0.0'
+STORAGE_FOLDER = '/opt/wgcna/'
+REDIS_DB_SESSION = 0
+REDIS_DB_DATA = 1
+SESSION_TYPE = 'redis'
+SESSION_USE_SIGNER = True

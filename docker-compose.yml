@@ -1,0 +1,24 @@
+version: "3.0"
+services:
+  api:
+    build: ./api
+    ports:
+      - "127.0.0.1:5000:5000"
+    network_mode: host
+    depends_on:
+      - redis
+    environment:
+      - LC_ALL=C.UTF-8
+      - LANG=C.UTF-8
+
+  www:
+    build: ./www
+    ports:
+      - "127.0.0.1:80:80"
+    network_mode: host
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "127.0.0.1:6379:6379"
+    network_mode: host

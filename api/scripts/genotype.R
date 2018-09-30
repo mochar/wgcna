@@ -2,17 +2,13 @@ suppressMessages(library(WGCNA))
 options(stringsAsFactors = FALSE)
 
 args <- commandArgs(TRUE)
-load(paste('data/', args[1], '/colors.RData', sep = ''))
-filename <- paste('data/', args[1], '/expression.csv', sep = '')
-writename <- paste('data/', args[1], '/pvalues.csv', sep = '')
+filename <- paste(args[1], '/expression.csv', sep = '')
+writename <- paste(args[1], '/pvalues.csv', sep = '')
 group <- as.factor(strsplit(args[2], ',')[[1]])
 
 datExpr <- read.csv(filename, row.names = 1)
-
-nSamples <- nrow(datExpr)
-MEs0 <- moduleEigengenes(datExpr, colors)$eigengenes
-MEs <- orderMEs(MEs0)
-MEs <- MEs[, colnames(MEs) != 'MEgrey']
+modules <- read.csv(paste(args[1], '/modules.csv', sep = ''), row.names = 1)$modules
+MEs <- read.csv(paste(args[1], '/eigengenes.csv', sep = ''), row.names = 1)
 
 p.values <- sapply(colnames(MEs), function(col) kruskal.test(MEs[, col], group)$p.value)
 p.values.adjusted <- p.adjust(p.values, 'fdr')

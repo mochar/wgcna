@@ -35,12 +35,30 @@ module.exports = {
     loaders: [
       {
         test: /\.vue$/,
-        loaders: ['vue-loader']
+        loaders: 'vue-loader',
+        options: {
+          loaders: {
+            js: [
+              {
+                loader: 'babel-loader',
+                options: {
+                  presets: ['vue-app']
+                }
+              }
+            ]
+          }
+        }
       },
       {
         test: /\.js$/,
-        loaders: ['babel-loader'],
-        exclude: [/node_modules/]
+        // loaders: ['babel-loader'],
+        exclude: [/node_modules/],
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['vue-app']
+          }
+        }
       },
       {
         test: /\.es6$/,
@@ -77,8 +95,7 @@ module.exports = {
       $: 'jquery',
       jQuery: 'jquery',
       'window.jQuery': 'jquery',
-      'Tether': 'tether',
-      'window.Tether': 'tether'
+      Popper: ['popper.js', 'default']
     })
   ],
   target: _.target
