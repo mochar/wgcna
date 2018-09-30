@@ -34,7 +34,7 @@ Session(app)
 CORS(app, supports_credentials=True, expose_headers=['Location'])
 
 
-# Not simple CORS requests send a preflight OPTIONS request, which do not
+# Non-simple CORS requests send a preflight OPTIONS request, which do not
 # contain cookies. Flask-session therefore creates a new session, even
 # though one might already exist. Here I "fix" this by ignoring OPTIONS
 # requests in the session interface.
@@ -215,6 +215,16 @@ def expression(project_id):
             redis.hset('project:{}'.format(project_id), 'samples', n_genes)
         df.to_csv(g.expression_path)
         return jsonify({}), 200
+
+
+@app.route('/projects/<project_id>/expression/<module>', methods=['GET'])
+@project_exists
+def expression_module(project_id, module):
+    df = pd.read_csv(g.expression_path, index_col=0)
+    modules = pd.read_csv(g.module_path, index_col=0)
+    module_expression = df[modules['modules'] == module]
+    response = create_file_response(module_expression.to_csv(), '{}.csv'.format(module))
+    return response
 
 
 @app.route('/projects/<project_id>/trait', methods=['GET', 'POST', 'PUT'])
