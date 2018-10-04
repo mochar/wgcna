@@ -89,7 +89,8 @@ function makeDistroChart(settings) {
                 return colorOptions[group];
             }
         } else {
-            return d3.scaleOrdinal(d3.schemeCategory10);
+            // return d3.scaleOrdinal(d3.schemeCategory10);
+            return d3.scaleOrdinal(d3.schemePastel1);
         }
     }
 

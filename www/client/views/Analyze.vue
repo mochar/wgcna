@@ -9,6 +9,7 @@
                         :class="{ active: tab == 'ModuleCreationTab' }" 
                         href="#" 
                         @click.prevent="tab = 'ModuleCreationTab'">
+                        <i class="fa fa-certificate fa-fw"></i>
                         Generate
                     </a>
                 </li>
@@ -18,6 +19,7 @@
                         :class="{ disabled: !hasModules, active: tab == 'ModuleSignificanceTab' }" 
                         href="#" 
                         @click.prevent="tab = 'ModuleSignificanceTab'">
+                        <i class="fa fa-bar-chart fa-fw"></i>
                         Significance
                     </a>
                 </li>
@@ -27,6 +29,7 @@
                         :class="{ disabled: !hasModules, active: tab == 'ModuleInspectionTab' }" 
                         href="#" 
                         @click.prevent="tab = 'ModuleInspectionTab'">
+                        <i class="fa fa-eye fa-fw"></i>
                         Inspection
                     </a>
                 </li>
@@ -68,11 +71,13 @@
     </div>
 
     <keep-alive>
+    <transition name="component-fade" mode="out-in">
         <component
             :is="tab"
             :project="project" 
             :should-update="shouldUpdate || project.step == 4">
         </component>
+    </transition>
     </keep-alive>
 
     <!-- <export-modal :name="name" :step="step" :modules="modules" v-if="step > 3"></export-modal> -->
@@ -210,5 +215,12 @@ export default {
 <style scoped>
 .nav-link {
     color: #999;
+}
+.component-fade-enter-active, .component-fade-leave-active {
+  transition: opacity .05s ease;
+}
+.component-fade-enter, .component-fade-leave-to
+/* .component-fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
 }
 </style>

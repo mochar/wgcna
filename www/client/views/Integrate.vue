@@ -52,8 +52,8 @@
 
     <!-- <span v-if="matching">{{ matching }}</span> -->
 
-    <div class="card card-body block mt-2 mb-5" v-show="true">
-        <svg id="cross-plot"></svg>
+    <div class="card card-body block mt-2 mb-5" style="border: none">
+        <svg id="cross-plot" v-show="show"></svg>
     </div>
 </page>
 </template>
@@ -63,6 +63,7 @@ import AddProjectBlock from 'components/Integrate/AddProjectBlock'
 import Page from './Page'
 import dendrogram from 'charts/Dendrogram3.js'
 import { mapState, mapActions, mapGetters } from 'vuex'
+import Vue from 'vue'
 
 export default {
     data() {
@@ -98,8 +99,10 @@ export default {
                     corrs: data.crosscorrs.filter(d => Math.abs(d.value) >= minCorrelation),
                     ratio: 0.8
                 })
-                chart.update()
-                this.loading = false
+                Vue.nextTick(() => {
+                    chart.update()
+                    this.loading = false
+                })
             })
         }
     },
