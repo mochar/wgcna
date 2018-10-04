@@ -263,7 +263,9 @@ function makeDistroChart(settings) {
             chart.yScale = d3.scaleLinear();
         }
 
-        if (chart.settings.constrainExtremes === true) {
+        if (chart.settings.yRange) {
+            chart.range = chart.settings.yRange
+        } else if (chart.settings.constrainExtremes === true) {
             var fences = [];
             for (var cName in chart.groupObjs) {
                 fences.push(chart.groupObjs[cName].metrics.lowerInnerFence);

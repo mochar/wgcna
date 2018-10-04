@@ -33,6 +33,7 @@ export default {
                 axisLabels: {xAxis: null, yAxis: 'Eigengene'},
                 selector: `#${this.id}`,
                 chartSize: {height:350, width:960},
+                yRange: [-1, 1],
                 color: scaleOrdinal(schemePastel1),
                 constrainExtremes:true})
             this.chart.update()
