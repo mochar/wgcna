@@ -1,8 +1,8 @@
 <template>
 <div class="h-100">
     <div class="container" id="app">
-        <div id="navigation" class="d-flex justify-content-between mb-4 p-2">
-            <router-link to="/" class="navbar-brand text-main font-weight-bold pl-1">WGCNA</router-link>
+        <div id="navigation" class="d-flex justify-content-between align-items-center">
+            <router-link to="/" class="navbar-brand text-main font-weight-bold">WGCNA</router-link>
             <ul class="nav nav-pills nav-fill" v-if="!isNewPage">
                 <router-link :to="`/analyze/${analyzeTo}`" class="nav-item nav-link pl-3 pr-3 btn btn-link" 
                         active-class="active text-main" tag="button" >
@@ -23,6 +23,8 @@
                 Cancel
             </button>
         </div>
+
+        <hr id="content-hr" class="mb-4" />
 
         <keep-alive exclude="new,project">
             <router-view></router-view>
@@ -190,11 +192,9 @@ a:active, .btn-link:active {
 }
 
 #new-project-btn {
-    color: #111;
+    color: #363636;
     background-color: #f8f8f8;
-    border-color: #dae0e54d;
-    /* background: -moz-linear-gradient(hsl(0, 0, 100%), hsl(0, 0, 30%));
-    background: linear-gradient(hsl(0, 0%, 97%), hsl(0, 0%, 95%));  */
+    /* border-color: #dae0e54d; */
 }
 
 #navbar-main {
@@ -211,13 +211,20 @@ a:active, .btn-link:active {
 }
 
 #navigation {
-    background-color: #fcfcfc66;
-    border: 1px solid #eaeaea;
-    /* font-weight: bold; */
+    padding-left: .5rem;
+    padding-right: .5rem;
 }
 #navigation .nav-link.active {
     background-color: transparent;
     color: #01549b !important;
     border-bottom: 2px solid;
+}
+#navigation .nav-link:not(.active) {
+    color: grey;
+}
+
+#content-hr {
+    margin-top: .75rem;
+    border-top-width: 2px;
 }
 </style>
