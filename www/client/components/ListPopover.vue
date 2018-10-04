@@ -11,7 +11,7 @@
             <h5 class="text-capitalize">{{ name }}</h5>
             <input type="text" placeholder="Search" class="bg-light w-100 p-1" v-model="searchTerm" />
             <div class="d-flex flex-column p-1">
-                <div v-for="(item, i) in paginatedList" :key="item" class="d-flex align-items-center">
+                <div v-for="(item, i) in pageList" :key="item" class="d-flex align-items-center">
                     <div class="reformat-item w-100">
                         {{ item }}
                     </div>
@@ -28,51 +28,26 @@
 
 <script>
 import webuiPopover from 'webui-popover'
+import { PaginatedListMixin } from 'mixins'
 
 export default {
+    mixins: [PaginatedListMixin],
+
     data() {
         return {
             searchTerm: '',
             items: 12,
-            page: 1
         }
     },
 
     props: ['list', 'name'],
 
-    methods: {
-        prevPage() {
-            if (this.canPrev) this.page = this.page - 1
-        },
-        nextPage() {
-            if (this.canNext) this.page = this.page + 1
-        },
-        toAbsoluteIndex(i) {
-            return ((this.page - 1) * this.items) + i
-        }
-    },
-
     computed: {
-        searchedList() {
+        itemList() {
             if (this.searchTerm === '') 
                 return this.list
             else 
                 return this.list.filter(item => item.search(this.searchTerm) > -1)
-        },
-        pages() {
-            return Math.ceil(this.searchedList.length / this.items)
-        },
-        offset() {
-            return (this.page - 1) * this.items
-        },
-        paginatedList() {
-            return this.searchedList.slice(this.offset, this.offset + this.items)
-        },
-        canPrev() {
-            return this.page > 1
-        },
-        canNext() {
-            return this.page < this.pages
         }
     },
 
