@@ -30,7 +30,7 @@ export default {
             g: null,
             size: 75,
             margin: {top: 30, right: 5, bottom: 25, left: 35},
-            color: d3.scaleOrdinal(d3.schemeCategory20c)
+            color: d3.scaleOrdinal(d3.schemePastel1)
         }
     },
 

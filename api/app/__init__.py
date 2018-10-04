@@ -19,10 +19,6 @@ import pandas as pd
 import numpy as np
 
 import app.rscripts as rscripts
-try:
-    from scripts.set_analysis import Set_analysis
-except:
-    print('Annotation script not found, starting without annotation support.')
 
 
 app = Flask(__name__)
@@ -400,53 +396,6 @@ def correlate(project_id):
     elif request.method == 'GET':
         corrs = pd.read_csv(os.path.join(project_folder, 'corrs.csv'), index_col=0)
         return jsonify(corrs.to_dict(orient='split'))
-
-
-@app.route('/projects/<project_id>/annotate', methods=['GET'])
-@project_exists
-def annotate(project_id):
-    from scripts.set_analysis import Set_analysis
-    id_type = request.args.get('id_type')
-    annotation_type = request.args.get('annotation_type')
-    recalculate = request.args.get('recalculate')
-
-    if recalculate == "true":
-        project_folder = project_id_to_folder(project_id)
-        set_analysis = Set_analysis(annotation_type)
-        annotations = set_analysis.annotate(project_folder, id_type)
-
-        arguments = {'annotation_type':annotation_type, 'id_type':id_type}
-        # Store in project data??
-        #return jsonify({'annotations' : annotations, 'arguments' : arguments})
-        return jsonify(annotations)
-    else:
-        try:
-            return jsonify(json.load(open(g.annotation_path, 'r')))
-        except:
-            return jsonify({})
-
-@app.route('/integrate', methods=['GET'])
-def integrate():
-    from scripts.set_analysis import Set_analysis
-    print(request.args.get('projectId1'))
-    print(request.args.get('projectId2'))
-    print(request.args.get('id_type1'))
-    print(request.args.get('id_type2'))
-    print(request.args.get('annotation_type'))
-
-    id_type1 = request.args.get('id_type1')
-    id_type2 = request.args.get('id_type2')
-
-    project_folder1 = project_id_to_folder(request.args.get('projectId1'))
-    project_folder2 = project_id_to_folder(request.args.get('projectId2'))
-
-    print(project_folder1)
-    print(project_folder2)
-
-    set_analysis = Set_analysis(request.args.get('annotation_type'))
-    overlap_list = set_analysis.make_real_matrix(project_folder1, project_folder2, id_type1, id_type2)
-
-    return jsonify(overlap_list)
 
 
 @app.route('/export/<name>')

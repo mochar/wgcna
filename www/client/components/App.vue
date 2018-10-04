@@ -14,9 +14,6 @@
                                 :disabled="$store.state.projects.length < 2">
                     Integrate
                 </router-link>
-                <router-link to="/semanticintegrate" class="nav-item nav-link" active-class="active" tag="a" v-if="false">
-                    Semantic Integrate
-                </router-link>
             </ul>
             <router-link to="/new" class="btn btn-light float-right" id="new-project-btn" tag="button" v-if="!isNewPage">
                 <span class="fa fa-plus"></span>
