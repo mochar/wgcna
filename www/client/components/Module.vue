@@ -61,6 +61,10 @@ export default {
 
     mounted() {
         this.createChart()
+    },
+
+    updated() {
+        this.createChart()
     }
 }
 </script>

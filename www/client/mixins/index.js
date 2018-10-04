@@ -34,6 +34,9 @@ const PaginatedListMixin = {
         },
         canNext() {
             return this.page < this.pages
+        },
+        pageItemIndices() {
+            return this.$helpers.range(this.items).map(x => (this.page - 1) * this.items + x)
         }
     }
 }
