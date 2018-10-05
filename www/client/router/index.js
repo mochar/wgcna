@@ -1,12 +1,13 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import store from '../store'
-import Home from 'views/Home'
 import Analyze from 'views/Analyze'
 import Integrate from 'views/Integrate'
 import NotFound from 'views/NotFound'
 import Project from 'views/Project'
-import New from 'views/New'
+
+const Home = () => import(/* webpackChunkName: "home" */  'views/Home')
+const New = () => import(/* webpackChunkName: "new" */  'views/New')
 
 Vue.use(Router)
 
