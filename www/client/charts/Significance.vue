@@ -14,7 +14,13 @@
 </template>
 
 <script>
-import * as d3 from 'd3'
+import { select } from 'd3-selection'
+import { scaleOrdinal, scaleBand, scaleLinear } from 'd3-scale'
+import { schemePastel1 } from 'd3-scale-chromatic'
+import { rgb } from 'd3-color'
+import { axisBottom, axisTop } from 'd3-axis'
+import 'd3-transition'
+const d3 = { select, scaleOrdinal, scaleBand, scaleLinear, schemePastel1, rgb, axisBottom, axisTop }
 
 export default {
     data() {

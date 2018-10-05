@@ -1,4 +1,4 @@
-import { scaleLinear} from 'd3'
+import { scaleLinear} from 'd3-scale'
 
 function drawAxis(scale, context, linear = true, label = '', tickCount = 10, tickSize = 6) {
     let tickPadding = 3,

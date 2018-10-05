@@ -19,7 +19,16 @@
  * @param [settings.constrainExtremes=false] Should the y scale include outliers?
  * @returns {object} chart A chart object
  */
-import * as d3 from 'd3'
+import { select, event } from 'd3-selection'
+import { scaleOrdinal, scaleLog, scaleLinear, scaleBand } from 'd3-scale'
+import { format } from 'd3-format'
+import { schemeCategory10, schemePastel1 } from 'd3-scale-chromatic'
+import { min, max, quantile, median, mean, ascending, extent } from 'd3-array'
+import { axisBottom, axisLeft } from 'd3-axis'
+import { curveCardinal, area, line } from 'd3-shape'
+import { interpolateRound } from 'd3-interpolate'
+const d3 = { select, event, scaleOrdinal, scaleLog, scaleLinear, scaleBand, format, schemeCategory10, schemePastel1, min, max, quantile, median, mean, ascending, extent,
+             axisBottom, axisLeft, curveCardinal, area, line, interpolateRound}
 
 function makeDistroChart(settings) {
 

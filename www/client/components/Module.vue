@@ -15,7 +15,8 @@
 
 <script>
 import makeDistroChart from '../external/distrochart'
-import { scaleOrdinal, schemePastel1 } from 'd3'
+import { scaleOrdinal } from 'd3-scale'
+import { schemePastel1 } from 'd3-scale-chromatic'
 
 export default {
     props: ['name', 'data', 'samples', 'groups'],

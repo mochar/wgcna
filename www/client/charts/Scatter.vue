@@ -26,7 +26,10 @@
 </template>
 
 <script>
-import * as d3 from 'd3'
+import { select } from 'd3-selection'
+import { scaleLinear } from 'd3-scale'
+import { axisBottom, axisLeft } from 'd3-axis'
+const d3 = { select, scaleLinear, axisBottom, axisLeft }
 
 export default {
     data() {

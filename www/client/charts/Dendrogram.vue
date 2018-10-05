@@ -15,7 +15,12 @@
 </template>
 
 <script>
-import * as d3 from 'd3'
+import { scaleBand, scaleLinear } from 'd3-scale'
+import { axisLeft } from 'd3-axis'
+import { select, event } from 'd3-selection'
+import { min, max } from 'd3-array'
+import { formatPrefix } from 'd3-format'
+const d3 = { scaleBand, scaleLinear, axisLeft, select, event, min, max, formatPrefix }
 
 export default {
     data() {

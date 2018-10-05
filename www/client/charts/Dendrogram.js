@@ -1,5 +1,10 @@
-import * as d3 from 'd3'
 import { drawAxis } from 'charts/Functions'
+
+import { select, event } from 'd3-selection'
+import { scaleBand, scaleLinear } from 'd3-scale'
+import { interpolateRound } from 'd3-interpolate'
+import { min, max } from 'd3-array'
+const d3 = { select, event, scaleBand, scaleLinear, interpolateRound, min, max }
 
 function dendrogram(settings) {
 

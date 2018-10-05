@@ -8,7 +8,10 @@
 </template>
 
 <script>
-import * as d3 from 'd3'
+import { select } from 'd3-selection'
+import { axisBottom, axisLeft } from 'd3-axis'
+import { scalePoint, scaleLinear, scaleOrdinal } from 'd3-scale'
+const d3 = { select, axisBottom, axisLeft, scalePoint, scaleLinear, scaleOrdinal }
 
 export default {
     data() {

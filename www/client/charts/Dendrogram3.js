@@ -1,5 +1,11 @@
-import * as d3 from 'd3'
 import { drawAxis, scaleRadial } from 'charts/Functions'
+
+import { selectAll, select, mouse } from 'd3-selection'
+import { scaleLinear, scalePoint, scaleQuantize } from 'd3-scale'
+import { min, max } from 'd3-array'
+import { lineRadial, arc } from 'd3-shape'
+import { ribbon } from 'd3-chord'
+const d3 = { selectAll, select, mouse, scaleLinear, scalePoint, scaleQuantize, min, max, lineRadial, arc, ribbon }
 
 function flatten(array) {
     return Array.prototype.concat(...array)
