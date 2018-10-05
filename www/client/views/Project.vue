@@ -16,7 +16,7 @@
                         Edit
                     </a>
                     <a class="dropdown-item" href="#" @click.prevent="del">
-                        <font-awesome-icon icon="trash" fixed-width />
+                        <font-awesome-icon :icon="['far', 'trash-alt']" fixed-width />
                         Delete
                     </a>
                     <h6 class="dropdown-header">Download plot</h6>
