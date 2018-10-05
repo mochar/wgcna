@@ -1,0 +1,87 @@
+@import "~bootstrap/scss/bootstrap";
+@import "~webui-popover/src/jquery.webui-popover.css";
+@import "../external/distrochart.css";
+
+html {
+    overflow-y: scroll;
+    font-size: 14px;
+}
+
+input[type=text] {
+    border: 1px solid #ccc;
+    box-shadow: initial;
+}
+
+svg {
+    font-family: sans-serif;
+    font-size: 10pt;
+}
+
+.badge-pill {
+    border-radius: 10rem !important;
+}
+
+.btn {
+    cursor: pointer;
+    position: relative;
+    -webkit-transition: initial;
+       -moz-transition: initial;
+            transition: initial;
+}
+
+.btn-primary { 
+    background-color: #0c7dd6;
+    border-color: #0c7dd6;
+}
+.btn-primary:hover, .btn-primary:focus { background-color: #0275d8; }
+
+.btn-success { border-color: #419641; }
+.btn-success:hover, .btn-success:focus { background-color: #5cb85c; }
+.btn-danger { border-color: #c12e2a; }
+.btn-danger:hover, .btn-danger:focus { background-color: #d9534f; }
+.btn-secondary { border-color: #adadad; }
+.btn-secondary:hover, .btn-secondary:focus { background-color: #fff;  }
+
+.btn:focus {
+    box-shadow: inherit;
+}
+
+* {
+    -webkit-border-radius: 0 !important;
+    -moz-border-radius: 0 !important;
+    border-radius: 0 !important;
+}
+
+.custom-radio .custom-control-indicator {
+    border-radius: 50% !important;
+}
+
+.text-main {
+    color: #01549b !important;
+}
+.border-main {
+    border-color: #01549b !important;
+}
+
+.text-normal {
+    color: #5a5a5a !important;
+}
+
+.bg-lipidomics {
+    background-color: #fbc93d !important;
+}
+.text-lipidomics {
+    color: #fbc93d !important;
+}
+.bg-metabolomics {
+    background-color: #6cc0e5;
+}
+.text-metabolomics {
+    color: #6cc0e5;
+}
+.bg-transcriptomics {
+    background-color: #fb4f4f;
+}
+.text-transcriptomics {
+    color: #fb4f4f;
+}
