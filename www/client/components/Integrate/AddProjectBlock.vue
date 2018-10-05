@@ -20,7 +20,7 @@
     </div>
     <div class="col-2">
         <button class="btn btn-light" v-if="showAdd" @click="$emit('add')">
-            <span class="fa fa-plus"></span>
+            <font-awesome-icon icon="plus" />
         </button>
         <button v-if="!showAdd && deletable" type="button" class="close" data-dismiss="alert"
             :style="{'float': 'initial', 'line-height': 'initial'}">

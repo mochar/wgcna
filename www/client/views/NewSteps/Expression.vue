@@ -29,7 +29,7 @@
         </div>
 
         <button class="btn btn-light mt-2" type="submit" :disabled="uploading" v-if="!disabled">
-            <span class="fa fa-upload"></span>
+            <font-awesome-icon icon="upload" />
             Upload / retrieve
         </button>
     </form>
@@ -42,13 +42,13 @@
             Matrix contains <strong>{{ dims.features }} features</strong> and <strong>{{ dims.samples }} samples</strong>.
         </span>
         <button class="btn btn-light" @click="transpose = !transpose" v-if="!disabled">
-            <span class="fa fa-retweet fa-lg"></span>
+            <font-awesome-icon icon="retweet" size="lg" />
             Swap rows and columns
         </button>
     </div>
 
     <div v-if="dims">
-        <span class="fa fa-spin fa-refresh" v-if="evaluating"></span>
+        <font-awesome-icon icon="sync" spin v-if="evaluating" />
         <div v-else>
             <span>In terms of missing values:</span>
             <span v-if="evaluation.allOK">All OK</span>
@@ -62,7 +62,7 @@
 
     <div class="mt-4" v-if="!disabled && dims && !evaluating">
         <button class="btn btn-primary" @click="done" :disabled="loading">
-            <span class="fa fa-check"></span>
+            <font-awesome-icon icon="check" />
             OK
         </button>
     </div>

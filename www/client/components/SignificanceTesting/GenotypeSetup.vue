@@ -13,8 +13,8 @@
     </select>
     <div class="mt-3">
         <button class="btn btn-light" @click="go" :disabled="loading">
-            <span class="fa fa-check" v-if="!loading"></span>
-            <span class="fa fa-refresh fa-spin" v-else></span>
+            <font-awesome-icon icon="check" v-if="!loading" />
+            <font-awesome-icon icon="sync" spin v-else />
             Go
         </button>
         <button class="btn btn-light" disabled>

@@ -6,11 +6,11 @@
         </select>
         <input type="text" placeholder="Search module" class="bg-light p-1 ml-2 mr-2" v-model="searchTerm" />
         <button class="btn btn-light" @click="prevPage" :disabled="!canPrev">
-            <span class="fa fa-chevron-left fa-fw"></span>
+            <font-awesome-icon icon="chevron-left" fixed-width />
         </button>
         <div class="pl-1"></div>
         <button class="btn btn-light" @click="nextPage" :disabled="!canNext">
-            <span class="fa fa-chevron-right fa-fw"></span>
+            <font-awesome-icon icon="chevron-right" fixed-width />
         </button>
     </div>
     <div v-if="traitData && data && trait">
@@ -25,11 +25,11 @@
     </div>
     <div class="d-flex flex-row-reverse">
         <button class="btn btn-light" @click="nextPage" :disabled="!canNext">
-            <span class="fa fa-chevron-right fa-fw"></span>
+            <font-awesome-icon icon="chevron-right" fixed-width />
         </button>
         <div class="pl-1"></div>
         <button class="btn btn-light" @click="prevPage" :disabled="!canPrev">
-            <span class="fa fa-chevron-left fa-fw"></span>
+            <font-awesome-icon icon="chevron-left" fixed-width />
         </button>
     </div>
 </div>  

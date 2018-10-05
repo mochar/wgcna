@@ -23,7 +23,7 @@
         </div>
 
         <button class="btn btn-primary mt-4" type="submit" :disabled="submitting" v-if="!disabled">
-            <span class="fa fa-check"></span>
+            <font-awesome-icon icon="check" />
             OK
         </button>
     </form>

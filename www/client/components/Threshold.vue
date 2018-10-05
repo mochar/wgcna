@@ -3,14 +3,14 @@
     <div class="d-flex justify-content-between align-items-start">
         <h6 class="block-title">
             SOFT TRESHOLD
-            <span class="fa fa-cog fa-spin" v-if="loading"></span>
+            <font-awesome-icon icon="cog" spin v-if="loading" />
         </h6>
 
         <div class="text-muted d-flex align-items-center">
-            <span class="fa fa-info text-muted"></span>
+            <font-awesome-icon icon="info" class="text-muted" />
             <div class="dropdown ml-2">
                 <button class="btn btn-link text-muted pr-1 pt-0 pb-0" data-toggle="dropdown">
-                    <span class="fa fa-ellipsis-v"></span>
+                    <font-awesome-icon icon="ellipsis-v" />
                 </button>
                 <div class="dropdown-menu dropdown-menu-right">
                     <h6 class="dropdown-header">Download plot</h6>
@@ -76,7 +76,7 @@
 
     <div class="block-action-div">
         <button class="btn btn-light" :disabled="!buttonReady" @click="pick">
-            <span class="fa fa-check"></span>
+            <font-awesome-icon icon="check" />
             Select
         </button>
     </div>

@@ -3,12 +3,12 @@
     <div class="d-flex justify-content-between align-items-start">
         <h6 class="block-title text-uppercase">
             Module Significance
-            <span class="fa fa-cog fa-spin" v-if="loading"></span>
+            <font-awesome-icon icon="cog" spin v-if="loading" />
         </h6>
         <div class="text-muted d-flex align-items-center">
             <div class="dropdown ml-2">
                 <button class="btn btn-link text-muted pr-1 pt-0 pb-0" data-toggle="dropdown">
-                    <span class="fa fa-ellipsis-v"></span>
+                    <font-awesome-icon icon="ellipsis-v" />
                 </button>
                 <div class="dropdown-menu  dropdown-menu-right">
                     <h6 class="dropdown-header">Download plot</h6>
@@ -65,7 +65,7 @@
         </significance>
         <!-- <button @click.prevent="showPvalues = false" class="btn btn-light" v-if="showPvalues"> -->
         <button @click.prevent="$emit('back')" class="btn btn-light">
-            <span class="fa fa-angle-double-left"></span>
+            <font-awesome-icon icon="angle-double-left" />
             Return
         </button>
     </div>

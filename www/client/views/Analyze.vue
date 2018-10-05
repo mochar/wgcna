@@ -9,7 +9,7 @@
                         :class="{ active: tab == 'ModuleCreationTab' }" 
                         href="#" 
                         @click.prevent="tab = 'ModuleCreationTab'">
-                        <i class="fa fa-certificate fa-fw"></i>
+                        <font-awesome-icon icon="certificate" fixed-width size="sm" />
                         Generate
                     </a>
                 </li>
@@ -19,7 +19,7 @@
                         :class="{ disabled: !hasModules, active: tab == 'ModuleSignificanceTab' }" 
                         href="#" 
                         @click.prevent="tab = 'ModuleSignificanceTab'">
-                        <i class="fa fa-bar-chart fa-fw"></i>
+                        <font-awesome-icon icon="chart-bar" fixed-width size="sm" />
                         Significance
                     </a>
                 </li>
@@ -29,7 +29,7 @@
                         :class="{ disabled: !hasModules, active: tab == 'ModuleInspectionTab' }" 
                         href="#" 
                         @click.prevent="tab = 'ModuleInspectionTab'">
-                        <i class="fa fa-eye fa-fw"></i>
+                        <font-awesome-icon :icon="['far', 'eye']" fixed-width size="sm" />
                         Inspection
                     </a>
                 </li>
@@ -41,11 +41,11 @@
                     <button class="btn btn-light btn-block dropdown-toggle text-left d-flex justify-content-between align-items-center" 
                             style="margin-right: -1px" data-toggle="dropdown">
                         <span v-if="!$store.state.projectLoading && project">
-                            <span class="fa fa-circle fa-fw" :class="`text-${project.omic}`"></span>
+                            <font-awesome-icon icon="circle" fixed-width :class="`text-${project.omic}`" />
                             <span>{{ project.name }}</span>
                             <span v-show="project.description" class="text-muted">- {{ project.description }}</span>
                         </span>
-                        <span class="fa fa-cog fa-spin" v-else></span>
+                        <font-awesome-icon icon="cog" spin v-else />
                     </button>
                     <div class="dropdown-menu w-100">
                         <!-- <span class="m-3">Projects</span> -->
@@ -64,7 +64,7 @@
                     </div>
                 </div>
                 <router-link tag="button" class="btn btn-light" style="margin-left: -1px" :to="{ name: 'project', params: { id: $route.params.id }}">
-                    <span class="fa fa-edit"></span>
+                    <font-awesome-icon icon="edit" size="sm" />
                 </router-link>
             </div>
         </div>

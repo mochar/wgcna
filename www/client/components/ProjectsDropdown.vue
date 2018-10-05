@@ -3,11 +3,11 @@
     <button class="btn btn-light btn-block dropdown-toggle text-left d-flex justify-content-between align-items-center" 
             style="margin-right: -1px" data-toggle="dropdown">
         <span v-if="project">
-            <span v-if="circle" class="fa fa-circle fa-fw" :class="`text-${project.omic}`"></span>
+            <font-awesome-icon icon="circle" fixed-width v-if="circle" :class="`text-${project.omic}`" />
             <span>{{ project.name }}</span>
             <span v-show="project.description" class="text-muted">- {{ project.description }}</span>
         </span>
-        <span class="fa fa-cog fa-spin" v-else></span>
+        <font-awesome-icon icon="cog" spin v-else />
     </button>
     <div class="dropdown-menu w-100">
         <!-- <span class="m-3">Projects</span> -->

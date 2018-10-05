@@ -15,7 +15,7 @@
 
     <div class="mt-2">
         <button @click="$emit('back')" class="btn btn-light">
-            <span class="fa fa-angle-double-left"></span>
+            <font-awesome-icon icon="angle-double-left" />
             Return
         </button>
     </div>

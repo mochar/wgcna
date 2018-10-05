@@ -43,8 +43,8 @@
         </div>
         <div>
             <button class="btn btn-light" @click="plot" :disabled="loading">
-                <span class="fa fa-refresh fa-spin fa-fw" v-if="loading"></span>
-                <span class="fa fa-check fa-fw" v-else></span>
+                <font-awesome-icon icon="sync" spin fixed-width v-if="loading" />
+                <font-awesome-icon icon="check" fixed-width v-else />
                 Plot
             </button>
         </div>

@@ -33,7 +33,7 @@
 
     <div v-if="false">
     <button class="btn btn-link" @click="advanced = true" v-if="!advanced">
-        <span class="fa fa-angle-double-right"></span>
+        <font-awesome-icon icon="angle-double-right" />
         Advanced
     </button>
     <div v-else>

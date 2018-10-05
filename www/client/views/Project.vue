@@ -8,15 +8,15 @@
         <div class="text-muted d-flex align-items-center">
             <div class="dropdown ml-2">
                 <button class="btn btn-link text-muted pr-1 pt-0 pb-0" data-toggle="dropdown">
-                    <span class="fa fa-ellipsis-v"></span>
+                    <font-awesome-icon icon="ellipsis-v" />
                 </button>
                 <div class="dropdown-menu dropdown-menu-right">
                     <a class="dropdown-item" href="#" @click.prevent="">
-                        <span class="fa fa-edit fa-fw"></span>
+                        <font-awesome-icon icon="edit" fixed-width />
                         Edit
                     </a>
                     <a class="dropdown-item" href="#" @click.prevent="del">
-                        <span class="fa fa-trash fa-fw"></span>
+                        <font-awesome-icon icon="trash" fixed-width />
                         Delete
                     </a>
                     <h6 class="dropdown-header">Download plot</h6>
@@ -58,7 +58,7 @@
 
     <div>
         <button @click.prevent="$router.go(-1)" class="btn btn-light">
-            <span class="fa fa-angle-double-left"></span>
+            <font-awesome-icon icon="angle-double-left" />
             Return
         </button>
     </div>

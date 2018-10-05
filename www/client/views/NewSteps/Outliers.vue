@@ -13,14 +13,14 @@
             @loaded="building = false"
             @cutted="d => outlierSamples = d">
         </sample-tree>
-        <span class="fa fa-refresh fa-spin" v-if="building"></span>
+        <font-awesome-icon icon="sync" spin v-if="building" />
     </div>
 
     <list-popover name="Outlier samples" :list="outlierSamples" v-if="outlierSamples.length"></list-popover>
 
     <div class="mt-3" v-if="!building">
         <button class="btn btn-primary" @click="done" :disabled="loading">
-            <span class="fa fa-check"></span>
+            <font-awesome-icon icon="check" />
             OK
         </button>
     </div>

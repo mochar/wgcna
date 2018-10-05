@@ -5,7 +5,7 @@
             {{ name }}
         </h6>
         <button class="btn btn-light" @click="download">
-            <span class="fa fa-download fa-fw"></span>
+            <font-awesome-icon icon="download" fixed-width />
             Download module
         </button>
     </div>

@@ -16,7 +16,7 @@
                 </router-link>
             </ul>
             <router-link to="/new" class="btn btn-light float-right" id="new-project-btn" tag="button" v-if="!isNewPage">
-                <span class="fa fa-plus"></span>
+                <font-awesome-icon icon="plus" />
                 New Project
             </router-link>
             <button class="btn btn-light float-right" id="new-project-btn" @click="$router.go(-1)" v-else>
@@ -63,7 +63,6 @@ export default {
 }
 </script>
 
-<style src="../../node_modules/font-awesome/css/font-awesome.min.css"></style>
 <style src="../../node_modules/webui-popover/dist/jquery.webui-popover.min.css"></style>
 <style src="../../client/external/distrochart.css"></style>
 <style lang="scss">

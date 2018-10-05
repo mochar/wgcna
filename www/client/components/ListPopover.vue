@@ -3,7 +3,7 @@
     <button class="btn btn-light">
         <span class="text-lowercase">
             {{ list.length }} {{ name }}
-            <span class="fa fa-caret-down"></span>
+            <font-awesome-icon icon="caret-down" />
         </span>
     </button>
     <div class="webui-popover-content">

@@ -17,7 +17,7 @@
         </div>
 
         <button class="btn btn-light mt-2" type="submit" :disabled="uploading" v-if="!disabled">
-            <span class="fa fa-upload"></span>
+            <font-awesome-icon icon="upload" />
             Upload / retrieve
         </button>
 
@@ -51,7 +51,7 @@
 
     <div class="mt-3" v-if="types && !disabled">
         <button class="btn btn-primary" @click="done" :disabled="loading">
-            <span class="fa fa-check"></span>
+            <font-awesome-icon icon="check" />
             OK
         </button>
     </div>

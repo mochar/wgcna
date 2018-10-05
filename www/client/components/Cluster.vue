@@ -3,13 +3,13 @@
     <div class="d-flex justify-content-between align-items-start">
         <h6 class="block-title">
             FEATURE CLUSTERING
-            <span class="fa fa-lg fa-cog fa-spin float-right" v-if="loading"></span>
+            <font-awesome-icon pull="right" icon="cog" size="lg" spin v-if="loading" />
         </h6>
         <div class="text-muted d-flex align-items-center">
-            <span class="fa fa-info text-muted"></span>
+            <font-awesome-icon class="text-muted" icon="info" />
             <div class="dropdown ml-2">
                 <button class="btn btn-link text-muted pr-1 pt-0 pb-0" data-toggle="dropdown">
-                    <span class="fa fa-ellipsis-v"></span>
+                    <font-awesome-icon icon="ellipsis-v" />
                 </button>
                 <div class="dropdown-menu  dropdown-menu-right">
                     <h6 class="dropdown-header">Download plot</h6>
@@ -46,7 +46,7 @@
                 </div> -->
 
                 <button type="submit" class="btn btn-light mr-2" :disabled="cutting">
-                    <span class="fa fa-scissors"></span>
+                    <font-awesome-icon icon="cut" />
                     Cut
                 </button>
             </form>
