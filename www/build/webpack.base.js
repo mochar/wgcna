@@ -51,8 +51,10 @@ module.exports = {
       },
       {
         test: /\.js$/,
-        // loaders: ['babel-loader'],
-        exclude: [/node_modules/],
+        include: [
+          path.resolve(__dirname, '../client'),
+          path.resolve(__dirname, '../node_modules/bootstrap/js/')
+        ],
         use: {
           loader: 'babel-loader',
           options: {
@@ -93,8 +95,8 @@ module.exports = {
     ]),
     new webpack.ProvidePlugin({   
       $: 'jquery',
-      jQuery: 'jquery',
-      'window.jQuery': 'jquery',
+      // jQuery: 'jquery',
+      // 'window.jQuery': 'jquery',
       Popper: ['popper.js', 'default']
     })
   ],

@@ -1,5 +1,6 @@
 import './promise-polyfill'
-import 'bootstrap'
+import 'bootstrap/js/src/util'
+import 'bootstrap/js/src/dropdown'
 import { app } from './app'
 
 // Enable progressive web app support (with offline-plugin)
