@@ -19,7 +19,7 @@ if (config.electron) {
   // remove dist folder in web app mode
   exec('rm -rf dist/')
   // use source-map in web app mode
-  base.devtool = 'eval-source-map'
+  base.devtool = 'cheap-module-source-map'
 }
 
 // use hash filename to support long-term caching
