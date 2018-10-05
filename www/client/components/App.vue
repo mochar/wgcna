@@ -34,7 +34,6 @@
 </template>
 
 <script>
-import 'bootstrap'
 import Vue from 'vue'
 
 Vue.filter('round', function(value, decimals) {
@@ -65,10 +64,11 @@ export default {
 </script>
 
 <style src="../../node_modules/font-awesome/css/font-awesome.min.css"></style>
-<style src="../../node_modules/bootstrap/dist/css/bootstrap.min.css"></style>
 <style src="../../node_modules/webui-popover/dist/jquery.webui-popover.min.css"></style>
 <style src="../../client/external/distrochart.css"></style>
-<style>
+<style lang="scss">
+@import "../../node_modules/bootstrap/scss/bootstrap";
+
 html {
     overflow-y: scroll;
     font-size: 14px;
