@@ -16,21 +16,21 @@
                 <li class="nav-item">
                     <a 
                         class="nav-link" 
-                        :class="{ disabled: !hasModules, active: tab == 'ModuleSignificanceTab' }" 
-                        href="#" 
-                        @click.prevent="tab = 'ModuleSignificanceTab'">
-                        <font-awesome-icon icon="chart-bar" fixed-width size="sm" />
-                        Significance
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a 
-                        class="nav-link" 
                         :class="{ disabled: !hasModules, active: tab == 'ModuleInspectionTab' }" 
                         href="#" 
                         @click.prevent="tab = 'ModuleInspectionTab'">
                         <font-awesome-icon :icon="['far', 'eye']" fixed-width size="sm" />
                         Inspection
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a 
+                        class="nav-link" 
+                        :class="{ disabled: !hasModules, active: tab == 'ModuleSignificanceTab' }" 
+                        href="#" 
+                        @click.prevent="tab = 'ModuleSignificanceTab'">
+                        <font-awesome-icon icon="chart-bar" fixed-width size="sm" />
+                        Significance
                     </a>
                 </li>
             </ul>
