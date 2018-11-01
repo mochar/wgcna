@@ -14,6 +14,7 @@ function dendrogram(settings) {
         data: null,
         cuttable: false,
         labels: false,
+        axis: true,
         ratio: null,
         colors: null,
         selector: null
@@ -39,7 +40,6 @@ function dendrogram(settings) {
     }
 
     !function init() {
-        console.log('init')
         chart.container = d3.select(chart.settings.selector)
 
         chart.canvas = chart.container.select('canvas.main').node()
@@ -50,11 +50,11 @@ function dendrogram(settings) {
 
         chart.height = 100
         chart.width = 100
-        chart.colorHeight = 20
+        chart.colorHeight = chart.colors ? 20 : 0
         chart.colorsHeight = 0
-        chart.colorsMargin = 50
+        chart.colorsMargin = chart.colors ? 50 : 0
         chart.cutHeight = null
-        chart.margin = {top: 10, right: 5, bottom: 5, left: 100}
+        chart.margin = {top: 10, right: 5, bottom: 5, left: chart.settings.axis ? 100 : 10 }
 
         chart.x = d3.scaleBand().paddingOuter(.5)
         chart.y = d3.scaleLinear().interpolate(d3.interpolateRound)
@@ -95,7 +95,6 @@ function dendrogram(settings) {
             chart.cutContext.stroke()
         }).on('click', () => {
             chart.cutHeight = d3.event.offsetY - chart.margin.top
-            console.log(chart.yReverse(chart.cutHeight))
             chart.cutContext.moveTo(0, chart.cutHeight)
             chart.cutContext.lineTo(chart.cutCanvas.width, chart.cutHeight)
         })
@@ -158,7 +157,6 @@ function dendrogram(settings) {
         for (let i = 0; i < chart.data.merge.length; i++) {
             let d = chart.data.merge[i],
                 location = locations[i]
-            console.log(`${location.x}, ${location.y}`)
             chart.context.translate(location.x, location.y)
             if (chart.settings.labels && d[0] <= 0) {
                 const x = d[0] < 0 ? toX(d[0]) : positions[d[0]-1]
@@ -191,7 +189,7 @@ function dendrogram(settings) {
         })
 
         // draw
-        drawAxis(chart.y, chart.context, true, 'Height')
+        if (chart.settings.axis) drawAxis(chart.y, chart.context, true, 'Height')
 
         chart.context.beginPath()
         for (let i = 0; i < locations.length; i++) {
