@@ -9,17 +9,12 @@ function boxplot(settings) {
     let chart = {}
 
     chart.settings = {
-        data: null,
-        groups: null,
         selector: null,
         boxSize: 50
     }
     for (var setting in settings) {
         chart.settings[setting] = settings[setting]
     }
-
-    chart.data = chart.settings.data
-    chart.groups = chart.settings.groups
 
     !function init() {
         chart.margin = {top: 20, right: 5, bottom: 0, left: 5}
@@ -28,42 +23,45 @@ function boxplot(settings) {
         chart.gAxis = chart.svg.append('g')
 
         chart.x = d3.scaleLinear().domain([-1, 1])
-        chart.y = d3.scaleBand().domain(chart.groups).padding(.2)
-        chart.c = d3.scaleOrdinal().domain(chart.groups).range(d3.schemePastel1)
+        chart.y = d3.scaleBand().padding(.2)
+        chart.c = d3.scaleOrdinal().range(d3.schemePastel1)
 
         chart.axis = g => g
             .attr('transform', `translate(0,${chart.margin.top})`)
             .call(d3.axisTop(chart.x).ticks(2, '.0f'))
+    }()
 
-        chart.data = chart.data.map((bin, i) => {
-            bin.sort((a, b) => a - b)
-            const min = bin[0]
-            const max = bin[bin.length - 1]
-            const q1 = d3.quantile(bin, 0.25)
-            const q2 = d3.quantile(bin, 0.50)
-            const q3 = d3.quantile(bin, 0.75)
+    /* Update sizes and ranges based on data and container size */
+    function adjust() {
+        chart.width = Math.round($(chart.settings.selector).parent().width())
+        chart.height = chart.settings.boxSize * chart.data.length
+        chart.svg.attr('width', chart.width).attr('height', chart.height)
+        chart.x.rangeRound([chart.margin.left, chart.width - chart.margin.right])
+        chart.y.domain(chart.groups).rangeRound([chart.height - chart.margin.bottom, chart.margin.top])
+        chart.c.domain(chart.groups)
+    }
+
+    chart.update = function(data) {
+        chart.groups = data.map(d => d.group)
+
+        chart.data = data.map((bin, i) => {
+            bin.data.sort((a, b) => a - b)
+            const min = bin.data[0]
+            const max = bin.data[bin.data.length - 1]
+            const q1 = d3.quantile(bin.data, 0.25)
+            const q2 = d3.quantile(bin.data, 0.50)
+            const q3 = d3.quantile(bin.data, 0.75)
             const iqr = q3 - q1
             const r0 = Math.max(min, q1 - iqr * 1.5)
             const r1 = Math.min(max, q3 + iqr * 1.5)
             bin.quaritiles = [q1, q2, q3]
             bin.range = [r0, r1]
-            bin.outliers = bin.filter(x => x < r0 || x > r1)
-            bin.group = chart.groups[i]
+            bin.outliers = bin.data.filter(x => x < r0 || x > r1)
             return bin
         })
 
-        resize()
-    }()
+        adjust()
 
-    function resize() {
-        chart.width = Math.round($(chart.settings.selector).parent().width())
-        chart.height = chart.settings.boxSize * chart.data.length
-        chart.svg.attr('width', chart.width).attr('height', chart.height)
-        chart.x.rangeRound([chart.margin.left, chart.width - chart.margin.right])
-        chart.y.rangeRound([chart.height - chart.margin.bottom, chart.margin.top])
-    }
-
-    chart.update = function() {
         const g = chart.g
           .selectAll('g')
           .data(chart.data, d => d.group)

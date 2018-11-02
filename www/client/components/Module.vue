@@ -47,17 +47,15 @@ export default {
     methods: {
         processData(){
             const bins = this.data.reduce((acc, cur, i) => { 
-                acc[this.groupLabels.indexOf(this.groups[i])].push(cur)
+                acc[this.groupLabels.indexOf(this.groups[i])].data.push(cur)
                 return acc
-            }, this.$helpers.range(this.groupLabels.length).map(() => []))
+            }, this.groupLabels.map(d => ({ group: d, data: [] })))
             return bins
         },
         createChart() {
             this.chart = boxplot({
                 selector: `#box-plot-${this.name}`,
-                data: this.processData(),
-                groups: this.groupLabels
-            }).update()
+            }).update(this.processData())
         },
         download() {
         }
@@ -71,8 +69,7 @@ export default {
 
     watch: {
         groups() {
-            // this.createChart()
-            this.chart.update()
+            this.chart.update(this.processData())
         }
     },
 
@@ -81,8 +78,7 @@ export default {
     },
 
     updated() {
-        // this.createChart()
-        this.chart.update()
+        this.chart.update(this.processData())
     }
 }
 </script>
