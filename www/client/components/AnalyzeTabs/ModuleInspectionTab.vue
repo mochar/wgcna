@@ -11,6 +11,7 @@
             :cuttable="false"
             :axis="false"
             :selectable="true"
+            @selected="d => selected = d"
             :ratio="0.1">
         </dendro>
         <module 
@@ -65,7 +66,8 @@ export default {
         ...mapGetters(['nominalTraits']),
         itemList() {
             if (this.data === null) return []
-            return this.data.index
+            if (this.selected == null) return this.data.index
+            return this.data.index.filter((d, i) => this.selected.includes(i))
         }
     },
 

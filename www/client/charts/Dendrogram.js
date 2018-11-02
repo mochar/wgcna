@@ -239,6 +239,7 @@ function dendrogram(settings) {
         if (chart.settings.selectable) {
             chart.selectSvg.select('g').selectAll('rect').data(positions)
                 .enter().append('rect')
+                .attr('class', 'merge-rect')
                 .attr('x', d => d - (chart.recSize * .5))
                 .attr('y', (d, i) => chart.y(chart.data.height[i]) - (chart.recSize * .5))
                 .attr('width', chart.recSize)
@@ -246,10 +247,14 @@ function dendrogram(settings) {
                 .attr('fill', 'white')
                 .attr('stroke', 'black')
                 .style('cursor', 'pointer')
-                .on('mouseover', function() { d3.select(this).attr('fill', 'red')})
-                .on('mouseout', function() { d3.select(this).attr('fill', 'white')})
+                .on('mouseover', function() { d3.select(this).attr('fill', '#01549b')})
+                .on('mouseout', function(d, i) { 
+                    if (chart.selected !== i) d3.select(this).attr('fill', 'white')}
+                )
                 .on('click', function(d, i) {
                     chart.settings.onSelect(i)
+                    chart.selectSvg.selectAll('rect.merge-rect').attr('fill', 'white')
+                    d3.select(this).attr('fill', '#01549b')
                 })
         }
 

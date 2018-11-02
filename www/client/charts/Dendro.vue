@@ -27,12 +27,6 @@ export default {
         colors: Object
     },
 
-    data() {
-        return {
-            selected: null
-        }
-    },
-
     methods: {
         findChildren(index, children) {
             const row = this.clusterData.merge[index] 
@@ -44,7 +38,7 @@ export default {
     },
 
     mounted() {
-        const chart = dendrogram({
+        this.chart = dendrogram({
             selector: '#tree',
             data: this.clusterData,
             cuttable: this.cuttable,
@@ -52,18 +46,14 @@ export default {
             labels: this.labels,
             ratio: this.ratio,
             colors: this.colors,
-            onSelect: d => this.selected = d
+            onSelect: d => {
+                let children = []
+                this.findChildren(d, children)
+                this.$emit('selected', children)
+                this.chart.selected = d
+            }
         })
-        chart.update()
-    },
-
-    computed: {
-        children() {
-            if (this.selected === null) return []
-            let c = []
-            this.findChildren(this.selected, c)
-            return c
-        }
+        this.chart.update()
     }
 }
 </script>
