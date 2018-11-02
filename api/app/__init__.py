@@ -346,6 +346,8 @@ def cluster_genes(project_id):
         r = rscripts.cut_genes(cluster_data, g.diss_tom_path, min_module_size)
         pd.DataFrame(r).to_csv(g.module_path)
         rscripts.generate_eigengenes(g.expression_path, g.module_path).to_csv(g.eigengene_path)
+        with open(os.path.join(g.project_folder, 'eigentree.json'), 'w') as f:
+            json.dump(rscripts.hclust(g.eigengene_path, transpose=True), f)
         redis.hset('project:{}'.format(project_id), 'step', 4)
         redis.hset('project:{}'.format(project_id), 'minModuleSize', min_module_size)
         return jsonify(r)
@@ -355,7 +357,9 @@ def cluster_genes(project_id):
 @project_exists
 def module_eigengenes(project_id):
     eigengenes = pd.read_csv(g.eigengene_path, index_col=0)
-    return jsonify(eigengenes.T.to_dict(orient='split'))
+    with open(os.path.join(g.project_folder, 'eigentree.json'), 'r') as f:
+        tree = json.load(f)
+    return jsonify(data=eigengenes.T.to_dict(orient='split'), tree=tree)
 
 
 @app.route('/projects/<project_id>/genotype', methods=['GET', 'POST'])

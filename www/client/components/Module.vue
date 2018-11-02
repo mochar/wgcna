@@ -1,62 +1,78 @@
 <template>
-<div class="card card-body block">
-    <div class="d-flex justify-content-between align-items-baseline">
+<div class="col-3 p-1">
+<div class="card card-body p-2" @mouseover="showDetails = true" @mouseout="showDetails = false">
+    <div class="d-flex justify-content-between align-items-baseline p-2">
         <h6 class="block-title text-uppercase">
             {{ name }}
         </h6>
-        <button class="btn btn-light" @click="download">
-            <font-awesome-icon icon="download" fixed-width />
-            Download module
-        </button>
+
+        <div class="text-muted d-flex align-items-center">
+            <div class="dropdown ml-2" :style="{ opacity: showDetails ? 1 : 0 }">
+                <button class="btn btn-link text-muted pr-1 pt-0 pb-0" data-toggle="dropdown">
+                    <font-awesome-icon icon="ellipsis-v" />
+                </button>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="#" @click.prevent="">
+                        Download expression
+                    </a>
+                    <a class="dropdown-item" href="#" @click.prevent="">
+                        Download feature list
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="chart-wrapper" :id="id"></div>
+    <svg :id="`box-plot-${name}`"></svg>
+    <!-- <div v-show="showDetails">
+        Legend
+    </div> -->
+</div>
 </div>
 </template>
 
 <script>
-import makeDistroChart from '../external/distrochart'
+import boxplot from 'charts/Boxplot.js'
 import { scaleOrdinal } from 'd3-scale'
 import { schemePastel1 } from 'd3-scale-chromatic'
 
 export default {
     props: ['name', 'data', 'samples', 'groups'],
 
+    data() {
+        return {
+            showDetails: false
+        }
+    },
+
     methods: {
-        processData() {
-            return this.data.map((d, i) => ({ group: this.groups[i], value: d}))
+        processData(){
+            const bins = this.data.reduce((acc, cur, i) => { 
+                acc[this.groupLabels.indexOf(this.groups[i])].push(cur)
+                return acc
+            }, this.$helpers.range(this.groupLabels.length).map(() => []))
+            return bins
         },
         createChart() {
-            $(`#${this.id}`).empty()
-            this.chart = makeDistroChart({
+            this.chart = boxplot({
+                selector: `#box-plot-${this.name}`,
                 data: this.processData(),
-                xName: 'group',
-                yName: 'value',
-                axisLabels: {xAxis: null, yAxis: 'Eigengene'},
-                selector: `#${this.id}`,
-                chartSize: {height:350, width:960},
-                yRange: [-1, 1],
-                color: scaleOrdinal(schemePastel1),
-                constrainExtremes:true})
-            this.chart.update()
-            this.chart.renderBoxPlot()
-            this.chart.renderDataPlots({showPlot: true, showbeanLines:true})
-            this.chart.renderNotchBoxes({showNotchBox:false, showLines:false})
-            // this.chart.renderViolinPlot({ bandWidth: .10 })
+                groups: this.groupLabels
+            }).update()
         },
         download() {
-
         }
     },
 
     computed: {
-        id() {
-            return `module-${this.name}`
+        groupLabels() {
+            return [...new Set(this.groups)]
         }
     },
 
     watch: {
         groups() {
-            this.createChart()
+            // this.createChart()
+            this.chart.update()
         }
     },
 
@@ -65,7 +81,14 @@ export default {
     },
 
     updated() {
-        this.createChart()
+        // this.createChart()
+        this.chart.update()
     }
 }
 </script>
+
+<style scoped>
+svg#box-plot-* {
+    shape-rendering: crispEdges;
+}
+</style>
