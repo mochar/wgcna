@@ -63,7 +63,6 @@ export default {
         cut(event) {
             this.cutHeight = d3.event.offsetY - this.margin.top
             this.cutHeight = this.cutline.attr('y1')
-            console.log(this.cutHeight)
             const reverseY = d3.scaleLinear()
                 .domain(this.y.range())
                 .range(this.y.domain())
