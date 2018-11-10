@@ -78,9 +78,6 @@ export default {
                 this.trait = null
                 this.setUp()
             }
-        },
-        searchTerm() {
-            this.page = 1
         }
     },
 
