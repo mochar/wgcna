@@ -5,7 +5,8 @@ import { scaleLinear, scalePoint, scaleQuantize } from 'd3-scale'
 import { min, max } from 'd3-array'
 import { lineRadial, arc } from 'd3-shape'
 import { ribbon } from 'd3-chord'
-const d3 = { selectAll, select, mouse, scaleLinear, scalePoint, scaleQuantize, min, max, lineRadial, arc, ribbon }
+import { interpolateSpectral } from 'd3-scale-chromatic'
+const d3 = { selectAll, select, mouse, scaleLinear, scalePoint, scaleQuantize, min, max, lineRadial, arc, ribbon, interpolateSpectral }
 
 function flatten(array) {
     return Array.prototype.concat(...array)
@@ -172,9 +173,10 @@ function dendrogram(settings) {
             .range([chart.innerRadius, chart.outerRadius])
         
         // 
-        chart.color = d3.scaleLinear()
-            .domain([-1, 0, 1])
-            .range(['#C51D1D', 'white', 'steelblue'])
+        // chart.color = d3.scaleLinear()
+        //     .domain([-1, 0, 1])
+        //     .range(['#C51D1D', 'white', 'steelblue'])
+        chart.color = val => d3.interpolateSpectral((val + 1) * 0.5)
 
         // Axis
         chart.axis = chart.g.append('g')
