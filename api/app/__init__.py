@@ -307,7 +307,7 @@ def tresholds(project_id):
     elif request.method == 'POST':
         power = request.form.get('power')
         if power is None:
-            return {'error': 'Please specify a power.'}, 403
+            return jsonify(error='Please specify a power.'), 403
         pipe = redis.pipeline()
         pipe.hset('project:{}'.format(project_id), 'power', power)
         pipe.hset('project:{}'.format(project_id), 'step', 2)
@@ -337,10 +337,10 @@ def cluster_genes(project_id):
     elif request.method == 'POST':
         min_module_size = request.form.get('minModuleSize')
         if min_module_size is None or not is_number(min_module_size):
-            return {'error': 'Please specify a (correct) minimum module size.'}, 403
+            return jsonify(error='Please specify a (correct) minimum module size.'), 403
         min_module_size = int(min_module_size)
         if not os.path.isfile(g.genetree_path):
-            return {'error': 'Please cluster the genes first.'}, 403
+            return jsonify(error='Please cluster the genes first.'), 403
         with open(g.genetree_path, 'r') as f:
             cluster_data = json.load(f)
         r = rscripts.cut_genes(cluster_data, g.diss_tom_path, min_module_size)
@@ -371,7 +371,7 @@ def genotype(project_id):
         groups = pd.read_csv(project_folder + '/trait.csv', index_col=0).loc[:, trait]
         groups = ','.join(groups.apply(str).tolist())
         if groups is None:
-            return {'error': 'Please specify the groups.'}, 403
+            return jsonify(error='Please specify the groups.'), 403
         cmd = ['Rscript', '--no-init-file', 'scripts/genotype.R', project_folder, groups]
         subprocess.check_output(cmd, universal_newlines=True)
         redis.hset('project:{}'.format(project_id), 'groups', groups)
