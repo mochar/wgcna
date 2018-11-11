@@ -107,7 +107,7 @@ def create_project(user_id, name, description, omic):
     project_folder = project_id_to_folder(project_id)
     os.makedirs(project_folder)
     redis.sadd('projects:{}'.format(user_id), project_id)
-    project = {'name': name, 'description': description, 'id': project_id, 'step': 1,
+    project = {'name': name, 'description': description, 'id': project_id, 
         'omic': omic, 'trait': 0, 'processed': 0}
     redis.hmset('project:{}'.format(project_id), project)
     return project
@@ -310,7 +310,7 @@ def tresholds(project_id):
             return jsonify(error='Please specify a power.'), 403
         pipe = redis.pipeline()
         pipe.hset('project:{}'.format(project_id), 'power', power)
-        pipe.hset('project:{}'.format(project_id), 'step', 2)
+        pipe.hdel('project:{}'.format(project_id), 'minModuleSize')
         pipe.execute()
         remove_file_if_exists(g.genetree_path)
         remove_file_if_exists(g.module_path)
@@ -329,7 +329,6 @@ def cluster_genes(project_id):
             cluster_data = rscripts.tom(g.expression_path, g.diss_tom_path, int(power))
             with open(g.genetree_path, 'w') as f:
                 json.dump(cluster_data, f)
-            redis.hset('project:{}'.format(project_id), 'step', 3)
         response = {'clusterData': cluster_data}
         if os.path.isfile(g.module_path):
             response['colors'] = pd.read_csv(g.module_path).to_dict(orient='list')
@@ -348,8 +347,8 @@ def cluster_genes(project_id):
         rscripts.generate_eigengenes(g.expression_path, g.module_path).to_csv(g.eigengene_path)
         with open(os.path.join(g.project_folder, 'eigentree.json'), 'w') as f:
             json.dump(rscripts.hclust(g.eigengene_path, transpose=True), f)
-        redis.hset('project:{}'.format(project_id), 'step', 4)
         redis.hset('project:{}'.format(project_id), 'minModuleSize', min_module_size)
+        remove_file_if_exists(g.pvalues_path)
         return jsonify(r)
 
 
@@ -374,16 +373,16 @@ def genotype(project_id):
             return jsonify(error='Please specify the groups.'), 403
         cmd = ['Rscript', '--no-init-file', 'scripts/genotype.R', project_folder, groups]
         subprocess.check_output(cmd, universal_newlines=True)
-        redis.hset('project:{}'.format(project_id), 'groups', groups)
-        redis.hset('project:{}'.format(project_id), 'step', 5)
+        redis.hset('project:{}'.format(project_id), 'genotypeTrait', trait)
         return jsonify()
     else:
         df = pd.read_csv(g.pvalues_path, index_col=0, keep_default_na=False, na_values=[''])
+        trait = redis.hget('project:{}'.format(project_id), 'genotypeTrait')
         response = {}
         response['pvalues'] = df.to_dict(orient='list')
         response['modules'] = df.index.tolist()
         response['eigengenes'] = pd.read_csv(g.eigengene_path, index_col=0).to_dict(orient='list')
-        response['groups'] = redis.hget('project:{}'.format(project_id), 'groups').split(',')
+        response['groups'] = pd.read_csv(project_folder + '/trait.csv', index_col=0).loc[:, trait].tolist()
         return jsonify(response)
 
 
