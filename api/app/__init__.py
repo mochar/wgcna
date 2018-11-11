@@ -367,7 +367,10 @@ def genotype(project_id):
     project_folder = project_id_to_folder(project_id)
     if request.method == 'POST':
         trait = request.get_json(force=True)['trait']
-        groups = pd.read_csv(project_folder + '/trait.csv', index_col=0).loc[:, trait]
+        traits_df = pd.read_csv(project_folder + '/trait.csv', index_col=0)
+        if trait not in traits_df.columns:
+            return jsonify(error='Unknown trait.'), 403
+        groups = traits_df.loc[:, trait]
         groups = ','.join(groups.apply(str).tolist())
         if groups is None:
             return jsonify(error='Please specify the groups.'), 403
