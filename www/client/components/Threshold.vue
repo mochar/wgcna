@@ -85,6 +85,7 @@
 
 <script>
 import Scatter from 'charts/Scatter'
+import { mapGetters } from 'vuex'
 
 export default {
     data() {
@@ -94,15 +95,14 @@ export default {
             meank: null,
             loading: true,
             hovered: null,
-            selected: null
+            selected: null,
+            shouldUpdate: false
         }
     },
 
     components: {
         Scatter
     },
-
-    props: ['project', 'update'],
 
     methods: {
         pick() {
@@ -133,16 +133,8 @@ export default {
         this.getValues()
     },
 
-    watch: {
-        project() {
-            if (this.update) {
-                this.loading = true
-                this.getValues()
-            }
-        }
-    },
-
     computed: {
+        ...mapGetters(['project']),
         highlight() {
             if (this.hovered) {
                 return this.hovered
@@ -157,7 +149,21 @@ export default {
         buttonReady() {
             return this.selected && this.project.power != this.selected
         }
-    }
+    },
+
+    watch: {
+        project(val, oldVal) {
+            this.shouldUpdate = val.id !== oldVal.id
+        }
+    },
+
+    activated() {
+        if (this.shouldUpdate) {
+            this.loading = true
+            this.getValues()
+            this.shouldUpdate = false
+        }
+    },
 }
 </script>
 

@@ -1,5 +1,5 @@
 <template>
-<div class="dendro" id="tree">
+<div class="dendro" :id="selector">
     <canvas class="main"></canvas>
     <canvas v-if="cuttable" class="cut"></canvas>
     <svg v-if="selectable"></svg>
@@ -12,6 +12,10 @@ import dendrogram from 'charts/Dendrogram.js'
 
 export default {
     props: {
+        selector: {
+            type: String,
+            required: true
+        },
         clusterData: Object,
         cuttable: Boolean,
         selectable: {
@@ -39,7 +43,7 @@ export default {
 
     mounted() {
         this.chart = dendrogram({
-            selector: '#tree',
+            selector: `#${this.selector}`,
             data: this.clusterData,
             cuttable: this.cuttable,
             axis: this.axis,

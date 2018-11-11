@@ -1,5 +1,5 @@
 <template>
-<page :show-page="showPage">
+<page :show-page="showPage && project !== null">
     <div class="row">
         <div class="col-6">
             <tab-nav :project="project" :tab.sync="tab" />
@@ -41,11 +41,7 @@
 
     <transition name="component-fade" mode="out-in">
         <keep-alive>
-            <component
-                :is="tab"
-                :project="project" 
-                :should-update="shouldUpdate || project.step == 4">
-            </component>
+            <component :is="tab" :project="project" />
         </keep-alive>
     </transition>
 </page>
@@ -53,7 +49,6 @@
 
 <script>
 import Annotation from 'components/Annotation'
-import ExportModal from 'components/ExportModal'
 import ModuleCreationTab from 'components/AnalyzeTabs/ModuleCreationTab'
 import ModuleInspectionTab from 'components/AnalyzeTabs/ModuleInspectionTab'
 import ModuleSignificanceTab from 'components/AnalyzeTabs/ModuleSignificanceTab'
@@ -67,15 +62,12 @@ export default {
             showPage: false,
             modules: [],
             loading: false,
-            previousProject: null,
-            shouldUpdate: true,
             tab: 'ModuleCreationTab'
         }
     },
 
     components: {
         Annotation,
-        ExportModal,
         ModuleCreationTab,
         ModuleInspectionTab,
         ModuleSignificanceTab,
@@ -104,20 +96,17 @@ export default {
 
     computed: {
         ...mapState(['projectIndex', 'projects']),
-        ...mapGetters(['projectIds']),
-        project() {
-            const project = this.$store.getters.project
-            this.shouldUpdate = !this.previousProject || this.previousProject.id != project.id
-            this.previousProject = project
-            return project
-        },
+        ...mapGetters(['projectIds', 'project'])
     },
 
     beforeRouteUpdate(to, from, next) {
         if (!this.projectIds.includes(to.params.id)) next({ name: 'notfound' })
-        this.selectProjectById(to.params.id)
-        if (from.name === 'analyze') next()
-        else next({ name: 'analyze', params: { id: this.projectIndex }})
+        if (from.name === 'analyze')  {
+            next()
+            this.selectProjectById(to.params.id)
+        } else {
+            next({ name: 'analyze', params: { id: this.projectIndex }})
+        }
     },
 
     created() {

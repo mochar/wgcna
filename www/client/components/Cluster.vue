@@ -27,6 +27,7 @@
 
     <div v-if="!loading">
         <dendro
+            selector="features-tree"
             :cluster-data="clusterData" 
             :cuttable="false"
             :ratio="0.35" 
@@ -57,22 +58,22 @@
 
 <script>
 import Dendro from 'charts/Dendro'
+import Vue from 'vue'
+import { mapGetters } from 'vuex'
 
 export default {
     data() {
         return {
             loading: true,
             cutting: false,
-            // clusterData: null,
-            // colors: null
+            active: false,
+            shouldUpdate: false
         }
     },
 
     components: {
         Dendro
     },
-
-    props: ['project', 'update'],
 
     methods: {
         cluster() {
@@ -88,14 +89,17 @@ export default {
         },
         cut(event) {
             this.cutting = true
-            this.$emit('cutting')
             const formData = new FormData(event.target)
             const minModuleSize = parseInt(formData.get('minModuleSize'))
             this.$helpers.post(formData, this.project.id, 'clustergenes')
             .then(data => {
-                this.colors = data
+                this.colors = { Modules: data.hex }
                 this.cutting = false
                 this.$emit('done', minModuleSize)
+
+                // Force reload to recreate graph
+                this.loading = true
+                Vue.nextTick(() => this.loading = false)
             }, () => {
                 this.cutting = false
             })
@@ -106,24 +110,38 @@ export default {
         }
     },
 
+    computed: {
+        ...mapGetters(['project']),
+    },
+
     watch: {
-        project() {
-            if (this.update) this.cluster()
+        /* Update when:
+         * - New project selected
+         * - New power / threshold
+         */
+        project(val, oldVal) {
+            if (val.id !== oldVal.id || val.power !== oldVal.power) {
+                if (this.active) this.cluster()
+                else this.shouldUpdate = true
+            }   
         }
     },
 
+    activated() {
+        this.active = true
+        if (this.shouldUpdate) {
+            this.cluster()
+            this.shouldUpdate = false
+        }
+    },
+
+    deactivated() {
+        this.active = false
+    },
+
     created() {
+        this.active = true
         this.cluster()
     }
 }
 </script>
-
-<style scoped>
-img {
-    width: 100%;
-}
-
-img.cutting {
-    opacity: .5;
-}
-</style>

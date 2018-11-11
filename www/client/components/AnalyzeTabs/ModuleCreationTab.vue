@@ -1,18 +1,7 @@
 <template>
 <div>
-    <threshold 
-        :project="project" 
-        :update="shouldUpdate"
-        v-if="project.step > 0" 
-        @done="thresholdDone">
-    </threshold>
-    <cluster 
-        :project="project" 
-        :update="shouldUpdate || project.step == 2"
-        v-if="project.step > 1"
-        @cutting="$store.commit('editProject', {step: 3})"
-        @done="clusterDone">
-    </cluster>
+    <threshold  @done="thresholdDone" />
+    <cluster  v-if="project.power" @done="clusterDone" />
 </div>
 </template>
 
@@ -21,7 +10,7 @@ import Threshold from 'components/Threshold'
 import Cluster from 'components/Cluster'
 
 export default {
-    props: ['project', 'shouldUpdate'],
+    props: ['project'],
 
     components: {
         Threshold,
@@ -30,10 +19,10 @@ export default {
 
     methods: {
         thresholdDone(power) {
-            this.$store.commit('editProject', {step: 2, power})
+            this.$store.commit('editProject', { power, minModuleSize: null })
         },
         clusterDone(minModuleSize) {
-            this.$store.commit('editProject', {step: 4, minModuleSize })
+            this.$store.commit('editProject', { minModuleSize })
         }
     }
 }

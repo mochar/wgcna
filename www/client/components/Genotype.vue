@@ -135,16 +135,6 @@ export default {
         }
     },
 
-    watch: {
-        project() {
-            if (this.update) {
-                // this.loading = true
-                // this.showPvalues = false
-                // this.setUp()
-            }
-        }
-    },
-
     created() {
         this.setUp()
     }

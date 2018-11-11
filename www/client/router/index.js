@@ -1,12 +1,10 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import store from '../store'
 import Analyze from 'views/analyze/Analyze'
 import Integrate from 'views/Integrate'
 import NotFound from 'views/NotFound'
 import Project from 'views/Project'
 
-const Home = () => import(/* webpackChunkName: "home" */  'views/Home')
 const New = () => import(/* webpackChunkName: "new" */  'views/New')
 
 Vue.use(Router)
@@ -15,9 +13,8 @@ export default new Router({
 	mode: 'hash',
 	routes: [
 		{
-            name: 'home',
             path: '/',
-            component: Home
+            redirect: { name: 'analyze' }
         },
         {
             name: 'new',
@@ -27,11 +24,7 @@ export default new Router({
         {
             name: 'analyze',
             path: '/analyze/:id',
-            component: Analyze,
-            beforeEnter: (to, from, next) => {
-                if (to.params.id == 'undefined' || to.params.id == 'null') next({ name: 'new' })
-                else next()
-            }
+            component: Analyze
         },
         {
             name: 'project',
@@ -40,21 +33,16 @@ export default new Router({
         },
         {
             path: '/integrate',
-            component: Integrate,
-            beforeEnter: (to, from, next) => {
-                if (from.name === null) {
-                    next({ name: 'analyze' })
-                } else if (store.state.projects.length < 2) {
-                    next(false)
-                } else {
-                    next()
-                }
-            }
+            component: Integrate
         },
         {
             name: 'notfound',
             path: '/notfound',
             component: NotFound
+        },
+        {
+            path: '*',
+            redirect: { name: 'notfound' }
         }
 	]
 })

@@ -26,11 +26,12 @@ import { faChartBar } from '@fortawesome/free-solid-svg-icons/faChartBar'
 import { faUpload } from '@fortawesome/free-solid-svg-icons/faUpload'
 import { faRetweet } from '@fortawesome/free-solid-svg-icons/faRetweet'
 import { faCircle } from '@fortawesome/free-solid-svg-icons/faCircle'
+import { faExclamationCircle } from '@fortawesome/free-solid-svg-icons/faExclamationCircle'
 import { faEye } from '@fortawesome/free-regular-svg-icons/faEye'
 import { faTrashAlt } from '@fortawesome/free-regular-svg-icons/faTrashAlt'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
-library.add(faPlus, faChevronLeft, faChevronRight, faCog, faInfo, faEllipsisV, faCut, faAngleDoubleLeft, faAngleDoubleRight, faCaretDown, faDownload, faSync, faCheck, faCertificate, faChartBar, faEye, faUpload, faRetweet, faEdit, faCircle, faTrashAlt)
+library.add(faPlus, faChevronLeft, faChevronRight, faCog, faInfo, faEllipsisV, faCut, faAngleDoubleLeft, faAngleDoubleRight, faCaretDown, faDownload, faSync, faCheck, faCertificate, faChartBar, faEye, faUpload, faRetweet, faEdit, faCircle, faTrashAlt, faExclamationCircle)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 sync(store, router)

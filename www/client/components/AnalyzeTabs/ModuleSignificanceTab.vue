@@ -1,8 +1,9 @@
 <template>
 <div>
+    <no-modules v-if="!hasModules" />
+    <div v-else>
     <genotype
         :project="project" 
-        :update="shouldUpdate || project.step == 4"
         @back="showSig = false"
         v-if="showSig">
     </genotype>
@@ -29,6 +30,7 @@
             style="flex: 1">
         </correlation-setup>
     </div>
+    </div>
 </div>
 </template>
 
@@ -37,6 +39,7 @@ import Genotype from 'components/Genotype'
 import CorrelationSetup from 'components/SignificanceTesting/CorrelationSetup'
 import GenotypeSetup from 'components/SignificanceTesting/GenotypeSetup'
 import CorrelationView from 'components/SignificanceTesting/CorrelationView'
+import NoModules from './NoModules'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -47,25 +50,28 @@ export default {
         }
     },
 
-    props: ['project', 'shouldUpdate'],
+    props: ['project'],
 
     components: {
         Genotype,
         CorrelationSetup,
         CorrelationView,
-        GenotypeSetup
+        GenotypeSetup,
+        NoModules
     },
     
     computed: {
-        ...mapGetters(['nominalTraits'])
+        ...mapGetters(['nominalTraits', 'hasModules'])
     },
 
     watch: {
-        project() {
-            if (this.shouldUpdate) {
-                this.showCorrs = false
-                this.showSig = false
-            }
+        project(val, oldVal) {
+            this.showCorrs = false
+            this.showSig = false
+        },
+        hasModules() {
+            this.showCorrs = false
+            this.showSig = false
         }
     }
 }

@@ -48,7 +48,7 @@ export default {
 
     computed: {
         hasModules() {
-            return this.project && this.project.step > 3
+            return this.$store.getters.hasModules
         }
     }
 }

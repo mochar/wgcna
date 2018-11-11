@@ -2,7 +2,7 @@
 <div class="h-100">
     <div class="container" id="app">
         <div id="navigation" class="d-flex justify-content-between align-items-center">
-            <router-link to="/" class="navbar-brand text-main font-weight-bold">WGCNA</router-link>
+            <router-link to="/" class="navbar-brand text-main font-weight-bold">WGCNApp</router-link>
             <ul class="nav nav-pills nav-fill" v-if="!isNewPage">
                 <router-link :to="`/analyze/${analyzeTo}`" class="nav-item nav-link pl-3 pr-3 btn btn-link" 
                         active-class="active text-main" tag="button" >
@@ -26,7 +26,8 @@
 
         <hr id="content-hr" class="mb-4" />
 
-        <keep-alive exclude="new,project">
+        <span v-if="$store.state.projectLoading">Loading data</span>
+        <keep-alive exclude="new,project" v-else>
             <router-view></router-view>
         </keep-alive>
     </div>

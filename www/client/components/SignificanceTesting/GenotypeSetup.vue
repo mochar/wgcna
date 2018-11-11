@@ -42,7 +42,6 @@ export default {
             this.$helpers.post(data, this.project.id, 'genotype')
             .then(() => {
                 this.loading = false
-                this.$store.commit('editProject', {step: 5})
                 this.$emit('go')
             }, () => {
                 this.loading = false

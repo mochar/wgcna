@@ -15,6 +15,9 @@ const getters = {
     project: state => {
         return state.projectIndex === null ? null : state.projects[state.projectIndex]
     },
+    hasModules: (state, getters) => {
+        return typeof getters.project.minModuleSize === 'number'
+    },
     nominalTraits: (state, getters) => {
         const project = getters.project
         if (!project && !project.traits) return null
@@ -63,7 +66,12 @@ const mutations = {
 const actions = {
     getProjects({ commit }) {
         return $.getJSON(`${ROOTURL}/projects/`).then(data => {
-            const projects = data.projects
+            const projects = data.projects.map(project => {
+                ['power', 'minModuleSize', 'samples', 'genes'].forEach(prop => {
+                    if (prop in project) project[prop] = Number(project[prop])
+                })
+                return project
+            })
             commit('setProjects', projects)
             return projects
         })

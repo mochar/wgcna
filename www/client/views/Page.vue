@@ -1,8 +1,8 @@
 <template>
 <div>
-    <slot v-if="!$store.state.projectLoading && requirement">...</slot>
+    <slot v-if="showPage">...</slot>
     <div class="w-100 h-100 d-flex flex-column justify-content-center align-items-center" 
-         style="color: rgba(0,0,0,.3)" v-if="$store.state.projectLoading">
+         style="color: rgba(0,0,0,.3)" v-else>
         <div>
             <font-awesome-icon icon="circle" size="lg" />
             <font-awesome-icon icon="circle" size="lg" class="ml-2 mr-2" />
@@ -16,7 +16,7 @@
 <script>
 export default {
     props: {
-        requirement: {
+        showPage: {
             type: Boolean,
             default: true
         }

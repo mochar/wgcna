@@ -1,5 +1,5 @@
 <template>
-<page>
+<page :show="showPage">
     <div class="card card-body block">
         <div class="d-flex justify-content-between align-items-start">
             <h6 class="block-title text-uppercase">
@@ -68,6 +68,7 @@ import Vue from 'vue'
 export default {
     data() {
         return {
+            showPage: false,
             show: false,
             selected: [],
             loading: false,
@@ -119,7 +120,17 @@ export default {
     },
 
     created() {
-        this.project = this.projects[0]
+        switch (this.projects.length) {
+            case 0:
+                this.$router.push({ name: 'new' })
+                break;
+            case 1:
+                this.$router.push({ name: 'analyze', params: { id: this.projects[0].id } })
+                break;
+            default:
+                this.showPage = true
+                break;
+        }
     }
 }
 </script>
