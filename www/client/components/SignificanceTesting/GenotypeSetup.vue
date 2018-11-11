@@ -17,7 +17,7 @@
             <font-awesome-icon icon="sync" spin v-else />
             Go
         </button>
-        <button class="btn btn-light" disabled>
+        <button class="btn btn-light" @click="$emit('go')" :disabled="!project.genotypeTrait">
             View previous result
         </button>
     </div>
@@ -38,9 +38,11 @@ export default {
     methods: {
         go() {
             this.loading = true
-            const data = JSON.stringify({ trait: this.trait })
+            const trait = this.trait
+            const data = JSON.stringify({ trait })
             this.$helpers.post(data, this.project.id, 'genotype')
             .then(() => {
+                this.$store.commit('editProject', { genotypeTrait: trait })
                 this.loading = false
                 this.$emit('go')
             }, () => {

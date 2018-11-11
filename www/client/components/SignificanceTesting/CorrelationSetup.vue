@@ -37,7 +37,7 @@
             <font-awesome-icon icon="check" fixed-width v-else />
             Go
         </button>
-        <button class="btn btn-light" disabled>
+        <button class="btn btn-light" @click="$emit('go')" :disabled="!project.corrType">
             View previous result
         </button>
     </div>
@@ -47,6 +47,7 @@
 <script>
 import OrdinalTrait from 'components/SignificanceTesting/OrdinalTrait'
 import { mapActions, mapState, mapGetters } from 'vuex'
+import Vue from 'vue'
 
 export default {
     data() {
@@ -67,11 +68,14 @@ export default {
         ...mapActions(['getTraitData']),
         go() {
             this.loading = true
-            const data = JSON.stringify(this.ordinals)
+            const data = JSON.stringify({ ordinals: this.ordinals, correlation: this.method })
             this.$helpers.post(data, this.project.id, 'correlate')
             .then(() => {
+                this.$store.commit('editProject', { corrType: this.method })
                 this.loading = false
-                this.$emit('go')
+                // Inspection tab is set to reset when project changes, as happens
+                // here with the corrType attribute. Wait until next tick to bypass this.
+                Vue.nextTick(() => this.$emit('go'))
             }, () => {
                 this.loading = false
             })

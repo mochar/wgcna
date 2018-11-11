@@ -394,10 +394,14 @@ def genotype(project_id):
 def correlate(project_id):
     project_folder = project_id_to_folder(project_id)
     if request.method == 'POST':
-        ordinals = request.get_json(force=True)
+        request_data = request.get_json(force=True)
+        ordinals = request_data['ordinals']
+        corr_type = request_data['correlation']
         trait_types = redis.hgetall('traits:{}'.format(project_id))
-        corrs = rscripts.correlate_traits(g.eigengene_path, g.trait_path, trait_types, ordinals)
+        corrs = rscripts.correlate_traits(g.eigengene_path, g.trait_path, trait_types, 
+            ordinals, corr_type)
         corrs.to_csv(os.path.join(project_folder, 'corrs.csv'))
+        redis.hset('project:{}'.format(project_id), 'corrType', corr_type)
         return jsonify()
     elif request.method == 'GET':
         corrs = pd.read_csv(os.path.join(project_folder, 'corrs.csv'), index_col=0)

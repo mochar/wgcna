@@ -4,7 +4,7 @@ import rpy2.robjects as robjects
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import importr
 from scipy.stats import rankdata
-from scipy.stats.mstats import spearmanr
+from scipy.stats.mstats import spearmanr, pearsonr
 import pandas as pd
 import numpy as np
 
@@ -108,7 +108,7 @@ def generate_eigengenes(expression_path, modules_path):
     return eigengenes
 
 
-def correlate_traits(eigengene_path, trait_path, trait_types, ordinals):
+def correlate_traits(eigengene_path, trait_path, trait_types, ordinals, corr_type):
     traits = pd.read_csv(trait_path, index_col=0)
     continuous_traits = traits[[trait for trait, type_ in trait_types.items() if type_ == 'C']]
     nominal_traits = traits[[trait for trait, type_ in trait_types.items()
@@ -117,14 +117,15 @@ def correlate_traits(eigengene_path, trait_path, trait_types, ordinals):
     ordinal_traits = traits[list(ordinals.keys())]
     for trait, variables in ordinals.items():
         variables = {v: i for i, v in enumerate(variables)}
-        ordinal_traits[trait] = ordinal_traits[trait].replace(variables)
+        ordinal_traits.loc[:, trait] = ordinal_traits[trait].replace(variables)
     traits = pd.concat([continuous_traits, nominal_traits, ordinal_traits], axis=1)
 
     eigengenes = pd.read_csv(eigengene_path, index_col=0)
+    corr_func = pearsonr if corr_type == 'pearson' else spearmanr
 
     corrs = pd.DataFrame(index=eigengenes.columns, columns=traits.columns)
     for module in corrs.index:
         for trait in corrs.columns:
-            corrs.at[module, trait] = spearmanr(eigengenes[module], traits[trait]).correlation
+            corrs.at[module, trait] = corr_func(eigengenes[module], traits[trait])[0]
 
     return corrs
