@@ -1,5 +1,5 @@
 <template>
-<page :requirement="Boolean($store.getters.project)" class="card card-body mb-5">
+<page :showPage="Boolean($store.getters.project)" class="card card-body mb-5">
     <div class="d-flex justify-content-between align-items-start">
         <h6 class="block-title">
             PROJECT
@@ -136,8 +136,3 @@ export default {
     }
 }
 </script>
-
-<style>
-#project-name {
-}
-</style>
