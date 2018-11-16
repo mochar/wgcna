@@ -61,7 +61,6 @@ export default {
             this.getTraitData().then(() => {
                 this.trait = this.nominalTraits[0]
                 $.getJSON(`${ROOTURL}/projects/${this.project.id}/eigengenes`).then(data => {
-                    data.index = data.data.index.map(x => x.replace(/^ME/g, ''))
                     this.data = data.data
                     this.tree = data.tree
                 })

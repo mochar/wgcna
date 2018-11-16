@@ -87,7 +87,6 @@ if __name__ == '__main__':
 
     # Modules
     pvalues = pd.read_csv(os.path.join(dataset_path, 'pvalues.csv'), index_col=0)
-    pvalues.index = [x.lstrip('ME') for x in pvalues.index]
     tom_path = os.path.join(dataset_path, 'tom-colors.png')
     template_vars['tom_img'] = prepend_base64(base64_encode_image(tom_path))
     template_vars['pvalues'] = pvalues

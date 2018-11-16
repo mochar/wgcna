@@ -100,10 +100,9 @@ def cut_genes(cluster_data, diss_tom_path, min_module_size):
 def generate_eigengenes(expression_path, modules_path):
     df = pd.read_csv(expression_path, index_col=0)
     modules = pd.read_csv(modules_path)['modules']
-    eigengenes = WGCNA.moduleEigengenes(df, modules).rx2('eigengenes')
+    eigengenes = WGCNA.moduleEigengenes(df, modules, excludeGrey=True).rx2('eigengenes')
     eigengenes = pandas2ri.ri2py(WGCNA.orderMEs(eigengenes))
-    if 'MEgrey' in eigengenes.columns:
-        eigengenes.drop(['MEgrey'], axis=1, inplace=True)
+    eigengenes.columns = [c.lstrip('ME') for c in eigengenes.columns]
     eigengenes.index = df.index
     return eigengenes
 
