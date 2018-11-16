@@ -8,7 +8,8 @@ const state = {
     projects: [],
     projectIndex: null,
     projectLoading: true,
-    traitData: null
+    traitData: null,
+    tags: null
 }
 
 const getters = {
@@ -60,6 +61,12 @@ const mutations = {
         state.projects = projects
         state.projectIndex = state.projects.length >= 1 ? 0 : null
         state.traitData = null
+    },
+    setTags(state, tags) {
+        state.tags = tags
+    },
+    addTag(state, tag) {
+        Vue.set(state.tags, tag.name, tag.color)
     }
 }
 
@@ -74,6 +81,11 @@ const actions = {
             })
             commit('setProjects', projects)
             return projects
+        })
+    },
+    getTags({ commit }) {
+        return $.getJSON(`${ROOTURL}/tags`).then(data => {
+            commit('setTags', data.tags)
         })
     },
     getTraitData({ state, getters, commit }) {

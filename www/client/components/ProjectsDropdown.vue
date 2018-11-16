@@ -3,7 +3,7 @@
     <button class="btn btn-light btn-block dropdown-toggle text-left d-flex justify-content-between align-items-center" 
             style="margin-right: -1px" data-toggle="dropdown">
         <span v-if="project">
-            <font-awesome-icon icon="circle" fixed-width v-if="circle" :class="`text-${project.omic}`" />
+            <font-awesome-icon icon="circle" fixed-width v-if="circle" :style="{'color': tags[project.omic]}" />
             <span>{{ project.name }}</span>
             <span v-show="project.description" class="text-muted">- {{ project.description }}</span>
         </span>
@@ -14,7 +14,7 @@
         <a class="dropdown-item" href="#" v-for="(p, i) in projects" :key="p.id" @click.prevent="select(p)">
             <div class="d-flex justify-content-between align-items-center">
                 <span>{{ p.name }}</span>
-                <span class="badge badge-pill badge-light bg-main" :class="`bg-${p.omic}`">
+                <span class="badge badge-pill badge-light bg-main" :style="{'background-color': tags[project.omic]}">
                     {{ p.omic }}
                 </span>
             </div>
@@ -27,6 +27,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 export default {
     data() {
         return {
@@ -41,6 +43,10 @@ export default {
             type: Boolean,
             default: true
         }
+    },
+
+    computed: {
+        ...mapState(['tags'])
     },
 
     methods: {

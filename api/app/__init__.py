@@ -29,6 +29,12 @@ app.config['SESSION_REDIS'] =  StrictRedis(db=app.config['REDIS_DB_SESSION'])
 Session(app)
 CORS(app, supports_credentials=True, expose_headers=['Location'])
 
+base_tags = {
+    'Metabolomics': '#6cc0e5',
+    'Lipidomics': '#fbc93d',
+    'Transcriptomics': '#fb4f4f'
+}
+
 
 # Non-simple CORS requests send a preflight OPTIONS request, which do not
 # contain cookies. Flask-session therefore creates a new session, even
@@ -152,7 +158,19 @@ def project_exists(f):
     return decorated_function
 
 
-# @app.route('/projects/', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/tags', methods=['GET', 'POST'])
+def tags():
+    if request.method == 'GET':
+        return jsonify(tags={**base_tags, **redis.hgetall('tags:{}'.format(session.sid))})
+    elif request.method == 'POST':
+        app.logger.debug(request.data)
+        d = request.get_json(force=True)
+        if d.get('name') is None or d.get('color') is None:
+            return jsonify(error='Required fields not supplied.'), 403
+        redis.hset('tags:{}'.format(session.sid), d['name'], d['color'])
+        return jsonify(d)
+
+
 @app.route('/projects/', methods=['GET', 'POST'])
 def projects():
     if request.method == 'GET':
@@ -160,10 +178,10 @@ def projects():
     elif request.method == 'POST':
         name = request.form.get('name', '')
         description = request.form.get('description', '')
-        omic = request.form.get('omic')
-        if name == '':
+        tag = request.form.get('tag')
+        if name == '' or tag is None:
             return jsonify(error='Required fields not supplied.'), 403
-        project = create_project(session.sid, name, description, omic)
+        project = create_project(session.sid, name, description, tag)
         return jsonify({'project': project})
 
 

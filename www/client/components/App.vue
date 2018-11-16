@@ -2,7 +2,7 @@
 <div class="h-100">
     <div class="container" id="app">
         <div id="navigation" class="d-flex justify-content-between align-items-center">
-            <router-link to="/" class="navbar-brand text-main font-weight-bold">WGCNApp</router-link>
+            <router-link :to="brandTo" class="navbar-brand text-main font-weight-bold">WGCNApp</router-link>
             <ul class="nav nav-pills nav-fill" v-if="!isNewPage">
                 <router-link :to="`/analyze/${analyzeTo}`" class="nav-item nav-link pl-3 pr-3 btn btn-link" 
                         active-class="active text-main" tag="button" >
@@ -48,7 +48,9 @@ $.ajaxSetup({ xhrFields: { withCredentials: true } })
 export default {
     created() {
         this.$store.dispatch('getProjects').then(() => {
-            this.$store.commit('setProjectLoading', false)
+            this.$store.dispatch('getTags').then(() => {
+                this.$store.commit('setProjectLoading', false)
+            })
         })
     },
 
@@ -56,6 +58,9 @@ export default {
         analyzeTo() {
             const project = this.$store.getters.project
             return project ? project.id : this.$store.getters.projectIds[0]
+        },
+        brandTo() {
+            return this.$store.state.projects.length ? `/analyze/${this.analyzeTo}` : '/new'
         },
         isNewPage() {
             return this.$route.name === 'new'

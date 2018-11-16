@@ -22,6 +22,11 @@ let helpers = {
     downloadSvg: function(svgEl, filename) {
         svgDownload(svgEl, filename)
     },
+    logFormData: function(formData) {
+        for (var pair of formData.entries()) {
+            console.log(pair[0]+ ', ' + pair[1]); 
+        }
+    },
 
     // AJAX things
     ajax: function(method, data, projectId, endpoint) {

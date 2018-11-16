@@ -10,7 +10,7 @@
                     <button class="btn btn-light btn-block dropdown-toggle text-left d-flex justify-content-between align-items-center" 
                             style="margin-right: -1px" data-toggle="dropdown">
                         <span v-if="!$store.state.projectLoading && project">
-                            <font-awesome-icon icon="circle" fixed-width :class="`text-${project.omic}`" />
+                            <font-awesome-icon icon="circle" fixed-width :style="{'color': tags[project.omic]}" />
                             <span>{{ project.name }}</span>
                             <span v-show="project.description" class="text-muted">- {{ project.description }}</span>
                         </span>
@@ -22,7 +22,7 @@
                             @click.prevent="selectProject(project, i)">
                             <div class="d-flex justify-content-between align-items-center">
                                 <span>{{ project.name }}</span>
-                                <span class="badge badge-pill badge-light bg-main" :class="`bg-${project.omic}`">
+                                <span class="badge badge-pill badge-light bg-main" :style="{'background-color': tags[project.omic]}">
                                     {{ project.omic }}
                                 </span>
                             </div>
@@ -95,7 +95,7 @@ export default {
     },
 
     computed: {
-        ...mapState(['projectIndex', 'projects']),
+        ...mapState(['projectIndex', 'projects', 'tags']),
         ...mapGetters(['projectIds', 'project'])
     },
 
