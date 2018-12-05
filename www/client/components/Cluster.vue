@@ -58,7 +58,6 @@
 
 <script>
 import Dendro from 'charts/Dendro'
-import Vue from 'vue'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -99,7 +98,7 @@ export default {
 
                 // Force reload to recreate graph
                 this.loading = true
-                Vue.nextTick(() => this.loading = false)
+                this.$nextTick(() => this.loading = false)
             }, () => {
                 this.cutting = false
             })

@@ -63,7 +63,6 @@ import AddProjectBlock from 'components/Integrate/AddProjectBlock'
 import Page from './Page'
 import dendrogram from 'charts/Dendrogram3.js'
 import { mapState, mapActions, mapGetters } from 'vuex'
-import Vue from 'vue'
 
 export default {
     data() {
@@ -100,7 +99,7 @@ export default {
                     corrs: data.crosscorrs.filter(d => Math.abs(d.value) >= minCorrelation),
                     ratio: 0.8
                 })
-                Vue.nextTick(() => {
+                this.$nextTick(() => {
                     chart.update()
                     this.loading = false
                 })

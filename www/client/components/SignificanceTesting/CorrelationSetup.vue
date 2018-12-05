@@ -47,7 +47,6 @@
 <script>
 import OrdinalTrait from 'components/SignificanceTesting/OrdinalTrait'
 import { mapActions, mapState, mapGetters } from 'vuex'
-import Vue from 'vue'
 
 export default {
     data() {
@@ -75,7 +74,7 @@ export default {
                 this.loading = false
                 // Inspection tab is set to reset when project changes, as happens
                 // here with the corrType attribute. Wait until next tick to bypass this.
-                Vue.nextTick(() => this.$emit('go'))
+                this.$nextTick(() => this.$emit('go'))
             }, () => {
                 this.loading = false
             })
