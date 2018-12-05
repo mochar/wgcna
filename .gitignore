@@ -5,3 +5,5 @@ dist/
 settings.json
 package-lock.json
 dump.rdb
+logs/*
+!logs/.gitkeep
