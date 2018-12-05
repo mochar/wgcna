@@ -3,6 +3,7 @@ const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const config = require('./config')
 const _ = require('./utils')
 
@@ -32,22 +33,22 @@ module.exports = {
     ]
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.vue$/,
-        loaders: 'vue-loader',
-        options: {
-          loaders: {
-            js: [
-              {
-                loader: 'babel-loader',
-                options: {
-                  presets: ['vue-app']
-                }
-              }
-            ]
-          }
-        }
+        loader: 'vue-loader',
+        // options: {
+        //   loaders: {
+        //     js: [
+        //       {
+        //         loader: 'babel-loader',
+        //         options: {
+        //           presets: ['vue-app']
+        //         }
+        //       }
+        //     ]
+        //   }
+        // }
       },
       {
         test: /\.js$/,
@@ -58,7 +59,8 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['vue-app']
+            presets: ['@babel/preset-env'],
+            plugins: ['@babel/plugin-syntax-dynamic-import']
           }
         }
       },
@@ -85,8 +87,9 @@ module.exports = {
       template: path.resolve(__dirname, 'index.html'),
       filename: _.outputIndexPath
     }),
-    new webpack.LoaderOptionsPlugin(_.loadersOptions()),
-        new CopyWebpackPlugin([
+    new VueLoaderPlugin(),
+    // new webpack.LoaderOptionsPlugin(_.loadersOptions()),
+    new CopyWebpackPlugin([
       {
         from: _.cwd('./static'),
         // to the roor of dist path

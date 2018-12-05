@@ -4,7 +4,9 @@ process.env.NODE_ENV = 'development'
 const webpack = require('webpack')
 const base = require('./webpack.base')
 const _ = require('./utils')
-const FriendlyErrors = require('friendly-errors-webpack-plugin')
+const FriendlyErrors = require('@nuxtjs/friendly-errors-webpack-plugin')
+
+base.mode = 'development'
 
 base.devtool = 'eval-source-map'
 base.plugins.push(
@@ -19,16 +21,10 @@ base.plugins.push(
 
 // push loader for css files
 _.cssProcessors.forEach(processor => {
-  let loaders
-  if (processor.loader === '') {
-    loaders = ['postcss-loader']
-  } else {
-    loaders = ['postcss-loader', processor.loader]
-  }
-  base.module.loaders.push(
+  base.module.rules.push(
     {
       test: processor.test,
-      loaders: ['style-loader', _.cssLoader].concat(loaders)
+      use: ['vue-style-loader'].concat(processor.use)
     }
   )
 })

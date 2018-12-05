@@ -3,7 +3,7 @@ process.env.NODE_ENV = 'production'
 
 const exec = require('child_process').execSync
 const webpack = require('webpack')
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const MiniCssExtractPlugin = require("mini-css-extract-plugin")
 const ProgressPlugin = require('webpack/lib/ProgressPlugin')
 const OfflinePlugin = require('offline-plugin')
 const base = require('./webpack.base')
@@ -12,24 +12,22 @@ const _ = require('./utils')
 const config = require('./config')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
-if (config.electron) {
-  // remove dist folder in electron mode
-  exec('rm -rf app/assets/')
-} else {
-  // remove dist folder in web app mode
-  exec('rm -rf dist/')
-  // use source-map in web app mode
-  base.devtool = 'cheap-module-source-map'
-}
+base.mode = 'production'
+
+exec('rm -rf dist/')
+// use source-map in web app mode
+base.devtool = 'cheap-module-source-map'
 
 // use hash filename to support long-term caching
 base.output.filename = '[name].[chunkhash:8].js'
 // add webpack plugins
 base.plugins.push(
   new ProgressPlugin(),
-  new ExtractTextPlugin('styles.[contenthash:8].css'),
+  new MiniCssExtractPlugin({
+    filename: '[name].css',
+    chunkFilename: '[id].css'
+  }),
   new webpack.DefinePlugin({
-    'process.env.NODE_ENV': JSON.stringify('production'),
     // 'ROOTURL': JSON.stringify('')
     'ROOTURL': JSON.stringify('http://localhost:5000')
   }),
@@ -41,16 +39,6 @@ base.plugins.push(
     output: {
       comments: false
     }
-  }),
-  // extract vendor chunks
-  new webpack.optimize.CommonsChunkPlugin({
-    name: 'vendor',
-    minChunks: module => {
-      return module.resource && /\.(js|css|es6)$/.test(module.resource) && module.resource.indexOf('node_modules') !== -1
-    }
-  }),
-  new webpack.optimize.CommonsChunkPlugin({
-    name: 'manifest'
   }),
   // progressive web app
   // it uses the publicPath in webpack config
@@ -70,18 +58,9 @@ base.plugins.push(
 
 // extract css in standalone css files
 _.cssProcessors.forEach(processor => {
-  let loaders
-  if (processor.loader === '') {
-    loaders = ['postcss-loader']
-  } else {
-    loaders = ['postcss-loader', processor.loader]
-  }
-  base.module.loaders.push({
+  base.module.rules.push({
     test: processor.test,
-    loader: ExtractTextPlugin.extract({
-      use: [_.cssLoader].concat(loaders),
-      fallback: 'style-loader'
-    })
+    use: [MiniCssExtractPlugin.loader].concat(processor.use)
   })
 })
 
