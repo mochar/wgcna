@@ -1,6 +1,9 @@
 <template>
 <div>
-    <slot v-if="showPage">...</slot>
+    <div v-if="show">
+        <slot></slot>
+    </div>
+    <!-- <slot v-if="showPage">...</slot> -->
     <div class="w-100 h-100 d-flex flex-column justify-content-center align-items-center" 
          style="color: rgba(0,0,0,.3)" v-else>
         <div>
@@ -16,10 +19,20 @@
 <script>
 export default {
     props: {
-        showPage: {
+        show: {
             type: Boolean,
             default: true
         }
+    },
+
+    watch: {
+        show() {
+            console.log('showPage? ', this.show)
+        }
+    },
+
+    created() {
+        console.log('Meme?' + this.show)
     }
 }
 </script>

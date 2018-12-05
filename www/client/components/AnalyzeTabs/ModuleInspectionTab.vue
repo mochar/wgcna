@@ -1,37 +1,53 @@
 <template>
-<div class="mb-5">
+<page class="mb-5" :show="!loading" v-if="!loading && datas !== null">
     <no-modules v-if="!hasModules" />
     <div v-else>
-    <div class="mb-2 d-flex">
-        <select class="custom-select mr-1" v-model="trait">
-            <option v-for="trait in nominalTraits" :key="trait" :value="trait">{{ trait }}</option>
-        </select>
-    </div>
-    <div class="row" v-if="traitData && data && trait">
+        <div class="d-flex justify-content-between align-items-baseline mb-3">
+            <div>
+                <span class="align-baseline">
+                    Showing {{ itemList.length }} of {{ datas.data.index.length }} modules
+                </span>
+                <button class="btn btn-light btn-sm pl-3 pr-3 ml-2">
+                    <font-awesome-icon icon="compress" />
+                    Merge modules
+                </button>
+                <button class="btn btn-light btn-sm pl-3 pr-3 ml-0">
+                    <font-awesome-icon icon="download" />
+                    Export modules
+                </button>
+            </div>
+            <select class="custom-select col-4" v-model="trait">
+                <option v-for="trait in nominalTraits" :key="trait" :value="trait">{{ trait }}</option>
+            </select>
+        </div>
+
         <dendro
             selector="modules-tree"
-            :cluster-data="tree" 
+            :cluster-data="datas.tree" 
             :cuttable="false"
             :axis="false"
             :selectable="true"
             @selected="d => selected = d"
             :ratio="0.1">
         </dendro>
-        <module 
-            v-for="(module, i) in itemList" 
-            :key="module" 
-            :name="module"
-            :data="data.data[i]"
-            :groups="traitData.data[traitData.index.indexOf(trait)]"
-            :samples="data.columns">
-        </module>
+
+        <div class="row m-0 mt-1">
+            <module 
+                v-for="(module, i) in itemList" 
+                :key="module" 
+                :name="module"
+                :data="datas.data.data[i]"
+                :groups="traitData.data[traitData.index.indexOf(trait)]"
+                :samples="datas.data.columns">
+            </module>
+        </div>
     </div>
-    </div>
-</div>  
+</page>  
 </template>
 
 <script>
 import Module from 'components/Module'
+import Page from 'views/Page'
 import NoModules from './NoModules'
 import { mapActions, mapState, mapGetters } from 'vuex'
 import Dendro from 'charts/Dendro'
@@ -39,10 +55,12 @@ import Dendro from 'charts/Dendro'
 export default {
     data() {
         return {
-            data: null,
             trait: null,
             selected: null,
-            shouldUpdate: true
+            shouldUpdate: false,
+            datas: null,
+            loading: true,
+            active: false
         }
     },
 
@@ -51,18 +69,20 @@ export default {
     components: {
         Module,
         Dendro,
-        NoModules
+        NoModules,
+        Page
     },
 
     methods: {
         ...mapActions(['getTraitData']),
         setUp() {
+            this.loading = true
             this.selected = null
             this.getTraitData().then(() => {
                 this.trait = this.nominalTraits[0]
                 $.getJSON(`${ROOTURL}/projects/${this.project.id}/eigengenes`).then(data => {
-                    this.data = data.data
-                    this.tree = data.tree
+                    this.datas = data
+                    this.loading = false
                 })
             })
         }
@@ -72,30 +92,47 @@ export default {
         ...mapState(['traitData']),
         ...mapGetters(['nominalTraits', 'hasModules']),
         itemList() {
-            if (this.data === null) return []
-            if (this.selected == null) return this.data.index
-            return this.data.index.filter((d, i) => this.selected.includes(i))
+            if (this.datas === null) return []
+            if (this.selected === null) return this.datas.data.index
+            return this.datas.data.index.filter((d, i) => this.selected.includes(i))
         }
     },
 
     watch: {
         project(val, oldVal) {
-            this.data = null
-            this.trait = null
+            this.loading = true
+            // this.datas = null
+            // this.trait = null
+            // this.selected = null
             if (this.hasModules) this.shouldUpdate = true
         },
         hasModules() {
-            this.data = null
-            this.trait = null
+            this.loading = true
+            // this.datas = null
+            // this.trait = null
+            // this.selected = null
             if (this.hasModules) this.shouldUpdate = true
+        },
+        loading() {
+            console.log('Inspection loading ' + this.loading)
+        },
+        datas() {
+            console.log('data? ', !this.datas === null)
+        },
+        traitData() {
+            console.log('trait? ', !this.traitData === null)
         }
     },
 
     activated() {
+        console.log('activated')
         if (this.shouldUpdate) {
             this.setUp()
             this.shouldUpdate = false
         }
+    },
+
+    deactivated() {
     },
 
     created() {
