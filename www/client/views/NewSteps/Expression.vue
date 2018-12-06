@@ -5,7 +5,7 @@
             Expression data
         </h6>
     </div>
-
+    
     <form class="mt-2" enctype="multipart/form-data" @submit.prevent="upload">
         <div class="d-flex align-items-center">
             <label class="custom-control custom-radio">
@@ -29,27 +29,27 @@
         </div>
 
         <button class="btn btn-light mt-2" type="submit" :disabled="uploading" v-if="!disabled">
-            <font-awesome-icon icon="upload" />
+            <font-awesome-icon icon="sync" spin v-if="uploading" />
+            <font-awesome-icon icon="upload" v-else />
             Upload / retrieve
         </button>
     </form>
 
-    <div class="mt-4 mb-3" v-if="dims">
-        <span v-if="transpose">
-            Matrix contains <strong>{{ dims.samples }} features</strong> and <strong>{{ dims.features }} samples</strong>.
-        </span>
-        <span v-else>
-            Matrix contains <strong>{{ dims.features }} features</strong> and <strong>{{ dims.samples }} samples</strong>.
-        </span>
-        <button class="btn btn-light" @click="transpose = !transpose" v-if="!disabled">
-            <font-awesome-icon icon="retweet" size="lg" />
-            Swap rows and columns
-        </button>
-    </div>
+    <div v-if="!uploading && processed">
+        <div class="mt-4 mb-3">
+            <span v-if="transpose">
+                Matrix contains <strong>{{ dims.samples }} features</strong> and <strong>{{ dims.features }} samples</strong>.
+            </span>
+            <span v-else>
+                Matrix contains <strong>{{ dims.features }} features</strong> and <strong>{{ dims.samples }} samples</strong>.
+            </span>
+            <button class="btn btn-light" @click="transpose = !transpose" v-if="!disabled">
+                <font-awesome-icon icon="retweet" size="lg" />
+                Swap rows and columns
+            </button>
+        </div>
 
-    <div v-if="dims">
-        <font-awesome-icon icon="sync" spin v-if="evaluating" />
-        <div v-else>
+        <div>
             <span>In terms of missing values:</span>
             <span v-if="evaluation.allOK">All OK</span>
             <div v-else>
@@ -58,13 +58,13 @@
                 These are removed from the expression file.
             </div>
         </div>
-    </div>
 
-    <div class="mt-4" v-if="!disabled && dims && !evaluating">
-        <button class="btn btn-primary" @click="done" :disabled="loading">
-            <font-awesome-icon icon="check" />
-            OK
-        </button>
+        <div class="mt-4" v-if="!disabled">
+            <button class="btn btn-primary" @click="done" :disabled="loading">
+                <font-awesome-icon icon="check" />
+                OK
+            </button>
+        </div>
     </div>
 </div>
 </template>
@@ -79,8 +79,8 @@ export default {
             uploading: false,
             dims: null,
             transpose: false,
-            evaluating: false,
             evaluation: null,
+            processed: false,
             loading: false
         }
     },
@@ -96,29 +96,17 @@ export default {
 
     methods: {
         upload(event) {
+            this.processed = false
             this.uploading = true
             this.dims = null
+            this.evaluation = null
             this.transpose = false
             const formData = new FormData(event.target)
             this.$helpers.post(formData, this.project, 'expression')
             .then(data => {
-                this.dims = { samples: data.samples, features: data.features }
                 this.uploading = false
-                this.evaluating = true
-                this.checkSamplesGenes()
             }, () => {
                 this.uploading = false
-            })
-        },
-        checkSamplesGenes() {
-            this.evaluating = true
-            $.get(`${ROOTURL}/projects/${this.project}/goodsamplesgenes`).then(data => {
-                this.allOK = data.allOK
-                this.badSamples = data.badSamples
-                this.badGenes = data.badGenes
-                this.evaluation = { allOK: data.allOK, badSamples: data.badSamples, 
-                    badGenes: data.badGenes}
-                this.evaluating = false
             })
         },
         done() {
@@ -137,6 +125,15 @@ export default {
                 this.loading = false
                 alert('nope')
             })
+        }
+    },
+
+    sockets: {
+        expressionDone(data) {
+            this.dims = { samples: data.samples, features: data.features }
+            this.evaluation = { allOK: data.allOK, badSamples: data.badSamples, 
+                badGenes: data.badGenes}
+            this.processed = true
         }
     }
 }

@@ -13,12 +13,18 @@ from flask import Flask, request, jsonify, send_file, make_response, session, g,
 from flask_session import Session
 from flask_session.sessions import RedisSessionInterface
 from flask_cors import CORS
+from flask_socketio import SocketIO, join_room, leave_room
 from scipy.stats.stats import pearsonr
 from redis import StrictRedis
+from rq import Queue
 import pandas as pd
 import numpy as np
 
 import app.rscripts as rscripts
+import app.jobs as jobs
+
+import eventlet
+eventlet.monkey_patch()
 
 
 app = Flask(__name__)
@@ -28,12 +34,32 @@ redis = StrictRedis(db=app.config['REDIS_DB_DATA'], decode_responses=True,
 app.config['SESSION_REDIS'] =  StrictRedis(db=app.config['REDIS_DB_SESSION'])
 Session(app)
 CORS(app, supports_credentials=True, expose_headers=['Location'])
+socketio = SocketIO(app, async_mode='eventlet', manage_session=False,
+                    message_queue='redis://')
+
+q = Queue(connection=StrictRedis(db=app.config['REDIS_DB_JOBS'],
+                                 decode_responses=True,
+                                 charset='utf-8'))
 
 base_tags = {
     'Metabolomics': '#6cc0e5',
     'Lipidomics': '#fbc93d',
     'Transcriptomics': '#fb4f4f'
 }
+
+
+@socketio.on('connect')
+def on_connect():
+    app.logger.debug('SocketIO connect: {}'.format(request.sid))
+    app.logger.debug(session.sid)
+    join_room(session.sid) 
+
+
+@socketio.on('disconnect')
+def on_disconnect():
+    app.logger.debug('SocketIO disconnect: {}'.format(request.sid))
+    app.logger.debug(session.sid)
+    leave_room(session.sid) 
 
 
 # Non-simple CORS requests send a preflight OPTIONS request, which do not
@@ -205,16 +231,15 @@ def project(project_id):
 @project_exists
 def expression(project_id):
     if request.method == 'POST':
+        # TODO: when url supplied instead, download job with process job depending on it afterwards
         expression = request.files.get('expression')
         if expression.filename == '':
             return jsonify(error='Required fields not supplied.'), 403
         expression.save(g.expression_path)
         sep = request.form.get('delim', ',') or ','
-        df = pd.read_csv(g.expression_path, index_col=0, sep=sep)
-        redis.hset('project:{}'.format(project_id), 'genes', len(df.columns))
-        redis.hset('project:{}'.format(project_id), 'samples', len(df.index))
-        redis.hset('project:{}'.format(project_id), 'processed', 1)
-        return jsonify(features=len(df.columns), samples=len(df.index))
+        q.enqueue_call(func=jobs.process_expression, 
+                       args=(g.expression_path, sep, project_id, session.sid))
+        return jsonify()
     elif request.method == 'GET':
         df = pd.read_csv(g.expression_path, index_col=0)
         response = {'colNames': df.columns.tolist(), 'rowNames': df.index.tolist()}

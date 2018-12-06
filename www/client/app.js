@@ -4,6 +4,8 @@ import App from './components/App'
 import router from './router'
 import store from './store'
 import Helpers from './plugins/Helpers'
+import VueSocketio from 'vue-socket.io-extended'
+import io from 'socket.io-client'
 import { library } from '@fortawesome/fontawesome-svg-core'
 
 // Line by line because of bug: https://github.com/FortAwesome/react-fontawesome/issues/70
@@ -39,6 +41,8 @@ Vue.component('font-awesome-icon', FontAwesomeIcon)
 sync(store, router)
 
 Vue.use(Helpers)
+
+Vue.use(VueSocketio, io(`${ROOTURL}`))
 
 const app = new Vue({
     router,
