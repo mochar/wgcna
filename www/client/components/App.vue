@@ -27,7 +27,8 @@
         <hr id="content-hr" class="mb-4" />
 
         <span v-if="$store.state.projectLoading">Loading data</span>
-        <keep-alive exclude="new" v-else>
+        <!-- <keep-alive exclude="new" v-else> -->
+        <keep-alive v-else>
             <router-view></router-view>
         </keep-alive>
     </div>

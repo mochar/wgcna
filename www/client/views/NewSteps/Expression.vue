@@ -28,14 +28,14 @@
             </div>
         </div>
 
-        <button class="btn btn-light mt-2" type="submit" :disabled="uploading" v-if="!disabled">
-            <font-awesome-icon icon="sync" spin v-if="uploading" />
-            <font-awesome-icon icon="upload" v-else />
+        <button class="btn btn-light mt-2" type="submit" :disabled="uploading || processing" v-if="!disabled">
+            <font-awesome-icon icon="sync" spin fixed-width v-if="uploading || processing" />
+            <font-awesome-icon icon="upload" fixed-width v-else />
             Upload / retrieve
         </button>
     </form>
 
-    <div v-if="!uploading && processed">
+    <div v-if="evaluation !== null">
         <div class="mt-4 mb-3">
             <span v-if="transpose">
                 Matrix contains <strong>{{ dims.samples }} features</strong> and <strong>{{ dims.features }} samples</strong>.
@@ -80,7 +80,7 @@ export default {
             dims: null,
             transpose: false,
             evaluation: null,
-            processed: false,
+            processing: false,
             loading: false
         }
     },
@@ -96,7 +96,7 @@ export default {
 
     methods: {
         upload(event) {
-            this.processed = false
+            this.processing = true
             this.uploading = true
             this.dims = null
             this.evaluation = null
@@ -133,7 +133,7 @@ export default {
             this.dims = { samples: data.samples, features: data.features }
             this.evaluation = { allOK: data.allOK, badSamples: data.badSamples, 
                 badGenes: data.badGenes}
-            this.processed = true
+            this.processing = false
         }
     }
 }

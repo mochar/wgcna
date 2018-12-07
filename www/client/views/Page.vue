@@ -27,12 +27,12 @@ export default {
 
     watch: {
         show() {
-            console.log('showPage? ', this.show)
+            //console.log('showPage? ', this.show)
         }
     },
 
     created() {
-        console.log('Meme?' + this.show)
+        //console.log('Meme?' + this.show)
     }
 }
 </script>

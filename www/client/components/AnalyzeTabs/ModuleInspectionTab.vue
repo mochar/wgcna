@@ -1,5 +1,8 @@
 <template>
-<page class="mb-5" :show="!loading" v-if="!loading && datas !== null">
+<!-- 
+<page class="mb-5" :show="!loading" v-if="!loading && datas !== null && traitData !== null"> 
+-->
+<div class="mb-5" v-if="!loading && traitData !== null"> 
     <no-modules v-if="!hasModules" />
     <div v-else>
         <div class="d-flex justify-content-between align-items-baseline mb-3">
@@ -42,7 +45,7 @@
             </module>
         </div>
     </div>
-</page>  
+</div>  
 </template>
 
 <script>
@@ -51,16 +54,17 @@ import Page from 'views/Page'
 import NoModules from './NoModules'
 import { mapActions, mapState, mapGetters } from 'vuex'
 import Dendro from 'charts/Dendro'
+import { AnalyzeTabMixin } from 'mixins'
 
 export default {
+    mixins: [AnalyzeTabMixin],
+    
     data() {
         return {
             trait: null,
             selected: null,
-            shouldUpdate: false,
             datas: null,
-            loading: true,
-            active: false
+            loading: true
         }
     },
 
@@ -75,16 +79,33 @@ export default {
 
     methods: {
         ...mapActions(['getTraitData']),
-        setUp() {
-            this.loading = true
-            this.selected = null
+        fetchData() {
             this.getTraitData().then(() => {
                 this.trait = this.nominalTraits[0]
                 $.getJSON(`${ROOTURL}/projects/${this.project.id}/eigengenes`).then(data => {
                     this.datas = data
-                    this.loading = false
+                    this.$nextTick(() => this.loading = false)
                 })
             })
+        },
+        update() {
+            this.loading = true
+            
+            // Reset
+            this.datas = null
+            this.trait = null
+            this.selected = null
+            
+            // Stop here if there are no modules
+            if (!this.hasModules) return
+                
+            this.fetchData()
+        },
+        projectChange() {
+            this.update()
+        },
+        projectUpdate() {
+            if (this.hasModules) this.update()
         }
     },
 
@@ -98,45 +119,8 @@ export default {
         }
     },
 
-    watch: {
-        project(val, oldVal) {
-            this.loading = true
-            // this.datas = null
-            // this.trait = null
-            // this.selected = null
-            if (this.hasModules) this.shouldUpdate = true
-        },
-        hasModules() {
-            this.loading = true
-            // this.datas = null
-            // this.trait = null
-            // this.selected = null
-            if (this.hasModules) this.shouldUpdate = true
-        },
-        loading() {
-            console.log('Inspection loading ' + this.loading)
-        },
-        datas() {
-            console.log('data? ', !this.datas === null)
-        },
-        traitData() {
-            console.log('trait? ', !this.traitData === null)
-        }
-    },
-
-    activated() {
-        console.log('activated')
-        if (this.shouldUpdate) {
-            this.setUp()
-            this.shouldUpdate = false
-        }
-    },
-
-    deactivated() {
-    },
-
     created() {
-        if (this.hasModules) this.setUp()
+        if (this.hasModules) this.fetchData()
     }
 }
 </script>

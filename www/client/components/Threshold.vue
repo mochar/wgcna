@@ -38,7 +38,7 @@
                     <th>Mean connectivity</th>
                 </thead>
                 <tbody>
-                    <tr v-for="(power, i) in powers" 
+                    <tr v-for="(power, i) in plotData.powers" 
                         :key="i"
                         :style="{ 'font-weight': power == highlight ? 'bold' : 'normal',
                                   'color': power == highlight || power == project.power ? 'red' : 'black' }"
@@ -46,8 +46,8 @@
                         @mouseover="hovered = power"
                         @mouseout="hovered = null">
                         <td>{{ power }}</td>
-                        <td>{{ scaleindep[i] | round(3) }}</td>
-                        <td>{{ meank[i] | round(3) }}</td>
+                        <td>{{ plotData.scaleindep[i] | round(3) }}</td>
+                        <td>{{ plotData.meank[i] | round(3) }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -55,21 +55,21 @@
 
         <div class="col-4">
             <scatter 
-                v-if="powers"
+                v-if="plotData !== null"
                 yLabel="Scale independence"
                 :highlight="highlight"
-                :xData="powers" 
-                :yData="scaleindep">
+                :xData="plotData.powers" 
+                :yData="plotData.scaleindep">
             </scatter>
         </div>
 
         <div class="col-4">
             <scatter 
-                v-if="powers"
+                v-if="plotData !== null"
                 yLabel="Mean connectivity"
                 :highlight="highlight"
-                :xData="powers" 
-                :yData="meank">
+                :xData="plotData.powers" 
+                :yData="plotData.meank">
             </scatter>
         </div>
     </div>
@@ -86,17 +86,17 @@
 <script>
 import Scatter from 'charts/Scatter'
 import { mapGetters } from 'vuex'
+import { AnalyzeTabMixin } from 'mixins'
 
 export default {
+    mixins: [ AnalyzeTabMixin ],
+    
     data() {
         return {
-            powers: null,
-            scaleindep: null,
-            meank: null,
+            plotData: null,
             loading: true,
             hovered: null,
-            selected: null,
-            shouldUpdate: false
+            selected: null
         }
     },
 
@@ -116,16 +116,25 @@ export default {
             })
         },
         getValues() {
-            $.get(`${ROOTURL}/projects/${this.project.id}/tresholds`).then(data => {
-                this.powers = data.powers
-                this.scaleindep = data.scaleindep
-                this.meank = data.meank
-                this.loading = false
+            $.get(`${ROOTURL}/projects/${this.project.id}/tresholds`)
+            .then(() => {
+            }, () => {
             })
         },
         downloadPlot(svgIndex, filename) {
             const svgEl = $(this.$el).find('svg')[svgIndex]
             this.$helpers.downloadSvg(svgEl, filename)
+        },
+        projectChange() {
+            this.loading = true
+            this.getValues()
+        }
+    },
+    
+    sockets: {
+        tresholdDone(data) {
+            this.plotData = data
+            this.loading = false
         }
     },
 
@@ -149,21 +158,7 @@ export default {
         buttonReady() {
             return this.selected && this.project.power != this.selected
         }
-    },
-
-    watch: {
-        project(val, oldVal) {
-            this.shouldUpdate = val.id !== oldVal.id
-        }
-    },
-
-    activated() {
-        if (this.shouldUpdate) {
-            this.loading = true
-            this.getValues()
-            this.shouldUpdate = false
-        }
-    },
+    }
 }
 </script>
 

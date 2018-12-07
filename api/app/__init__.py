@@ -343,10 +343,11 @@ def tresholds(project_id):
     if request.method == 'GET':
         if os.path.isfile(g.tresholds_path):
             df = pd.read_csv(g.tresholds_path)
+            socketio.emit('tresholdDone', df.to_dict(orient='list'), room=session.sid)
         else:
-            df = rscripts.soft_tresholds(g.expression_path)
-            df.to_csv(g.tresholds_path)
-        return jsonify(df.to_dict(orient='list'))
+            q.enqueue_call(func=jobs.calculate_tresholds, 
+                           args=(g.expression_path, g.tresholds_path, session.sid))
+        return jsonify()
     elif request.method == 'POST':
         power = request.form.get('power')
         if power is None:
@@ -358,7 +359,7 @@ def tresholds(project_id):
         remove_file_if_exists(g.genetree_path)
         remove_file_if_exists(g.module_path)
         return jsonify({})
-
+    
 
 @app.route('/projects/<project_id>/clustergenes', methods=['GET', 'POST'])
 @project_exists

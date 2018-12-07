@@ -41,4 +41,48 @@ const PaginatedListMixin = {
     }
 }
 
-export { PaginatedListMixin }
+// The components in the analyze page should only update when the project changes
+// AND when the component is active.
+const AnalyzeTabMixin = {
+    data() {
+        return {
+            active: false,
+            projectChanged: false,
+            projectUpdated: false
+        }
+    },
+    
+    methods: {
+        projectUpdate() {console.log('PROJECT UPDATE')},
+        projectChange() {console.log('PROJECT CHANGE')},
+    },
+    
+    watch: {
+        project(val, oldVal) {
+            this.projectChanged = val.id !== oldVal.id
+            this.projectUpdated = val.id === oldVal.id
+            
+            if (this.active) {
+                this.projectChanged ? this.projectChange() : this.projectUpdate()
+            }
+        }
+    },
+    
+    activated() {
+        this.active = true
+        if (this.projectChanged) {
+            this.projectChange()
+            this.projectChanged = false
+        }
+        if (this.projectUpdated) {
+            this.projectUpdate()
+            this.projectUpdated = false
+        }
+    },
+    
+    deactivated() {
+        this.active = false
+    }
+}
+
+export { PaginatedListMixin, AnalyzeTabMixin }
