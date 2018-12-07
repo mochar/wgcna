@@ -6,6 +6,7 @@ settings.json
 package-lock.json
 dump.rdb
 wgcna.kdev4
-./kdev4
+.kdev4/
+.vscode/
 logs/*
 !logs/.gitkeep
