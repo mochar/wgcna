@@ -5,5 +5,7 @@ dist/
 settings.json
 package-lock.json
 dump.rdb
+wgcna.kdev4
+./kdev4
 logs/*
 !logs/.gitkeep
